@@ -9,11 +9,11 @@ const characterTiles = Array.from(Array(7).keys()).map((x) => x + 1).map((x) => 
 const flowerTiles = Array.from(Array(4).keys()).map((x) => x + 1).map((x) => "flower_" + x); //x2 //separated the flowers since flowers are only used in certain sets of mahjong not all.
 
 const tileSuitSetUnique = dotTiles.concat(bambooTiles).concat(tenkTiles).concat(characterTiles);
-const tileSetFullnoFlowers = tileSetUnique.concat(tileSetUnique).concat(tileSetUnique).concat(tileSetUnique);
-const tileSetFullwFlowers = tileSetUnique.concat(tileSetUnique).concat(tileSetUnique).concat(tileSetUnique).concat(flowerTiles).concat(flowerTiles);
+const tileSetFullnoFlowers = tileSuitSetUnique.concat(tileSuitSetUnique).concat(tileSuitSetUnique).concat(tileSuitSetUnique);
+const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flowerTiles);
 
 class MahjongGame {
-    constructor(players, gameType) {
+    constructor(players, gameType='') {
         this.players = players;
         if(gameType == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
@@ -29,7 +29,7 @@ class MahjongGame {
         return this.tileBackIdx - this.tileFrontIdx + 1;
     }
 
-    takeTile(count, useBack = false) {
+    takeTiles(count, useBack = false) {
         //there are edge cases here
         var tileSubset = [];
 

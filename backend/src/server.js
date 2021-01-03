@@ -31,7 +31,7 @@ function handleNewConnection(ws) {
     }
 }
 
-testGame = new MahjongGame([])
+testGame = new MahjongGame([], 'flowers')
 console.log(testGame.tiles)
 console.log(testGame.takeTiles(5))
 console.log(testGame.takeTiles(2))
