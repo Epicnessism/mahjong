@@ -1,4 +1,6 @@
 const WebSocket = require('ws');
+const Player = require('./player')
+const MahjongGame = require('./mahjong')
 
 const wss = new WebSocket.Server({
   port: 8888
@@ -29,34 +31,9 @@ function handleNewConnection(ws) {
     }
 }
 
-class Player {
-    constructor(identifier, ws) {
-        this.identifier = identifier;
-        this.ws = ws;
-        ws.on('message', this.handleRecv);
-        ws.on('close', this.handleClose);
-    }
-
-    handleClose() {
-        console.log('player ' + this.identifier + ' disconnected!');
-    }
-
-    handleRecv(data) {
-        console.log('player ' + this.identifier + ' got data ' + data);
-    }
-
-    socketSend(data) {
-        this.ws.send(data)
-    }
-}
-
-class MahjongGame {
-    constructor(players) {
-        this.players = players;
-    }
-
-    start() {
-        console.log("New game starting...")
-        this.players.forEach(player => player.socketSend("Game Starting..."));
-    } 
-}
+testGame = new MahjongGame([])
+console.log(testGame.tiles)
+console.log(testGame.takeTiles(5))
+console.log(testGame.takeTiles(2))
+console.log(testGame.takeTiles(1, true))
+console.log(testGame.takeTiles(3, true))
