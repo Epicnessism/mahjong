@@ -45,45 +45,42 @@ class MahjongGame {
     }
 
     start() {
-        console.log("New game starting...");
-        // console.log(this.tiles);
+        console.log("New game starting");
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13))
-            console.log("doing something");
-            player.socketSend(
-                JSON.stringify({
-                    eventName:"GameStartSendingTiles",
-                    tiles: player.tiles
-                })
-            )
+            player.sendEvent('GameStart', {
+                tiles: player.tiles
+            });
         });
         this.nextTurn();
     }
 
     nextTurn() {
+        console.log('Starting Next Player Turn')
+        if(this.activePlayer != -1) {
+            this.players[this.activePlayer].activeTurn = false;
+        }
+
         if(this.activePlayer == 3) {
             this.activePlayer = 0;
         } else {
             this.activePlayer++;
         }
-        newTile = this.tiles.takeTiles(1);
-        this.player[this.activePlayer].addTile(newTile)
-        this.player[this.activePlayer].socketSend(
-            JSON.stringify({
-                eventName: "NextTurn",
-                newTile: newTile
-            })
-        )
+
+        this.players[this.activePlayer].activeTurn = true;
+
+        var newTile = this.takeTiles(1);
+        this.players[this.activePlayer].addTile(newTile)
+        this.players[this.activePlayer].sendEvent("YourTurn", {
+            newTile: newTile
+        });
+        
         this.players.filter(player => player != this.players[this.activePlayer]).forEach( otherPlayer => {
-            otherPlayer.socketSend(
-                JSON.stringify({
-                    eventName: "NextTurnNotYou",
-                    playerID: this.players[this.activePlayer].identifier
-                })
-            )
-        })
+            otherPlayer.sendEvent('NextTurnNotYou', {
+                playerID: this.players[this.activePlayer].identifier
+            });
+        });
     }
 }
-
 
 module.exports = MahjongGame

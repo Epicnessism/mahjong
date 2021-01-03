@@ -2,6 +2,7 @@ class Player {
     constructor(identifier, ws) {
         this.identifier = identifier;
         this.ws = ws;
+        this.activeTurn = false;
         ws.on('message', this.handleRecv);
         ws.on('close', this.handleClose);
     }
@@ -12,6 +13,14 @@ class Player {
 
     handleRecv(data) {
         console.log('player ' + this.identifier + ' got data ' + data);
+    }
+
+    sendEvent(eventName, eventData) {
+        const data = JSON.stringify({
+            'eventName': eventName,
+            'eventData': eventData
+        });
+        this.socketSend(data);
     }
 
     socketSend(data) {

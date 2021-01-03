@@ -16,7 +16,6 @@ function handleNewConnection(ws) {
     console.log('Got new connection!');
     randomId = Math.floor(Math.random() * 100);
     newPlayer = new Player(randomId, ws);
-    newPlayer.socketSend('Welcome to the Mahjong server!');
     waitingPlayers.push(newPlayer);
 
     if(waitingPlayers.length >= 4) {
@@ -27,7 +26,12 @@ function handleNewConnection(ws) {
         //todo this lobby system is super hacky lmao
         waitingPlayers = [];
     } else {
-        newPlayer.socketSend("Added to game queue, waiting for more players...");
+        waitingPlayers.forEach(player => {
+            player.sendEvent('QueueStatus', {
+                playerCount: waitingPlayers.length
+            });
+        });
+        
     }
 }
 
