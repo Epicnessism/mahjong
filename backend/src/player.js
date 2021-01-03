@@ -17,6 +17,18 @@ class Player {
     socketSend(data) {
         this.ws.send(data)
     }
+
+    setTiles(tiles) {
+        this.tiles = tiles;
+    }
+
+    addTile(tile) {
+        this.tiles.push(tile);
+    }
+
+    removeTile(tile) {
+        this.tiles.splice(this.tiles.indexOf(tile), 1);
+    }
 }
 
 module.exports = Player

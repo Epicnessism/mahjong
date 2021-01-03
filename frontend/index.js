@@ -11,3 +11,7 @@ socket.addEventListener('message', function (event) {
     console.log('server msg:', event.data);
 });
 
+function handleEvent(message) {
+    
+}
+

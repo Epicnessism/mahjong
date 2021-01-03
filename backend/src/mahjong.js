@@ -15,6 +15,7 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 class MahjongGame {
     constructor(players, gameType='') {
         this.players = players;
+        this.activePlayer = -1;
         if(gameType == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
         } else {
@@ -45,9 +46,44 @@ class MahjongGame {
 
     start() {
         console.log("New game starting...");
-        console.log(this.tiles);
-        this.players.forEach(player => player.socketSend("Game Starting..."));
-    } 
+        // console.log(this.tiles);
+        this.players.forEach(player => {
+            player.setTiles(this.takeTiles(13))
+            console.log("doing something");
+            player.socketSend(
+                JSON.stringify({
+                    eventName:"GameStartSendingTiles",
+                    tiles: player.tiles
+                })
+            )
+        });
+        this.nextTurn();
+    }
+
+    nextTurn() {
+        if(this.activePlayer == 3) {
+            this.activePlayer = 0;
+        } else {
+            this.activePlayer++;
+        }
+        newTile = this.tiles.takeTiles(1);
+        this.player[this.activePlayer].addTile(newTile)
+        this.player[this.activePlayer].socketSend(
+            JSON.stringify({
+                eventName: "NextTurn",
+                newTile: newTile
+            })
+        )
+        this.players.filter(player => player != this.players[this.activePlayer]).forEach( otherPlayer => {
+            otherPlayer.socketSend(
+                JSON.stringify({
+                    eventName: "NextTurnNotYou",
+                    playerID: this.players[this.activePlayer].identifier
+                })
+            )
+        })
+    }
 }
+
 
 module.exports = MahjongGame
