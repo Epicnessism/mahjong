@@ -1,14 +1,31 @@
 console.log('Starting Mahjong Client');
+const socket = new WebSocket('ws://localhost:8888');
 
 const app = new Vue({
     el: '#app',
     data: {
         status: 'Waiting for connection...',
-        myTiles: []
+        myTiles: [],
+        yourTurn: false
+    },
+    methods: {
+        playTile: function(tile) {
+            if(this.yourTurn) {
+                console.log("you chose: " + tile);
+                //send discard tile
+                socket.send(
+                    JSON.stringify({
+                        eventName: 'DiscardTile',
+                        tile: tile
+                    })
+                )
+            } else {
+                console.log("not your turn, please wait.");
+            }
+            
+        }
     }
 });
-
-const socket = new WebSocket('ws://localhost:8888');
 
 socket.addEventListener('open', function (event) {
     console.log('Socket Connection Established!')
@@ -38,7 +55,15 @@ function handleEvent(event) {
             break;
         case 'GameStart': 
             app.status = 'Game starting...';
-            app.myTiles = event.eventData.tiles
+            app.myTiles = event.eventData.tiles;
+            break;
+        case 'YourTurn':
+            app.yourTurn = true;
+            app.status = "waiting for player to discard a tile"
+            break;
+        case 'CheckDiscardedTile':
+            app.status = 'Checking if anyone wants ' + event.eventData.tile;
+            break;
     }
 }
 

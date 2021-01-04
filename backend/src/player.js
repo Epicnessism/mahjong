@@ -3,6 +3,9 @@ class Player {
         this.identifier = identifier;
         this.ws = ws;
         this.activeTurn = false;
+        this.visibleTiles = [];
+        this.tiles = [];
+        this.currentGame = null;
         ws.on('message', this.handleRecv);
         ws.on('close', this.handleClose);
     }
@@ -13,6 +16,8 @@ class Player {
 
     handleRecv(data) {
         console.log('player ' + this.identifier + ' got data ' + data);
+        console.log(this.currentGame);
+        this.currentGame.handleClientResponse(this, data);
     }
 
     sendEvent(eventName, eventData) {

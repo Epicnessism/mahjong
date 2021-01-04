@@ -12,10 +12,17 @@ const tileSuitSetUnique = dotTiles.concat(bambooTiles).concat(tenkTiles).concat(
 const tileSetFullnoFlowers = tileSuitSetUnique.concat(tileSuitSetUnique).concat(tileSuitSetUnique).concat(tileSuitSetUnique);
 const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flowerTiles);
 
+
 class MahjongGame {
     constructor(players, gameType='') {
+        this.discardedTiles = [];
+
         this.players = players;
+        
+        this.players.forEach(player => player.currentGame = this);
+
         this.activePlayer = -1;
+
         if(gameType == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
         } else {
@@ -74,12 +81,36 @@ class MahjongGame {
         this.players[this.activePlayer].sendEvent("YourTurn", {
             newTile: newTile
         });
-        
-        this.players.filter(player => player != this.players[this.activePlayer]).forEach( otherPlayer => {
+        this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
             otherPlayer.sendEvent('NextTurnNotYou', {
                 playerID: this.players[this.activePlayer].identifier
-            });
-        });
+            })});
+    }
+
+    handleClientResponse(player, eventData) {
+        switch(eventData.eventName) {
+            case 'DiscardTile':
+                
+                if(!player.activeTurn) {
+                    return
+                }
+
+                player.removeTile(eventData.tile);
+                this.discardedTiles.push(eventData.tile);
+                //do the check phase
+                this.allOtherPlayers(player).sendEvent('CheckDiscardedTile', {
+                    tile: tile
+                })
+
+        }
+    }
+
+    findByPlayerID(identifier) {
+        return this.players.filter(player => player.identifier == identifier)[0];
+    }
+
+    allOtherPlayers(excludedPlayer) {
+        return this.players.filter(player => player != excludedPlayer);
     }
 }
 

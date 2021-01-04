@@ -7,10 +7,10 @@
         <div id="app">
             <span>{{ status }}</span>
             <ul>
-                <li v-for="tile in myTiles">
+                <li v-for="tile in myTiles" v-on:click="playTile(tile)">
                   {{ tile }}
                 </li>
-              </ul>
+            </ul>
         </div>
         <a href="https://ea.com">Buy frontend DLC</a>
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
