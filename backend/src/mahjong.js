@@ -16,6 +16,7 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 class MahjongGame {
     constructor(players, gameType='') {
         this.discardedTiles = [];
+        this.checkResponses = [];
 
         this.players = players;
         
@@ -105,8 +106,44 @@ class MahjongGame {
                         tile: event.eventData.tile
                     });
                 });
+                break;
 
+            case 'Win':
+            case 'Gang':
+            case 'Match':
+            case 'Eat':
+            case 'Pass':
+                this.handleCheckResponses(player, event.eventName);
+                break;
         }
+    }
+
+    handleCheckResponses(player, eventName) {
+        this.checkResponses.push({
+            player: player,
+            eventName: eventName
+        });
+        if (this.checkResponses.length < 3) {
+            return
+        }
+        var win = this.checkResponses.filter( response => response.eventName == 'Win')[0]
+        if(win) {
+            //    do later
+            return
+        }
+        var gang = this.checkResponses.filter( response => response.eventName == 'Gang')[0]
+        if(gang) {
+            return
+        }
+        var match = this.checkResponses.filter( response => response.eventName == 'Match')[0]
+        if(match) {
+            return
+        }
+        var eat = this.checkResponses.filter( response => response.eventName == 'Eat')[0]
+        if(eat) {
+            return
+        }
+        this.nextTurn();
     }
 
     findByPlayerID(identifier) {

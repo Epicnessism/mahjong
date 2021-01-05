@@ -11,6 +11,21 @@
                   {{ tile }}
                 </li>
             </ul>
+            <button v-on:click="sendEmptyEvent('Win')">
+                Win (胡) literally win the game
+            </button>
+            <button v-on:click="sendEmptyEvent('Gang')">
+                Gang (杠) Four of a kind
+            </button>
+            <button v-on:click="sendEmptyEvent('Match')">
+                Match (碰) Three of a kind
+            </button>
+            <button v-on:click="sendEmptyEvent('Eat')">
+                Eat (吃) Straight (can only eat person directly upstream of you)
+            </button>
+            <button v-on:click="sendEmptyEvent('Pass')">
+                Pass (Do Nothing)
+            </button>
         </div>
         <a href="https://ea.com">Buy frontend DLC</a>
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>

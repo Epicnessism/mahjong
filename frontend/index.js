@@ -25,11 +25,19 @@ const app = new Vue({
                 this.yourTurn = false;
             } else {
                 console.log("not your turn, please wait.");
-            }
-            
+            }   
+        },
+        sendEmptyEvent: function(event) {
+            socket.send(
+                JSON.stringify({
+                    eventName: event,
+                    eventData: {}
+                })
+            )
         }
     }
 });
+
 
 socket.addEventListener('open', function (event) {
     console.log('Socket Connection Established!')
