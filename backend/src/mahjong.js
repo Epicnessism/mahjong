@@ -38,7 +38,7 @@ class MahjongGame {
         return this.tileBackIdx - this.tileFrontIdx + 1;
     }
 
-    takeTiles(count, useBack = false) {
+    takeTiles(count, useBack = false) { //returns a fucking list
         //there are edge cases here
         var tileSubset = [];
 
@@ -77,14 +77,16 @@ class MahjongGame {
 
         this.players[this.activePlayer].activeTurn = true;
 
-        var newTile = this.takeTiles(1);
+        var newTile = this.takeTiles(1)[0];
         this.players[this.activePlayer].addTile(newTile)
         this.players[this.activePlayer].sendEvent("YourTurn", {
             newTile: newTile
         });
         this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
+            console.log(otherPlayer.tiles);
             otherPlayer.sendEvent('NextTurnNotYou', {
-                playerID: this.players[this.activePlayer].identifier
+                activePlayerID: this.players[this.activePlayer].identifier,
+                tiles: otherPlayer.tiles
             })});
     }
 
@@ -123,6 +125,12 @@ class MahjongGame {
             player: player,
             eventName: eventName
         });
+
+        this.allOtherPlayers(player).forEach(otherPlayer => otherPlayer.sendEvent('OtherPlayerRespondedToCheck', {
+            checkAction: eventName,
+            otherPlayerID: player.identifier
+        }))
+
         if (this.checkResponses.length < 3) {
             return
         }
@@ -143,6 +151,8 @@ class MahjongGame {
         if(eat) {
             return
         }
+        //do nothing
+
         this.nextTurn();
     }
 

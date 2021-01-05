@@ -72,12 +72,17 @@ function handleEvent(event) {
         case 'YourTurn':
             app.yourTurn = true;
             app.status = "waiting for player to discard a tile"
+            app.myTiles.push(event.eventData.newTile)
             break;
         case 'CheckDiscardedTile':
             app.status = 'Checking if anyone wants ' + event.eventData.tile;
             break;
         case 'NextTurnNotYou':
-            app.status = 'Player ' + event.eventData.playerID + ' is starting their turn.'
+            app.status = 'Player ' + event.eventData.activePlayerID + ' is starting their turn.';
+            app.myTiles = event.eventData.tiles;
+            break;
+        case 'OtherPlayerRespondedToCheck':
+            app.status = 'Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction;
             break;
     }
 }
