@@ -129,7 +129,7 @@ class MahjongGame {
             return false;
         } else if (eventName == 'Match' && !this.ruleset.checkMatch(player, lastTile)) {
             return false;
-        } else if (eventName == 'Eat' && !this.ruleset.checkEat(player, lastTile, this.players)) {
+        } else if (eventName == 'Eat' && !this.ruleset.checkEat(player, lastTile, this.players, this.activePlayer)) {
             return false;
         }
         this.checkResponses.push({
