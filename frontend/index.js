@@ -6,7 +6,8 @@ const app = new Vue({
     data: {
         status: 'Waiting for connection...',
         myTiles: [],
-        yourTurn: false
+        yourTurn: false,
+        inCheckPhase: false,
     },
     methods: {
         playTile: function(tile) {
@@ -38,15 +39,18 @@ const app = new Vue({
     }
 });
 
+function updateStatus(status) {
+    app.status = status;
+}
 
 socket.addEventListener('open', function (event) {
     console.log('Socket Connection Established!')
-    app.status = 'Connection established.';
+    updateStatus('Connection established.');
     //socket.send('test message from client');
 });
 
 socket.addEventListener('close', function(event) {
-    app.status = 'Connection lost!!!';
+    updateStatus('Connection lost!!!');
 })
 
 socket.addEventListener('message', function (eventRaw) {
@@ -63,27 +67,37 @@ socket.addEventListener('message', function (eventRaw) {
 function handleEvent(event) {
     switch(event.eventName) {
         case 'QueueStatus':
-            app.status = 'In Queue[' + event.eventData.playerCount + '/4]';
+            updateStatus('In Queue[' + event.eventData.playerCount + '/4]');
             break;
         case 'GameStart': 
-            app.status = 'Game starting...';
+            updateStatus('Game starting...');
             app.myTiles = event.eventData.tiles;
             break;
         case 'YourTurn':
             app.yourTurn = true;
-            app.status = "waiting for player to discard a tile"
+            updateStatus("waiting for player to discard a tile")
             app.myTiles.push(event.eventData.newTile)
             break;
         case 'CheckDiscardedTile':
-            app.status = 'Checking if anyone wants ' + event.eventData.tile;
+            updateStatus('Checking if anyone wants ' + event.eventData.tile);
+            app.inCheckPhase = true;
             break;
         case 'NextTurnNotYou':
-            app.status = 'Player ' + event.eventData.activePlayerID + ' is starting their turn.';
+            updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
             app.myTiles = event.eventData.tiles;
             break;
         case 'OtherPlayerRespondedToCheck':
-            app.status = 'Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction;
+            updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
             break;
+        case 'InvalidCheckResponse':
+            updateStatus('Illegal Response!');
+            break;
+        case 'SuccessfulCheckResponse': 
+            updateStatus('Successful Check Response');
+            app.inCheckPhase = false;
+            break;
+        case 'AlreadySubmittedCheckResponse':
+            updateStatus('Response already submitted');
     }
 }
 

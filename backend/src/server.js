@@ -12,10 +12,11 @@ wss.on('connection', handleNewConnection);
 waitingPlayers = [];
 games = [];
 
+playerCounter = 1
+
 function handleNewConnection(ws) {
     console.log('Got new connection!');
-    randomId = Math.floor(Math.random() * 100);
-    newPlayer = new Player(randomId, ws);
+    newPlayer = new Player(playerCounter++, ws);
     waitingPlayers.push(newPlayer);
 
     if(waitingPlayers.length >= 4) {
@@ -34,12 +35,3 @@ function handleNewConnection(ws) {
         
     }
 }
-
-
-
-testGame = new MahjongGame([], 'flowers')
-console.log(testGame.tiles)
-console.log(testGame.takeTiles(5))
-console.log(testGame.takeTiles(2))
-console.log(testGame.takeTiles(1, true))
-console.log(testGame.takeTiles(3, true))

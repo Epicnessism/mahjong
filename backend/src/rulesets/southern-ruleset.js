@@ -9,7 +9,8 @@ function checkGang(player, lastTile) {
 
 function checkEat(player, lastTile, players, discarderIndex) {
 
-    if(discarderIndex++ % 4 != players.indexOf(player)) {
+    if(++discarderIndex % 4 != players.indexOf(player)) {
+        console.log("Couldn't eat due to wrong order");
         return false;
     }
 
@@ -35,7 +36,12 @@ function checkEat(player, lastTile, players, discarderIndex) {
     }
 
     var straightLength = upperBound - lowerBound + 1
-    return straightLength >= 3;
+    if(straightLength < 3) {
+        console.log("Couldn't eat due to incorrect tiles");
+        return false;
+    }
+
+    return true;
     
 }
 

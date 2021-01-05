@@ -121,17 +121,30 @@ class MahjongGame {
     }
 
     handleCheckResponses(player, eventName) {
-        lastTile = this.discardedTiles[this.discardedTiles.length - 1];
+        console.log(this.discardedTiles);
+        var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
 
         if (eventName == 'Win' && !this.ruleset.checkWin(player, lastTile)) {
+            player.sendEvent('InvalidCheckResponse', {});
             return false;
         } else if (eventName == 'Gang' && !this.ruleset.checkGang(player, lastTile)) {
+            player.sendEvent('InvalidCheckResponse', {});
             return false;
         } else if (eventName == 'Match' && !this.ruleset.checkMatch(player, lastTile)) {
+            player.sendEvent('InvalidCheckResponse', {});
             return false;
         } else if (eventName == 'Eat' && !this.ruleset.checkEat(player, lastTile, this.players, this.activePlayer)) {
+            player.sendEvent('InvalidCheckResponse', {});
             return false;
         }
+
+        player.sendEvent('SuccessfulCheckResponse', {})
+
+        if(this.checkResponses.filter(response => response.player == player).length > 0) {
+            player.sendEvent('AlreadySubmittedCheckResponse', {});
+            return;
+        }
+
         this.checkResponses.push({
             player: player,
             eventName: eventName
@@ -149,6 +162,8 @@ class MahjongGame {
         var gang = this.checkResponses.filter( response => response.eventName == 'Gang')[0]
         var match = this.checkResponses.filter( response => response.eventName == 'Match')[0]
         var eat = this.checkResponses.filter( response => response.eventName == 'Eat')[0]
+        
+        this.checkResponses = [];
         if(win) {
             //    do later
         } else if(gang) {
