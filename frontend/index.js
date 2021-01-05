@@ -16,9 +16,13 @@ const app = new Vue({
                 socket.send(
                     JSON.stringify({
                         eventName: 'DiscardTile',
-                        tile: tile
+                        eventData: {
+                            tile: tile
+                        }
                     })
                 )
+                this.status = 'Discard submitted';
+                this.yourTurn = false;
             } else {
                 console.log("not your turn, please wait.");
             }
@@ -63,6 +67,9 @@ function handleEvent(event) {
             break;
         case 'CheckDiscardedTile':
             app.status = 'Checking if anyone wants ' + event.eventData.tile;
+            break;
+        case 'NextTurnNotYou':
+            app.status = 'Player ' + event.eventData.playerID + ' is starting their turn.'
             break;
     }
 }

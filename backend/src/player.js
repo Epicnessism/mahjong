@@ -6,8 +6,13 @@ class Player {
         this.visibleTiles = [];
         this.tiles = [];
         this.currentGame = null;
-        ws.on('message', this.handleRecv);
-        ws.on('close', this.handleClose);
+        var curPlayer = this;
+        ws.on('message', function(data) {
+            curPlayer.handleRecv(data);
+        });
+        ws.on('close', function() {
+            curPlayer.handleClose();
+        });
     }
 
     handleClose() {
@@ -16,8 +21,7 @@ class Player {
 
     handleRecv(data) {
         console.log('player ' + this.identifier + ' got data ' + data);
-        console.log(this.currentGame);
-        this.currentGame.handleClientResponse(this, data);
+        this.currentGame.handleClientResponse(this, JSON.parse(data));
     }
 
     sendEvent(eventName, eventData) {

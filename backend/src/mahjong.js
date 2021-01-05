@@ -87,20 +87,24 @@ class MahjongGame {
             })});
     }
 
-    handleClientResponse(player, eventData) {
-        switch(eventData.eventName) {
+    handleClientResponse(player, event) {
+        console.log('Handling input event ' + event);
+        switch(event.eventName) {
             case 'DiscardTile':
-                
                 if(!player.activeTurn) {
+                    console.log('Nonactive player tried to discard tile!');
                     return
                 }
+                console.log('Player ' + player.identifier + ' has discarded ' + event.eventData.tile);
 
-                player.removeTile(eventData.tile);
-                this.discardedTiles.push(eventData.tile);
+                player.removeTile(event.eventData.tile);
+                this.discardedTiles.push(event.eventData.tile);
                 //do the check phase
-                this.allOtherPlayers(player).sendEvent('CheckDiscardedTile', {
-                    tile: tile
-                })
+                this.allOtherPlayers(player).forEach(otherPlayer => {
+                    otherPlayer.sendEvent('CheckDiscardedTile', {
+                        tile: event.eventData.tile
+                    });
+                });
 
         }
     }
