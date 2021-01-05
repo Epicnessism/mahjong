@@ -22,7 +22,7 @@ class MahjongGame {
         
         this.players.forEach(player => player.currentGame = this);
 
-        this.activePlayer = -1;
+        this.activePlayer = 0;
 
         if(gameType == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
@@ -63,18 +63,17 @@ class MahjongGame {
         this.nextTurn();
     }
 
-    nextTurn() {
-        console.log('Starting Next Player Turn')
-        if(this.activePlayer != -1) {
-            this.players[this.activePlayer].activeTurn = false;
-        }
-
-        if(this.activePlayer == 3) {
-            this.activePlayer = 0;
+    nextTurn(nextPlayer = null) {
+        this.players[this.activePlayer].activeTurn = false;
+        if(nextPlayer) {
+            this.activePlayer = this.players.indexOf(nextPlayer);
         } else {
-            this.activePlayer++;
+            if(this.activePlayer == 3) {
+                this.activePlayer = 0;
+            } else {
+                this.activePlayer++;
+            }
         }
-
         this.players[this.activePlayer].activeTurn = true;
 
         var newTile = this.takeTiles(1)[0];
@@ -83,7 +82,6 @@ class MahjongGame {
             newTile: newTile
         });
         this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
-            console.log(otherPlayer.tiles);
             otherPlayer.sendEvent('NextTurnNotYou', {
                 activePlayerID: this.players[this.activePlayer].identifier,
                 tiles: otherPlayer.tiles
@@ -135,24 +133,20 @@ class MahjongGame {
             return
         }
         var win = this.checkResponses.filter( response => response.eventName == 'Win')[0]
+        var gang = this.checkResponses.filter( response => response.eventName == 'Gang')[0]
+        var match = this.checkResponses.filter( response => response.eventName == 'Match')[0]
+        var eat = this.checkResponses.filter( response => response.eventName == 'Eat')[0]
         if(win) {
             //    do later
-            return
+        } else if(gang) {
+            //do gang logic here
+            this.nextTurn(gang.player);
+        } else if(match) {
+            this.nextTurn(match.player);
+        } else if(eat) {
+            this.nextTurn(eat.player);
         }
-        var gang = this.checkResponses.filter( response => response.eventName == 'Gang')[0]
-        if(gang) {
-            return
-        }
-        var match = this.checkResponses.filter( response => response.eventName == 'Match')[0]
-        if(match) {
-            return
-        }
-        var eat = this.checkResponses.filter( response => response.eventName == 'Eat')[0]
-        if(eat) {
-            return
-        }
-        //do nothing
-
+        //do nothing, go to expected next turn
         this.nextTurn();
     }
 
