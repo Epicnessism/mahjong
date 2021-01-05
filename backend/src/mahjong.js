@@ -1,4 +1,5 @@
-const util = require('./util')
+const util = require('./util');
+const southernRuleset = require('./rulesets/southern-ruleset');
 
 //referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
 //TODO add the rest
@@ -14,9 +15,10 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 
 
 class MahjongGame {
-    constructor(players, gameType='') {
+    constructor(players, tileSet='flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
+        this.ruleset = southernRuleset;
 
         this.players = players;
         
@@ -24,7 +26,7 @@ class MahjongGame {
 
         this.activePlayer = 0;
 
-        if(gameType == "flowers") {
+        if(tileSet == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
         } else {
             this.tiles = Array.from(tileSetFullnoFlowers);
@@ -119,6 +121,17 @@ class MahjongGame {
     }
 
     handleCheckResponses(player, eventName) {
+        lastTile = this.discardedTiles[this.discardedTiles.length - 1];
+
+        if (eventName == 'Win' && !this.ruleset.checkWin(player, lastTile)) {
+            return false;
+        } else if (eventName == 'Gang' && !this.ruleset.checkGang(player, lastTile)) {
+            return false;
+        } else if (eventName == 'Match' && !this.ruleset.checkMatch(player, lastTile)) {
+            return false;
+        } else if (eventName == 'Eat' && !this.ruleset.checkEat(player, lastTile, this.players)) {
+            return false;
+        }
         this.checkResponses.push({
             player: player,
             eventName: eventName
@@ -139,7 +152,7 @@ class MahjongGame {
         if(win) {
             //    do later
         } else if(gang) {
-            //do gang logic here
+            //do gang implementation here
             this.nextTurn(gang.player);
         } else if(match) {
             this.nextTurn(match.player);
