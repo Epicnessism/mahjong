@@ -7,24 +7,35 @@
         <div id="app">
             <span>{{ status }}</span>
             <ul>
-                <li v-for="tile in myTiles" v-on:click="playTile(tile)">
+                <h1>
+                    Your Tiles
+                </h1>
+                <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
                   {{ tile }}
                 </li>
             </ul>
+            <ul>
+                <h1>
+                    Actively Selected Tiles
+                </h1>
+                <li v-for="tile in activeTiles" v-on:click="deselectTile(tile)">
+                    {{ tile }}
+                </li>
+            </ul>
             <div v-if="inCheckPhase">
-                <button v-on:click="sendEmptyEvent('Win')">
+                <button v-on:click="sendEvent('Win')">
                     Win (胡) literally win the game
                 </button>
-                <button v-on:click="sendEmptyEvent('Gang')">
+                <button v-on:click="sendEvent('Gang')">
                     Gang (杠) Four of a kind
                 </button>
-                <button v-on:click="sendEmptyEvent('Match')">
+                <button v-on:click="sendEvent('Match')">
                     Match (碰) Three of a kind
                 </button>
-                <button v-on:click="sendEmptyEvent('Eat')">
+                <button v-on:click="sendEvent('Eat', activeTiles)">
                     Eat (吃) Straight (can only eat person directly upstream of you)
                 </button>
-                <button v-on:click="sendEmptyEvent('Pass')">
+                <button v-on:click="sendEvent('Pass')">
                     Pass (Do Nothing)
                 </button>
             </div>

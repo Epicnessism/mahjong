@@ -1,5 +1,6 @@
 const util = require('./util');
 const southernRuleset = require('./rulesets/southern-ruleset');
+const mahjongLogic = require('./mahjong-logic');
 
 //referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
 //TODO add the rest
@@ -18,7 +19,7 @@ class MahjongGame {
     constructor(players, tileSet='flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
-        this.ruleset = southernRuleset;
+        // this.mahjongLogic = mahjongLogic;
 
         this.players = players;
         
@@ -115,25 +116,25 @@ class MahjongGame {
             case 'Match':
             case 'Eat':
             case 'Pass':
-                this.handleCheckResponses(player, event.eventName);
+                this.handleCheckResponses(player, event);
                 break;
         }
     }
 
-    handleCheckResponses(player, eventName) {
+    handleCheckResponses(player, event) {
         console.log(this.discardedTiles);
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
 
-        if (eventName == 'Win' && !this.ruleset.checkWin(player, lastTile)) {
+        if (event.eventName == 'Win' && !mahjongLogic.checkWin(player.tiles, lastTile)) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
-        } else if (eventName == 'Gang' && !this.ruleset.checkGang(player, lastTile)) {
+        } else if (event.eventName == 'Gang' && !mahjongLogic.checkGang(player.tiles, lastTile)) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
-        } else if (eventName == 'Match' && !this.ruleset.checkMatch(player, lastTile)) {
+        } else if (event.eventName == 'Match' && !mahjongLogic.checkMatch(player.tiles, lastTile)) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
-        } else if (eventName == 'Eat' && !this.ruleset.checkEat(player, lastTile, this.players, this.activePlayer)) {
+        } else if (event.eventName == 'Eat' && !mahjongLogic.checkEat(event.eventData, lastTile, this.players.indexOf(player), this.activePlayer)) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
         }
@@ -147,11 +148,12 @@ class MahjongGame {
 
         this.checkResponses.push({
             player: player,
-            eventName: eventName
+            eventName: event.eventName,
+            eventData: event.eventData
         });
 
         this.allOtherPlayers(player).forEach(otherPlayer => otherPlayer.sendEvent('OtherPlayerRespondedToCheck', {
-            checkAction: eventName,
+            checkAction: event.eventName,
             otherPlayerID: player.identifier
         }))
 
@@ -164,14 +166,21 @@ class MahjongGame {
         var eat = this.checkResponses.filter( response => response.eventName == 'Eat')[0]
         
         this.checkResponses = [];
+        
         if(win) {
+            lastTile = this.discardedTiles.pop();
             //    do later
         } else if(gang) {
-            //do gang implementation here
+            lastTile = this.discardedTiles.pop();
+            mahjongLogic.implementGang(match.player, lastTile);
             this.nextTurn(gang.player);
         } else if(match) {
+            lastTile = this.discardedTiles.pop();
+            mahjongLogic.implementMatch(match.player, lastTile);
             this.nextTurn(match.player);
         } else if(eat) {
+            lastTile = this.discardedTiles.pop();
+            mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
             this.nextTurn(eat.player);
         }
         //do nothing, go to expected next turn

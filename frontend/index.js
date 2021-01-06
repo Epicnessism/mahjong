@@ -6,33 +6,37 @@ const app = new Vue({
     data: {
         status: 'Waiting for connection...',
         myTiles: [],
+        activeTiles: [],
         yourTurn: false,
         inCheckPhase: false,
     },
     methods: {
-        playTile: function(tile) {
+        clickTile: function(tile) {
             if(this.yourTurn) {
-                console.log("you chose: " + tile);
-                //send discard tile
-                socket.send(
-                    JSON.stringify({
-                        eventName: 'DiscardTile',
-                        eventData: {
-                            tile: tile
-                        }
-                    })
-                )
+                console.log("you chose to discard: " + tile);
+                this.sendEvent('DiscardTile', {
+                    tile: tile
+                })
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
+            } else if(this.inCheckPhase) {
+                console.log("You chose: " + tile);
+                this.myTiles.splice(this.myTiles.indexOf(tile), 1);
+                this.activeTiles.push(tile);
             } else {
-                console.log("not your turn, please wait.");
+                console.log("not your turn, no active actions, please wait.");
             }   
         },
-        sendEmptyEvent: function(event) {
+        deselectTile: function(tile) {
+            console.log("You deselected: " + tile);
+            this.activeTiles.splice(this.activeTiles.indexOf(tile), 1);
+            this.myTiles.push(tile);
+        },
+        sendEvent: function(event, eventData = {}) {
             socket.send(
                 JSON.stringify({
                     eventName: event,
-                    eventData: {}
+                    eventData: eventData
                 })
             )
         }
