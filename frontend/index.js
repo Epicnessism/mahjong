@@ -104,6 +104,11 @@ function handleEvent(event) {
             break;
         case 'AlreadySubmittedCheckResponse':
             updateStatus('Response already submitted');
+            break;
+        case 'CheckPhaseResolved':
+            updateStatus('Player ' + event.eventData.actingPlayerID + ' has ' + event.eventData.action + " " + event.eventData.lastTile + "!")
+            app.activeTiles = [];
+            break;
     }
 }
 

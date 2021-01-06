@@ -178,18 +178,47 @@ class MahjongGame {
             //    do later
         } else if(gang) {
             lastTile = this.discardedTiles.pop();
-            mahjongLogic.implementGang(match.player, lastTile);
+            mahjongLogic.implementGang(gang.player, lastTile);
+            this.allOtherPlayers(gang.player).forEach( otherPlayer => {
+                otherPlayer.sendEvent('CheckPhaseResolved', {
+                    actingPlayerID: gang.player.identifier,
+                    action: "Gang'ed",
+                    lastTile: lastTile,
+                })
+            })
             this.nextTurn(gang.player);
         } else if(match) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
+            this.allOtherPlayers(match.player).forEach( otherPlayer => {
+                otherPlayer.sendEvent('CheckPhaseResolved', {
+                    actingPlayerID: match.player.identifier,
+                    action: "Matched",
+                    lastTile: lastTile,
+                    //are we passing stuff here or no?
+                })
+            })
             this.nextTurn(match.player, false);
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
+            this.allOtherPlayers(eat.player).forEach( otherPlayer => {
+                otherPlayer.sendEvent('CheckPhaseResolved', {
+                    actingPlayerID: eat.player.identifier,
+                    action: "Ate",
+                    lastTile: lastTile,
+                })
+            })
             this.nextTurn(eat.player, false);
         } else {
             //do nothing, go to expected next turn
+            this.players.forEach( player => {
+                otherPlayer.sendEvent('CheckPhaseResolved', {
+                    actingPlayerID: "Nobody",
+                    action: "anything'ed",
+                    lastTile: lastTile,
+                })
+            })
             this.nextTurn();
         }
         
