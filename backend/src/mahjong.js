@@ -66,7 +66,7 @@ class MahjongGame {
         this.nextTurn();
     }
 
-    nextTurn(nextPlayer = null) {
+    nextTurn(nextPlayer = null, giveTile = true) {
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
             this.activePlayer = this.players.indexOf(nextPlayer);
@@ -78,12 +78,18 @@ class MahjongGame {
             }
         }
         this.players[this.activePlayer].activeTurn = true;
-
-        var newTile = this.takeTiles(1)[0];
-        this.players[this.activePlayer].addTile(newTile)
-        this.players[this.activePlayer].sendEvent("YourTurn", {
-            newTile: newTile
-        });
+        if(giveTile) {
+            var newTile = this.takeTiles(1)[0];
+            this.players[this.activePlayer].addTile(newTile)
+            this.players[this.activePlayer].sendEvent("YourTurn", {
+                newTile: newTile
+            });
+        } else {
+            this.players[this.activePlayer].sendEvent("YourTurn", {
+                newTile: null
+            });
+        }
+        
         this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
             otherPlayer.sendEvent('NextTurnNotYou', {
                 activePlayerID: this.players[this.activePlayer].identifier,
@@ -177,14 +183,16 @@ class MahjongGame {
         } else if(match) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
-            this.nextTurn(match.player);
+            this.nextTurn(match.player, false);
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
-            this.nextTurn(eat.player);
+            this.nextTurn(eat.player, false);
+        } else {
+            //do nothing, go to expected next turn
+            this.nextTurn();
         }
-        //do nothing, go to expected next turn
-        this.nextTurn();
+        
     }
 
     findByPlayerID(identifier) {
