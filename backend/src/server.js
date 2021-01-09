@@ -14,9 +14,7 @@ games = [];
 
 playerCounter = 1
 
-function handleNewConnection(ws) {
-    console.log('Got new connection!');
-    newPlayer = new Player(playerCounter++, ws);
+function handleQueueJoin(newPlayer) {
     waitingPlayers.push(newPlayer);
 
     if(waitingPlayers.length >= 4) {
@@ -34,4 +32,16 @@ function handleNewConnection(ws) {
         });
         
     }
+}
+
+function handleNewConnection(ws) {
+    console.log('Got new connection!');
+    ws.on('message', function(data) {
+        message = JSON.parse(data);
+        if(message.eventName == 'QueueJoin') {
+            console.log('Player ' + message.eventData.username + ' has joined the queue');
+            var newPlayer = new Player(message.eventData.username, ws);
+            handleQueueJoin(newPlayer)
+        }
+    });
 }

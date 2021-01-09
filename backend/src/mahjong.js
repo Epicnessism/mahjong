@@ -127,6 +127,22 @@ class MahjongGame {
         }
     }
 
+    sendAllVisibleTiles() {
+
+        var visibleTileMap =  this.players.map(curPlayer => {
+            return  {
+                    player: curPlayer.identifier,
+                    tiles: curPlayer.visibleTiles 
+                }
+        });
+
+        this.players.forEach(player => {
+            player.sendEvent('VisibleTileUpdate', {
+               visibleTileMap
+            });
+        })
+    }
+
     handleCheckResponses(player, event) {
         console.log(this.discardedTiles);
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
@@ -173,6 +189,9 @@ class MahjongGame {
         
         this.checkResponses = [];
         
+        var nextPlayer = null;
+        var giveNextPlayerTile = true;
+
         if(win) {
             lastTile = this.discardedTiles.pop();
             //    do later
@@ -182,11 +201,17 @@ class MahjongGame {
             this.allOtherPlayers(gang.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
                     actingPlayerID: gang.player.identifier,
-                    action: "Gang'ed",
+                    action: "Gang",
                     lastTile: lastTile,
                 })
-            })
-            this.nextTurn(gang.player);
+            });
+
+            var newTile = this.takeTiles(1, true)[0];
+            gang.player.tiles.push(newTile);
+            gang.player.sendEvent('GiveSupplementalTile', {
+                tile: newTile
+            });
+            nextPlayer = gang.player;
         } else if(match) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
@@ -198,7 +223,7 @@ class MahjongGame {
                     //are we passing stuff here or no?
                 })
             })
-            this.nextTurn(match.player, false);
+            nextPlayer = match.player;
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
@@ -209,19 +234,20 @@ class MahjongGame {
                     lastTile: lastTile,
                 })
             })
-            this.nextTurn(eat.player, false);
+            nextPlayer = eat.player;
+            giveNextPlayerTile = false;
         } else {
             //do nothing, go to expected next turn
-            this.players.forEach( player => {
+            this.players.forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
-                    actingPlayerID: "Nobody",
-                    action: "anything'ed",
+                    actingPlayerID: null,
+                    action: 'Pass',
                     lastTile: lastTile,
                 })
             })
-            this.nextTurn();
         }
-        
+        this.sendAllVisibleTiles();
+        this.nextTurn(nextPlayer, giveNextPlayerTile);
     }
 
     findByPlayerID(identifier) {

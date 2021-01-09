@@ -4,6 +4,9 @@ const socket = new WebSocket('ws://localhost:8888');
 const app = new Vue({
     el: '#app',
     data: {
+        joined: false,
+        username: 'anonymous',
+        otherPlayers: [],
         status: 'Waiting for connection...',
         myTiles: [],
         activeTiles: [],
@@ -39,7 +42,15 @@ const app = new Vue({
                     eventData: eventData
                 })
             )
+        },
+        joinQueue: function() {
+            console.log('Joining Queue');
+            this.sendEvent('QueueJoin', {
+                username: app.username
+            });
+            this.joined = true;
         }
+        
     }
 });
 
@@ -49,8 +60,7 @@ function updateStatus(status) {
 
 socket.addEventListener('open', function (event) {
     console.log('Socket Connection Established!')
-    updateStatus('Connection established.');
-    //socket.send('test message from client');
+    updateStatus('Connection established.');    
 });
 
 socket.addEventListener('close', function(event) {

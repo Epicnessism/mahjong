@@ -5,6 +5,14 @@
     </head>
     <body>
         <div id="app">
+            <div v-if="!joined">
+                <span>Username: </span>
+                <input v-model="username">
+                <button v-on:click="joinQueue()">Play Now</button>
+            </div>
+            <div v-if="joined">
+                <span>Playing as: {{ username}} </span>
+            </div>
             <span>{{ status }}</span>
             <ul>
                 <h1>
