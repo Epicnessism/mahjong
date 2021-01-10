@@ -58,9 +58,16 @@ class MahjongGame {
     start() {
         console.log("New game starting");
         this.players.forEach(player => {
-            player.setTiles(this.takeTiles(13))
+            player.setTiles(this.takeTiles(13));
+            var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
+                return {
+                    playerIdentifier: otherPlayer.identifier
+                }
+            });
+            console.log(otherPlayers)
             player.sendEvent('GameStart', {
-                tiles: player.tiles
+                tiles: player.tiles,
+                players: otherPlayers
             });
         });
         this.nextTurn();

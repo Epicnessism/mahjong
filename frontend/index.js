@@ -5,7 +5,7 @@ const app = new Vue({
     el: '#app',
     data: {
         joined: false,
-        username: 'anonymous',
+        username: 'anonymous' + Math.floor(Math.random() * 100),
         otherPlayers: [],
         status: 'Waiting for connection...',
         myTiles: [],
@@ -86,6 +86,7 @@ function handleEvent(event) {
         case 'GameStart': 
             updateStatus('Game starting...');
             app.myTiles = event.eventData.tiles;
+            app.otherPlayers = event.eventData.players
             break;
         case 'YourTurn':
             app.yourTurn = true;
@@ -93,6 +94,9 @@ function handleEvent(event) {
             if(event.eventData.newTile) {
                 app.myTiles.push(event.eventData.newTile)
             }
+            app.otherPlayers.forEach(player => {
+                player.isActive = false;
+            })
             break;
         case 'CheckDiscardedTile':
             updateStatus('Checking if anyone wants ' + event.eventData.tile);
@@ -100,7 +104,23 @@ function handleEvent(event) {
             break;
         case 'NextTurnNotYou':
             updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
+            
+            //update my tiles here?
             app.myTiles = event.eventData.tiles;
+
+            app.otherPlayers.forEach(player => {
+                console.log(event.eventData.activePlayerID);
+                console.log(player.playerIdentifier)
+                if(event.eventData.activePlayerID === player.playerIdentifier) {
+                    console.log("Setting active!");
+                    player.isActive = true;
+                } else {
+                    console.log("Setting inactive!");
+                    player.isActive = false;
+                }
+            });
+
+
             break;
         case 'OtherPlayerRespondedToCheck':
             updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
