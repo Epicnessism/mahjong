@@ -48,14 +48,24 @@ function thirteenSingles(player) {
     var playerTiles = player.tiles.concat(player.visibleTiles)
     console.log("THIRTEENSINGLES: playerTiles concated: ", playerTiles)
     
+    //get rid of unwanted tiles
     playerTilesSanitized = unIncludeFlowers(playerTiles)
     
     //return not true if contains unexpected characters
     var unexpectedTilesCount = !playerTiles.filter(tile => !thirteenSinglesUniqueSet.includes(tile)).length > 0
+    
     //check if there is at least 1 duplicate
     playerTiles.forEach(tile => {
-        var count = playerTiles.filter(tile)
+        var count = playerTiles.filter(tile).length
+        if (count === 2) {
+            //if you get here, then return true, you win
+            return true
+        }
     });
+
+    //otherwise you did not win
+    return false
+
 }
 
 
@@ -66,12 +76,33 @@ function unIncludeFlowers(playerTiles) {
 
 }
 
+function concatPlayerTiles(player) {
+    return playerTiles = player.tiles.concat(player.visibleTiles)
+}
 
 
 
 //
 //x4 or 7? i forget
 function sevenPairs(players) {
+    var playerTiles = concatPlayerTiles(player)
+    console.log("SEVENPAIRS: playerTiles concated: ", playerTiles)
+    
+    //get rid of unwanted tiles
+    playerTilesSanitized = unIncludeFlowers(playerTiles)
+
+    //check if each tile has a pair
+    var pair = 0;
+    playerTiles.forEach(tile => {
+        var count = playerTiles.filter(tile).length
+        if (count === 2) {
+            pair++
+        }
+    });
+    if (pair === 14) { //this should probably be rewritten with better logic buuuuut this works for now
+        return true
+    }
+    return false
 
 }
 
