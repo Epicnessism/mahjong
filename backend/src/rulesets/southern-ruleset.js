@@ -55,16 +55,12 @@ function standardWin(player) {
     //check characters tiles
     var characterTiles = inHandTiles.filter( tile => tile.split("_")[0] == "char")
     var charResponse = recursiveCharacterTiles(characterTiles, winningHand)
-    console.log(charResponse);
     if (charResponse) {
         winningHand.concat(charResponse)
-        // console.log(winningHand);
     } else {
-        console.log("lol?");
         return false
     }
-
-    
+    // recursiveCharacterTiles(characterTiles, winningHand) ? winningHand.concat(charResponse) : false??
 
     //calculate in hand tiles
     //split into suits first?
@@ -111,12 +107,10 @@ function standardWin(player) {
 
 function recursiveCharacterTiles(characterTiles, winningHand) {
     if(characterTiles.length == 0) {
-        console.log("winning return in recursive characters: ",winningHand);
+        // console.log("winning return in recursive characters: ",winningHand);
         return winningHand //winning
     }
     var activeSet = characterTiles.filter(charTile => charTile == characterTiles[0]) //filter by the first element
-    // console.log("characterTiles: ", characterTiles);
-    // console.log("activeSet: ", activeSet);
     characterTiles = characterTiles.filter(charTile => !activeSet.includes(charTile))
     if(activeSet.length == 4 || activeSet.length == 3) { //that means its a gang or a match
         winningHand.push(activeSet) 
@@ -125,7 +119,6 @@ function recursiveCharacterTiles(characterTiles, winningHand) {
         winningHand.push(activeSet) //it's a pair
         return recursiveCharacterTiles(characterTiles, winningHand) //continue winning
     } else {
-        // console.log(winningHand);
         return false //losing
     }
 }
@@ -141,9 +134,9 @@ function removeSets(i, tileValues, winningHand) {
         } else if (tileValues[i].find(tileValue => tileValue == tileValues[i][0]+1) && tileValues[i].find(tileValue => tileValue == tileValues[i][0]+2) ) {
             //there is a straight
             var straight = []
-            straight.push(tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+2),1)[0])
-            straight.push(tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+1),1)[0])
-            straight.push(tileValues[i].splice(0,1)[0])
+            straight.push(suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+2),1)[0])
+            straight.push(suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+1),1)[0])
+            straight.push(suits[i] + "_" + tileValues[i].splice(0,1)[0])
             winningHand.push(straight)
         } else {
             return false;
@@ -163,7 +156,7 @@ function findAndRemovePair(i, pairsToCheck, tileValues, winningHand) {
         var pairCount = tileValues[i].filter(tileValue => tileValue == pairsToCheck[p])
         if(pairCount.length >= 2) {
             //pair is removed from the suit
-            foundPair = [tileValues[i].splice(tileValues[i].indexOf(pairCount[0]), 1)[0], tileValues[i].splice(tileValues[i].indexOf(pairCount[1]), 1)[0]]
+            foundPair = [suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[0]), 1)[0], suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[1]), 1)[0]]
             winningHand.push(foundPair) //add to winning hand
             return true
         }
@@ -240,8 +233,8 @@ function sevenPairs(players) {
 
 //Test standard win
 var testPlayer = {
-    tiles: ["char_1", "char_1", "char_1",
-    "dot_5", "dot_5", "dot_5", 
+    tiles: ["char_1", "char_1", "char_1","char_1", "char_4", "char_4", "char_4",
+    // "dot_5", "dot_5", "dot_5", 
     "dot_4", "dot_4", "dot_3", "dot_3", "dot_2", "dot_2", 
     "dot_1", "dot_1"],
     visibleTiles: []
