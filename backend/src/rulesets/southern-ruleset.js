@@ -51,8 +51,20 @@ function standardWin(player) {
     var sanitizedVisibleTiles = unIncludeFlowers(visibleTiles)
 
     sanitizedVisibleTiles.forEach(set => winningHand.push(set)) //add visible sets to your winning hand
-    //calculate visible tiles?
-    //do we need to even calculate visible tiles? no right
+
+    //check characters tiles
+    var characterTiles = inHandTiles.filter( tile => tile.split("_")[0] == "char")
+    var charResponse = recursiveCharacterTiles(characterTiles, winningHand)
+    console.log(charResponse);
+    if (charResponse) {
+        winningHand.concat(charResponse)
+        // console.log(winningHand);
+    } else {
+        console.log("lol?");
+        return false
+    }
+
+    
 
     //calculate in hand tiles
     //split into suits first?
@@ -60,6 +72,7 @@ function standardWin(player) {
     var dotTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "dot").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var bambooTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "bamboo").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var tileValues = [tenkTileValues, dotTileValues, bambooTileValues]
+    console.log(tileValues);
     
 
     //calculate sum values of each suit
@@ -87,13 +100,33 @@ function standardWin(player) {
             continue;
         }
     }
-    console.log(tileValues);
     if( tileValues.filter( suit => suit.length == 0).length == 3) {
         console.log("winning hand!");
         return winningHand
     } else {
         console.log("you lying piece of shit!");
         return winningHand
+    }
+}
+
+function recursiveCharacterTiles(characterTiles, winningHand) {
+    if(characterTiles.length == 0) {
+        console.log("winning return in recursive characters: ",winningHand);
+        return winningHand //winning
+    }
+    var activeSet = characterTiles.filter(charTile => charTile == characterTiles[0]) //filter by the first element
+    // console.log("characterTiles: ", characterTiles);
+    // console.log("activeSet: ", activeSet);
+    characterTiles = characterTiles.filter(charTile => !activeSet.includes(charTile))
+    if(activeSet.length == 4 || activeSet.length == 3) { //that means its a gang or a match
+        winningHand.push(activeSet) 
+        return recursiveCharacterTiles(characterTiles, winningHand) //continue winning
+    } else if(activeSet.length == 2) {
+        winningHand.push(activeSet) //it's a pair
+        return recursiveCharacterTiles(characterTiles, winningHand) //continue winning
+    } else {
+        // console.log(winningHand);
+        return false //losing
     }
 }
 
@@ -118,7 +151,7 @@ function removeSets(i, tileValues, winningHand) {
 
     }
     if (tileValues[i].length == 0) {
-        console.log("returned true in removeSets");
+        // console.log("returned true in removeSets");
         return true
     }
     return false
@@ -161,10 +194,8 @@ function thirteenSingles(player) {
             return true
         }
     });
-
     //otherwise you did not win
     return false
-
 }
 
 
@@ -209,13 +240,10 @@ function sevenPairs(players) {
 
 //Test standard win
 var testPlayer = {
-    tiles: ["dot_7", "dot_7",
-        "dot_6", "dot_6",
-        "dot_5", "dot_5",
-        "dot_4", "dot_4",
-        "dot_3", "dot_3",
-        "dot_2", "dot_2", 
-        "dot_1", "dot_1"],
+    tiles: ["char_1", "char_1", "char_1",
+    "dot_5", "dot_5", "dot_5", 
+    "dot_4", "dot_4", "dot_3", "dot_3", "dot_2", "dot_2", 
+    "dot_1", "dot_1"],
     visibleTiles: []
 }
 

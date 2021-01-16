@@ -66,7 +66,7 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     var eatenTiles = listOfSelectedTiles;
     eatenTiles.push(lastTile);
     player.visibleTiles.push(eatenTiles);
-    player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile));
+    player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
     console.log("Eat Visible Tiles: " + player.visibleTiles);
     
 }
