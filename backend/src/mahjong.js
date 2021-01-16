@@ -19,6 +19,7 @@ class MahjongGame {
     constructor(players, tileSet='flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
+        this.ruleset = ruleset;
         // this.mahjongLogic = mahjongLogic;
 
         this.players = players;
@@ -201,7 +202,18 @@ class MahjongGame {
 
         if(win) {
             lastTile = this.discardedTiles.pop();
-            //    do later
+            var winningHand = this.ruleset.checkAllWinConditions(win.player, lastTile)
+            if(winningHand) {
+                this.allOtherPlayers(win.player).forEach( otherPlayer => {
+                    otherPlayer.sendEvent('Win', {
+                        actingPlayerID: win.player.identifier,
+                        action: "Win",
+                        lastTile: lastTile,
+                        winningHand: winningHand
+                    })
+                });
+            }
+            
         } else if(gang) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementGang(gang.player, lastTile);

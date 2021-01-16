@@ -21,15 +21,15 @@ const suits = ["tenk","dot", "bamboo"]
 //actually it will probably need to return an identifier for future meta-play where
 //winning multiple rounds and depending on which of the win-cons you meet, can change score (money)
 //multiplier, like if you win 2 in a row as host a x or y, with the thirteenSingles its like x26 or something lol
-function checkAllWinConditions(player) {
-    if(standardWin(player)) {
-        return true
+function checkAllWinConditions(player, winningTile) {
+    if(standardWin(player, winningTile)) {
+        return winningHand
     }
     if(thirteenSingles(player)) {
-        return true
+        return winningHand
     }
     if(sevenPairs(player)) {
-        return true
+        return winningHand
     }
     return false
     //alternate code but looks terrible and probably wont work in the future
@@ -38,10 +38,13 @@ function checkAllWinConditions(player) {
 
 //this is actually the hardest one to calculate....
 //x1
-function standardWin(player) {
-    // var playerTiles = concatPlayerTiles(player)
-    var inHandTiles = player.tiles;
-    var visibleTiles = player.visibleTiles;
+function standardWin(player, winningTile = null) {
+    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+    if(winningTile != null) {
+        inHandTiles.push(winningTile)
+    }
+    
+    var visibleTiles = Array.from(player.visibleTiles); //shallow copy this too
 
     var winningHand = []; //2D array of winning hand + sets
 
@@ -166,27 +169,33 @@ function findAndRemovePair(i, pairsToCheck, tileValues, winningHand) {
 
 // you must have one of EACH char tile, one of the 1 and 9 tiles for EACH suit, and you must have another duplicate of any of these.
 //x13
-function thirteenSingles(player) {
-    var playerTiles = concatPlayerTiles(player)
-    console.log("THIRTEENSINGLES: playerTiles concated: ", playerTiles)
+function thirteenSingles(player, winningTile = null) {
+    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+    if(winningTile != null) {
+        inHandTiles.push(winningTile)
+    }
+    //there should be no visible tiles that matter for winning
+    // var visibleTiles = Array.from(player.visibleTiles); //shallow copy this too
+    // var playerTiles = concatPlayerTiles(player)
+    // console.log("THIRTEENSINGLES: playerTiles: ", inHandTiles)
     
     //get rid of flower tiles
-    var playerTilesSanitized = unIncludeFlowers(playerTiles)
+    var playerTilesSanitized = unIncludeFlowers(inHandTiles) //there shouldnt be any flowers to sanitize either tbh...
     
     //return false if contains unexpected characters
-    var unexpectedTilesCount = playerTiles.filter(tile => !thirteenSinglesUniqueSet.includes(tile)).length
+    var unexpectedTilesCount = playerTilesSanitized.filter(tile => !thirteenSinglesUniqueSet.includes(tile)).length
     if(unexpectedTilesCount != 0) {
         return false
     }
 
     //check if there is at least 1 duplicate
-    playerTiles.forEach(tile => {
-        var count = playerTiles.filter(tile).length
+    playerTilesSanitized.forEach(tile => {
+        var count = playerTilesSanitized.filter(tile).length
         if (count === 2) {
             //if you get here, then return true, you win
             return true
         }
-    });
+    })
     //otherwise you did not win
     return false
 }
@@ -194,8 +203,8 @@ function thirteenSingles(player) {
 
 //returns array of tiles that have only game tiles
 function unIncludeFlowers(playerTiles) {
-    var unInclude = ["flower_1", "flower_2", "flower_3","flower_4"]
-    return playerTiles.filter( tile => !unInclude.includes(tile))
+    const toUninclude = ["flower_1", "flower_2", "flower_3","flower_4"]
+    return playerTiles.filter( tile => !toUninclude.includes(tile))
 
 }
 
@@ -207,12 +216,18 @@ function concatPlayerTiles(player) {
 
 //
 //x4 or 7? i forget
-function sevenPairs(players) {
-    var playerTiles = concatPlayerTiles(player)
-    console.log("SEVENPAIRS: playerTiles concated: ", playerTiles)
+function sevenPairs(players, winningTile = null) {
+    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+    if(winningTile != null) {
+        inHandTiles.push(winningTile)
+    }
+
+    //should be nothing to concat since no visible tiles that matter
+    // var playerTiles = concatPlayerTiles(player)
+    // console.log("SEVENPAIRS: playerTiles concated: ", playerTiles)
     
     //get rid of unwanted tiles
-    var playerTilesSanitized = unIncludeFlowers(playerTiles)
+    var playerTilesSanitized = unIncludeFlowers(inHandTiles)
 
     //check if each tile has a pair
     var pair = 0;
