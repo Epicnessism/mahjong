@@ -119,8 +119,6 @@ function handleEvent(event) {
                     player.isActive = false;
                 }
             });
-
-
             break;
         case 'OtherPlayerRespondedToCheck':
             updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
@@ -139,6 +137,9 @@ function handleEvent(event) {
             updateStatus('Player ' + event.eventData.actingPlayerID + ' has ' + event.eventData.action + " " + event.eventData.lastTile + "!")
             app.activeTiles = [];
             break;
+        case 'Win':
+            updateStatus('Player ' + event.eventData.actingPlayerID + ' has won the game! Winning hand is: ' + event.eventData.winningHand)
+            
     }
 }
 

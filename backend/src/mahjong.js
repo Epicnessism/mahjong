@@ -19,7 +19,7 @@ class MahjongGame {
     constructor(players, tileSet='flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
-        this.ruleset = ruleset;
+        // this.ruleset = ruleset;
         // this.mahjongLogic = mahjongLogic;
 
         this.players = players;
@@ -152,10 +152,9 @@ class MahjongGame {
     }
 
     handleCheckResponses(player, event) {
-        console.log(this.discardedTiles);
+        // console.log(this.discardedTiles);
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
-
-        if (event.eventName == 'Win' && !mahjongLogic.checkWin(player.tiles, lastTile)) {
+        if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile)) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
         } else if (event.eventName == 'Gang' && !mahjongLogic.checkGang(player.tiles, lastTile)) {
@@ -202,7 +201,7 @@ class MahjongGame {
 
         if(win) {
             lastTile = this.discardedTiles.pop();
-            var winningHand = this.ruleset.checkAllWinConditions(win.player, lastTile)
+            var winningHand = southernRuleset.checkAllWinConditions(win.player, lastTile)
             if(winningHand) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
                     otherPlayer.sendEvent('Win', {

@@ -39,7 +39,7 @@ function checkAllWinConditions(player, winningTile) {
 //this is actually the hardest one to calculate....
 //x1
 function standardWin(player, winningTile = null) {
-    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+    var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
     if(winningTile != null) {
         inHandTiles.push(winningTile)
     }
@@ -170,7 +170,7 @@ function findAndRemovePair(i, pairsToCheck, tileValues, winningHand) {
 // you must have one of EACH char tile, one of the 1 and 9 tiles for EACH suit, and you must have another duplicate of any of these.
 //x13
 function thirteenSingles(player, winningTile = null) {
-    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+    var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
     if(winningTile != null) {
         inHandTiles.push(winningTile)
     }
@@ -216,8 +216,8 @@ function concatPlayerTiles(player) {
 
 //
 //x4 or 7? i forget
-function sevenPairs(players, winningTile = null) {
-    var inHandTiles = Array.from(player.tiles) //shallow copy player tiles so we don't mess with the original
+function sevenPairs(player, winningTile = null) {
+    var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
     if(winningTile != null) {
         inHandTiles.push(winningTile)
     }
@@ -232,7 +232,7 @@ function sevenPairs(players, winningTile = null) {
     //check if each tile has a pair
     var pair = 0;
     playerTilesSanitized.forEach(tile => {
-        var count = playerTilesSanitized.filter(tile).length
+        var count = playerTilesSanitized.filter(otherTile => otherTile == tile).length
         if (count === 2) {
             pair++
         }
@@ -245,18 +245,6 @@ function sevenPairs(players, winningTile = null) {
 }
 
 //many....many more.....that I and most people don't even know fully
-
-//Test standard win
-var testPlayer = {
-    tiles: ["char_1", "char_1", "char_1","char_1", "char_4", "char_4", "char_4",
-    // "dot_5", "dot_5", "dot_5", 
-    "dot_4", "dot_4", "dot_3", "dot_3", "dot_2", "dot_2", 
-    "dot_1", "dot_1"],
-    visibleTiles: []
-}
-
-console.log(standardWin(testPlayer));
-
 
 
 module.exports = {
