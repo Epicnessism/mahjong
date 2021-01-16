@@ -108,12 +108,12 @@ function removeSets(i, tileValues, winningHand) {
         } else if (tileValues[i].find(tileValue => tileValue == tileValues[i][0]+1) && tileValues[i].find(tileValue => tileValue == tileValues[i][0]+2) ) {
             //there is a straight
             var straight = []
-            straight.push(tileValues[i].splice(tileValues.indexOf(tileValues[i][0]+2),1)[0])
-            straight.push(tileValues[i].splice(tileValues.indexOf(tileValues[i][0]+1),1)[0])
+            straight.push(tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+2),1)[0])
+            straight.push(tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+1),1)[0])
             straight.push(tileValues[i].splice(0,1)[0])
             winningHand.push(straight)
         } else {
-            break;
+            return false;
         }
 
     }
