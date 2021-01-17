@@ -1,6 +1,6 @@
 console.log('Starting Mahjong Client');
 // const socket = new WebSocket('ws://127.0.0.1:8888');
-const socket = new WebSocket('ws://ec2-3-138-102-31.us-east-2.compute.amazonaws.com:8888');
+const socket = new WebSocket('wss://ec2-3-138-102-31.us-east-2.compute.amazonaws.com:8888');
 
 const app = new Vue({
     el: '#app',
