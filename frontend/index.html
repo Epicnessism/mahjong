@@ -6,6 +6,7 @@
     </head>
     <body>
         <div id="app">
+            <img src="res/dot_1.png"></img>
             <div v-if="!joined">
                 <span>Username: </span>
                 <input v-model="username">
@@ -25,6 +26,7 @@
                 <h2>
                     Your Tiles
                 </h2>
+                <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'">
                 <ul>
                     <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
                     {{ tile }}
