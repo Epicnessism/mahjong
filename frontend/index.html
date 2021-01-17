@@ -20,16 +20,27 @@
                     <div id="other-player-stub" v-for="player in otherPlayers">
                         <b>{{ player.playerIdentifier }}</b>
                         <span v-if="player.isActive"> [Playing]</span>
+                        <span v-for="set in player.visibleTiles">
+                            <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                        </span>
                     </div>
                 </div>
+                <h2>
+                    Your Visible Tiles
+                </h2>
+                <div v-for="set in myVisibleTiles">
+                    <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                </div>
+                
                 <h2>    
-                    Your Tiles
+                    Your Hand
                 </h2>
                 <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false">
                     <!-- <div v-for="tile in myTiles" :key="tile">{{tile}}</div> -->
                     <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
                 </draggable>
 
+                
                 <!-- <ul>
                     <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
                     {{ tile }}

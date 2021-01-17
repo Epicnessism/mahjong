@@ -2,6 +2,8 @@ console.log('Starting Mahjong Client');
 // const socket = new WebSocket('ws://127.0.0.1:8888');
 const socket = new WebSocket('ws://ec2-3-138-102-31.us-east-2.compute.amazonaws.com:8888');
 
+
+
 const app = new Vue({
     el: '#app',
     data: {
@@ -10,6 +12,7 @@ const app = new Vue({
         otherPlayers: [],
         status: 'Waiting for connection...',
         myTiles: [],
+        myVisibleTiles: [],
         activeTiles: [],
         yourTurn: false,
         inCheckPhase: false,
@@ -103,11 +106,28 @@ function handleEvent(event) {
             })
             break;
         case 'CheckDiscardedTile':
-            // updateStatus('Checking if anyone wants ' + event.eventData.tile);
             updateStatus('Checking if anyone wants ');
             app.activeTile = event.eventData.tile
             app.inCheckPhase = true;
             break;
+        case 'VisibleTileUpdate':
+            updateStatus('updating all visible tiles');
+            console.log(event);
+            app.myVisibleTiles = event.eventData.visibleTileMap.filter(playerVT => playerVT.player == app.username).map(playerVisibleTiles => playerVisibleTiles.tiles )
+            event.eventData.visibleTileMap.forEach(playerTiles => {
+                console.log(playerTiles);
+                if(playerTiles.player == app.username) {
+                    console.log('Got my own played tiles');
+                    console.log(playerTiles.tiles);
+                    app.myVisibleTiles = playerTiles.tiles
+                }else {
+                    console.log('Got other played tilies')
+                    console.log(playerTiles.tiles);
+                    app.otherPlayers.filter(player => player.playerIdentifier == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
+                }
+            });
+            break;
+
         case 'NextTurnNotYou':
             updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
             app.activeTile = null
@@ -135,6 +155,7 @@ function handleEvent(event) {
             break;
         case 'SuccessfulCheckResponse': 
             updateStatus('Successful Check Response');
+            app.activeTiles = [];
             app.inCheckPhase = false;
             break;
         case 'AlreadySubmittedCheckResponse':

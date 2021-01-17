@@ -70,6 +70,8 @@ class MahjongGame {
                 tiles: player.tiles,
                 players: otherPlayers
             });
+            // //send all visible tiles at beginning of game too
+            // this.sendAllVisibleTiles();
         });
         this.nextTurn();
     }
@@ -145,9 +147,9 @@ class MahjongGame {
         });
 
         this.players.forEach(player => {
-            player.sendEvent('VisibleTileUpdate', {
+            player.sendEvent('VisibleTileUpdate', 
                visibleTileMap
-            });
+            );
         })
     }
 
