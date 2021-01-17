@@ -13,7 +13,7 @@
                 <button v-on:click="joinQueue()">Play Now</button>
             </div>
             <div id="main-game" v-if="joined">
-                <span>Playing as: {{ username}} </span>
+                <span>Playing as: {{ username }} </span>
                 <br>
                 <span>{{ status }}</span>
                 <h2>Other Players: </h2>
@@ -26,20 +26,21 @@
                 <h2>
                     Your Tiles
                 </h2>
-                <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'">
-                <ul>
+                <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                <!-- <ul>
                     <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
                     {{ tile }}
                     </li>
-                </ul>
+                </ul> -->
                 <h2>
                     Actively Selected Tiles
                 </h2>
-                <ul>
+                <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+                <!-- <ul>
                     <li v-for="tile in activeTiles" v-on:click="deselectTile(tile)">
                         {{ tile }}
                     </li>
-                </ul>
+                </ul> -->
                 <div v-if="inCheckPhase">
                     <button v-on:click="sendEvent('Win')">
                         Win (胡) literally win the game
