@@ -6,7 +6,6 @@
     </head>
     <body>
         <div id="app">
-            <img src="res/dot_1.png"></img>
             <div v-if="!joined">
                 <span>Username: </span>
                 <input v-model="username">
@@ -15,7 +14,7 @@
             <div id="main-game" v-if="joined">
                 <span>Playing as: {{ username }} </span>
                 <br>
-                <span>{{ status }}</span>
+                <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
                 <h2>Other Players: </h2>
                 <div id="other-player-section">
                     <div id="other-player-stub" v-for="player in otherPlayers">

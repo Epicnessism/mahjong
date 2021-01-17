@@ -13,14 +13,17 @@ const app = new Vue({
         activeTiles: [],
         yourTurn: false,
         inCheckPhase: false,
+        activeTile: null
     },
     methods: {
         clickTile: function(tile) {
             if(this.yourTurn) {
                 console.log("you chose to discard: " + tile);
+                this.activeTile = tile
                 this.sendEvent('DiscardTile', {
                     tile: tile
                 })
+                this.myTiles = this.myTiles.filter( otherTile => otherTile != tile)
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
             } else if(this.inCheckPhase) {
@@ -100,11 +103,14 @@ function handleEvent(event) {
             })
             break;
         case 'CheckDiscardedTile':
-            updateStatus('Checking if anyone wants ' + event.eventData.tile);
+            // updateStatus('Checking if anyone wants ' + event.eventData.tile);
+            updateStatus('Checking if anyone wants ');
+            app.activeTile = event.eventData.tile
             app.inCheckPhase = true;
             break;
         case 'NextTurnNotYou':
             updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
+            app.activeTile = null
             
             //update my tiles here?
             app.myTiles = event.eventData.tiles;
@@ -136,6 +142,7 @@ function handleEvent(event) {
             break;
         case 'CheckPhaseResolved':
             updateStatus('Player ' + event.eventData.actingPlayerID + ' has ' + event.eventData.action + " " + event.eventData.lastTile + "!")
+            app.activeTile = null
             app.activeTiles = [];
             break;
         case 'Win':
