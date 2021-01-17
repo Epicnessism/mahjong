@@ -22,15 +22,20 @@
                         <span v-if="player.isActive"> [Playing]</span>
                     </div>
                 </div>
-                <h2>
+                <h2>    
                     Your Tiles
                 </h2>
-                <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false">
+                    <!-- <div v-for="tile in myTiles" :key="tile">{{tile}}</div> -->
+                    <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                </draggable>
+
                 <!-- <ul>
                     <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
                     {{ tile }}
                     </li>
                 </ul> -->
+
                 <h2>
                     Actively Selected Tiles
                 </h2>
@@ -60,6 +65,15 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+        
+        
+        <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script> -->
+        <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+        <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.24.3/vuedraggable.umd.min.js"></script>
+        
+
         <script src="index.js"></script>
     </body>
 </html>
