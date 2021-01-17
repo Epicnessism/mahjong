@@ -16,7 +16,7 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 
 
 class MahjongGame {
-    constructor(players, tileSet='flowers', ruleset='southernRuleset') {
+    constructor(players, tileSet='no-flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
         // this.ruleset = ruleset;
