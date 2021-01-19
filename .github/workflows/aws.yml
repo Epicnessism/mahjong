@@ -78,8 +78,8 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: mahjong-service
-        cluster: mahjong
+        service: truemahjong-service
+        cluster: truemahjong
         wait-for-service-stability: true
     
     - name: S3 Sync
