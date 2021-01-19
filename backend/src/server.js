@@ -1,15 +1,28 @@
 const WebSocket = require('ws');
-const Player = require('./player.js')
-const MahjongGame = require('./mahjong.js')
-const config = require('./config.js')
+const Express = require('express');
+const CookieSession = require('cookie-session');
+const Player = require('./player.js');
+const MahjongGame = require('./mahjong.js');
+const config = require('./config.js');
 
-console.log('Mahjong Server Started');
+console.log('Starting Server...');
+
+const apiApp = Express();
+
+apiApp.get('/currentUser', (req, res) => {
+    console.log(req);
+    res.send('Hello World!');
+});
+
+apiApp.listen(config.apiPort, () => {
+    console.log('Express endpoints started on port ' + config.apiPort)
+})
 
 const wss = new WebSocket.Server({
   port: config.wsPort
 });
 
-console.log('Listening on port ' + config.wsPort);
+console.log('WSS server started on port ' + config.wsPort);
 
 wss.on('connection', handleNewConnection);
 

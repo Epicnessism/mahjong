@@ -1,4 +1,5 @@
 module.exports = {
     applicationName: 'Online Mahjong',
-    wsPort: 8889,
+    wsPort: 8888,
+    apiPort: 4444
 }
