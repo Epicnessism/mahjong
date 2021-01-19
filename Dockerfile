@@ -11,5 +11,5 @@ RUN npm install
 # Bundle app source
 COPY backend/ /usr/src/app
 
-EXPOSE 8888/tcp
+EXPOSE 80/tcp
 CMD [ "node", "src/server.js" ]

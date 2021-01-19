@@ -9,20 +9,32 @@ console.log('Starting Server...');
 
 const apiApp = Express();
 
+apiApp.use(CookieSession({
+    name: 'session',
+    keys: ['key1', 'key2']
+  }))
+
 apiApp.get('/currentUser', (req, res) => {
     console.log(req);
     res.send('Hello World!');
 });
 
-apiApp.listen(config.apiPort, () => {
+/*apiApp.listen(config.apiPort, () => {
     console.log('Express endpoints started on port ' + config.apiPort)
-})
+})*/
 
-const wss = new WebSocket.Server({
-  port: config.wsPort
+var server = require('http').createServer();
+
+var wss = new WebSocket.Server({
+    server: server,
+    perMessageDeflate: false
 });
 
-console.log('WSS server started on port ' + config.wsPort);
+server.on('request', apiApp);
+
+server.listen(config.port, function() {
+    console.log('Listening for WS and HTTP traffic on port ' + config.port);
+});
 
 wss.on('connection', handleNewConnection);
 
