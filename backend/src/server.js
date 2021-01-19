@@ -1,14 +1,15 @@
 const WebSocket = require('ws');
-const Player = require('./player')
-const MahjongGame = require('./mahjong')
+const Player = require('./player.js')
+const MahjongGame = require('./mahjong.js')
+const config = require('./config.js')
 
 console.log('Mahjong Server Started');
 
 const wss = new WebSocket.Server({
-  port: 8888
+  port: config.wsPort
 });
 
-console.log('Listening on port 8888');
+console.log('Listening on port ' + config.wsPort);
 
 wss.on('connection', handleNewConnection);
 
