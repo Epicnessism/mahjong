@@ -4,10 +4,13 @@ const CookieSession = require('cookie-session');
 const Player = require('./player.js');
 const MahjongGame = require('./mahjong.js');
 const config = require('./config.js');
+var path = require('path');
 
 console.log('Starting Server...');
 
 const apiApp = Express();
+
+apiApp.use('/', Express.static(path.join(__dirname, '../../frontend')))
 
 apiApp.use(CookieSession({
     name: 'session',
