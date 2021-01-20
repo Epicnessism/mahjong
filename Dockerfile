@@ -9,7 +9,10 @@ COPY backend/package*.json /usr/src/app/
 RUN npm install
 
 # Bundle app source
-COPY * /usr/src/app/
+COPY backend/ /usr/src/app
 
-EXPOSE 80/tcp
-CMD [ "node", "backend/src/server.js" ]
+RUN mkdir /usr/src/app/frontend
+COPY frontend/ /usr/src/app/frontend
+
+EXPOSE 8888/tcp
+CMD [ "node", "src/server.js" ]
