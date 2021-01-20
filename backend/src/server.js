@@ -10,7 +10,7 @@ console.log('Starting Server...');
 
 const apiApp = Express();
 
-apiApp.use('/', Express.static(path.join(__dirname, '../../frontend')))
+apiApp.use('/', Express.static(path.join(__dirname, '../frontend')))
 
 apiApp.use(CookieSession({
     name: 'session',
