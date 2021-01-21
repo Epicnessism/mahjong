@@ -17,8 +17,8 @@
                 <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
                 <h2>Other Players: </h2>
                 <div id="other-player-section">
-                    <div id="other-player-stub" v-for="player in otherPlayers">
-                        <b>{{ player.playerIdentifier }}</b>
+                    <div id="other-player-stub" v-for="player in players">
+                        <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
                         <span v-if="player.isActive"> [Playing]</span>
                         <span v-for="set in player.visibleTiles">
                             <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
@@ -31,31 +31,16 @@
                 <div v-for="set in myVisibleTiles">
                     <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
                 </div>
-                
                 <h2>    
                     Your Hand
                 </h2>
                 <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false">
-                    <!-- <div v-for="tile in myTiles" :key="tile">{{tile}}</div> -->
                     <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
                 </draggable>
-
-                
-                <!-- <ul>
-                    <li v-for="tile in myTiles" v-on:click="clickTile(tile)">
-                    {{ tile }}
-                    </li>
-                </ul> -->
-
                 <h2>
                     Actively Selected Tiles
                 </h2>
                 <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-                <!-- <ul>
-                    <li v-for="tile in activeTiles" v-on:click="deselectTile(tile)">
-                        {{ tile }}
-                    </li>
-                </ul> -->
                 <div v-if="inCheckPhase">
                     <button v-on:click="sendEvent('Win')">
                         Win (胡) literally win the game

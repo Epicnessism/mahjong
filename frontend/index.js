@@ -1,6 +1,6 @@
 console.log('Starting Mahjong Client');
-// const socket = new WebSocket('ws://127.0.0.1:8888');
-const socket = new WebSocket('wss://truemahjong.com:443');
+const socket = new WebSocket('ws://127.0.0.1:80');
+// const socket = new WebSocket('wss://truemahjong.com:443');
 
 const app = new Vue({
     el: '#app',
@@ -8,6 +8,7 @@ const app = new Vue({
         joined: false,
         username: 'anonymous' + Math.floor(Math.random() * 100),
         otherPlayers: [],
+        players: [],
         status: 'Waiting for connection...',
         myTiles: [],
         myVisibleTiles: [],
@@ -91,7 +92,8 @@ function handleEvent(event) {
         case 'GameStart': 
             updateStatus('Game starting...');
             app.myTiles = event.eventData.tiles;
-            app.otherPlayers = event.eventData.players
+            app.players = event.eventData.players;
+            app.otherPlayers = event.eventData.otherPlayers;
             break;
         case 'YourTurn':
             app.yourTurn = true;
@@ -132,7 +134,8 @@ function handleEvent(event) {
             
             //update my tiles here?
             app.myTiles = event.eventData.tiles;
-
+            console.log("other players: " + app.otherPlayers);
+            console.log("all players: " + app.players);
             app.otherPlayers.forEach(player => {
                 console.log(event.eventData.activePlayerID);
                 console.log(player.playerIdentifier)

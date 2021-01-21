@@ -65,10 +65,16 @@ class MahjongGame {
                     playerIdentifier: otherPlayer.identifier
                 }
             });
-            console.log(otherPlayers)
+            var allPlayers = this.players.map(player => {
+                return {
+                    playerIdentifier: player.identifier
+                }
+            });
+            console.log(this.players)
             player.sendEvent('GameStart', {
                 tiles: player.tiles,
-                players: otherPlayers
+                players: allPlayers,
+                otherPlayers: otherPlayers
             });
             // //send all visible tiles at beginning of game too
             // this.sendAllVisibleTiles();
