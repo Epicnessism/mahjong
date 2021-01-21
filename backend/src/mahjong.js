@@ -70,16 +70,21 @@ class MahjongGame {
                     playerIdentifier: player.identifier
                 }
             });
-            console.log(this.players)
+            // console.log(this.getPlayerOfIndex(this.activePlayer).identifier)
             player.sendEvent('GameStart', {
                 tiles: player.tiles,
                 players: allPlayers,
+                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
                 otherPlayers: otherPlayers
             });
             // //send all visible tiles at beginning of game too
             // this.sendAllVisibleTiles();
         });
         this.nextTurn();
+    }
+
+    getPlayerOfIndex(playerIndex) {
+        return this.players[playerIndex]
     }
 
     nextTurn(nextPlayer = null, giveTile = true) {
@@ -98,18 +103,21 @@ class MahjongGame {
             var newTile = this.takeTiles(1)[0];
             this.players[this.activePlayer].addTile(newTile)
             this.players[this.activePlayer].sendEvent("YourTurn", {
-                newTile: newTile
+                newTile: newTile,
+                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
             });
         } else {
             this.players[this.activePlayer].sendEvent("YourTurn", {
-                newTile: null
+                newTile: null,
+                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
             });
         }
         
         this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
             otherPlayer.sendEvent('NextTurnNotYou', {
                 activePlayerID: this.players[this.activePlayer].identifier,
-                tiles: otherPlayer.tiles
+                tiles: otherPlayer.tiles,
+                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
             })});
     }
 

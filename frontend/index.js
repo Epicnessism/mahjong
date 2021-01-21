@@ -15,9 +15,20 @@ const app = new Vue({
         activeTiles: [],
         yourTurn: false,
         inCheckPhase: false,
-        activeTile: null
+        activeTile: null,
+        activePlayerName: null,
+    },
+    computed: {
+        
     },
     methods: {
+        activePlayer: function(player) {            
+            console.log("activePlayerName: " + this.activePlayerName);
+            return { 
+                activePlayer : player.playerIdentifier == this.activePlayerName,
+                notActivePlayer : player.playerIdentifier != this.activePlayerName,
+             }            
+        },        
         clickTile: function(tile) {
             if(this.yourTurn) {
                 console.log("you chose to discard: " + tile);
@@ -93,11 +104,13 @@ function handleEvent(event) {
             updateStatus('Game starting...');
             app.myTiles = event.eventData.tiles;
             app.players = event.eventData.players;
+            app.activePlayerName = event.eventData.activePlayerName;
             app.otherPlayers = event.eventData.otherPlayers;
             break;
         case 'YourTurn':
             app.yourTurn = true;
-            updateStatus("waiting for you to discard a tile")
+            updateStatus("It is your turn")
+            app.activePlayerName = event.eventData.activePlayerName
             if(event.eventData.newTile) {
                 app.myTiles.push(event.eventData.newTile)
             }
@@ -131,6 +144,7 @@ function handleEvent(event) {
         case 'NextTurnNotYou':
             updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
             app.activeTile = null
+            app.activePlayerName = event.eventData.activePlayerName
             
             //update my tiles here?
             app.myTiles = event.eventData.tiles;

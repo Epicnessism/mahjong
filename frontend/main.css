@@ -10,7 +10,12 @@ html, body {
     column-gap: 40px; */
 }
 
-#other-player-stub {
-    border: 1px solid black;
+.notActivePlayer {
+    border: 2px solid black;
+    padding: 10px;
+}
+
+.activePlayer {
+    border: 2px solid greenyellow;
     padding: 10px;
 }

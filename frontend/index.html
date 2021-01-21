@@ -17,7 +17,7 @@
                 <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
                 <h2>Other Players: </h2>
                 <div id="other-player-section">
-                    <div id="other-player-stub" v-for="player in players">
+                    <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
                         <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
                         <span v-if="player.isActive"> [Playing]</span>
                         <span v-for="set in player.visibleTiles">
