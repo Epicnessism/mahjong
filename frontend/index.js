@@ -108,6 +108,7 @@ function handleEvent(event) {
             app.otherPlayers = event.eventData.otherPlayers;
             break;
         case 'YourTurn':
+            app.activeTile = null;
             app.yourTurn = true;
             updateStatus("It is your turn")
             app.activePlayerName = event.eventData.activePlayerName
@@ -125,19 +126,18 @@ function handleEvent(event) {
             break;
         case 'VisibleTileUpdate':
             updateStatus('updating all visible tiles');
-            console.log(event);
-            app.myVisibleTiles = event.eventData.visibleTileMap.filter(playerVT => playerVT.player == app.username).map(playerVisibleTiles => playerVisibleTiles.tiles )
-            event.eventData.visibleTileMap.forEach(playerTiles => {
+            console.log(event.eventData);
+            // app.myVisibleTiles = event.eventData.visibleTileMap.filter(playerVT => playerVT.player == app.username).map(playerVisibleTiles => playerVisibleTiles.tiles )
+            event.eventData.forEach(playerTiles => {
                 console.log(playerTiles);
                 if(playerTiles.player == app.username) {
                     console.log('Got my own played tiles');
-                    console.log(playerTiles.tiles);
                     app.myVisibleTiles = playerTiles.tiles
                 }else {
                     console.log('Got other played tilies')
-                    console.log(playerTiles.tiles);
-                    app.otherPlayers.filter(player => player.playerIdentifier == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
                 }
+                console.log(playerTiles.tiles);
+                app.players.filter(player => player.playerIdentifier == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
             });
             break;
 
