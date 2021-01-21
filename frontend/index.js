@@ -1,6 +1,6 @@
 console.log('Starting Mahjong Client');
-const socket = new WebSocket('ws://127.0.0.1:80');
-// const socket = new WebSocket('wss://truemahjong.com:443');
+// const socket = new WebSocket('ws://127.0.0.1:80');
+const socket = new WebSocket('wss://truemahjong.com:443');
 
 const app = new Vue({
     el: '#app',
