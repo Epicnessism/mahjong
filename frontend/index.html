@@ -19,19 +19,11 @@
                 <div id="other-player-section">
                     <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
                         <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
-                        <span v-if="player.isActive"> [Playing]</span>
                         <span v-for="set in player.visibleTiles">
                             <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
                         </span>
                     </div>
                 </div>
-                <!-- <h2>
-                    Your Visible Tiles
-                </h2>
-                <div v-for="set in myVisibleTiles">
-                    <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                </div>
-                <h2>     -->
                     Your Hand
                 </h2>
                 <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false">
@@ -41,7 +33,7 @@
                     Actively Selected Tiles
                 </h2>
                 <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-                <div v-if="inCheckPhase">
+                <div v-if="inCheckPhase && waitingForYourCheck">
                     <button v-on:click="sendEvent('Win')">
                         Win (胡) literally win the game
                     </button>

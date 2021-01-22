@@ -1,4 +1,4 @@
-
+const base_title = document.title
 console.log('Starting Mahjong Client');
 
 const socket_protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:'
@@ -10,13 +10,13 @@ const app = new Vue({
     data: {
         joined: false,
         username: 'anonymous' + Math.floor(Math.random() * 100),
-        otherPlayers: [],
         players: [],
         status: 'Waiting for connection...',
         myTiles: [],
         myVisibleTiles: [],
         activeTiles: [],
         yourTurn: false,
+        waitingForYourCheck: false,
         inCheckPhase: false,
         activeTile: null,
         activePlayerName: null,
@@ -28,8 +28,8 @@ const app = new Vue({
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
             return { 
-                activePlayer : player.playerIdentifier == this.activePlayerName,
-                notActivePlayer : player.playerIdentifier != this.activePlayerName,
+                activePlayerStyle : player.playerIdentifier == this.activePlayerName,
+                notActivePlayerStyle : player.playerIdentifier != this.activePlayerName,
              }            
         },        
         clickTile: function(tile) {
@@ -42,6 +42,7 @@ const app = new Vue({
                 this.myTiles = this.myTiles.filter( otherTile => otherTile != tile)
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
+                document.title = base_title;
             } else if(this.inCheckPhase) {
                 console.log("You chose: " + tile);
                 this.myTiles.splice(this.myTiles.indexOf(tile), 1);
@@ -108,29 +109,27 @@ function handleEvent(event) {
             app.myTiles = event.eventData.tiles;
             app.players = event.eventData.players;
             app.activePlayerName = event.eventData.activePlayerName;
-            app.otherPlayers = event.eventData.otherPlayers;
             break;
         case 'YourTurn':
             app.activeTile = null;
             app.yourTurn = true;
+            document.title = '(*)' + base_title;
             updateStatus("It is your turn")
             app.activePlayerName = event.eventData.activePlayerName
             if(event.eventData.newTile) {
                 app.myTiles.push(event.eventData.newTile)
             }
-            app.otherPlayers.forEach(player => {
-                player.isActive = false;
-            })
             break;
         case 'CheckDiscardedTile':
             updateStatus('Checking if anyone wants ');
             app.activeTile = event.eventData.tile
             app.inCheckPhase = true;
+            app.waitingForYourCheck = true;
+            document.title = '(*)' + base_title;
             break;
         case 'VisibleTileUpdate':
             updateStatus('updating all visible tiles');
             console.log(event.eventData);
-            // app.myVisibleTiles = event.eventData.visibleTileMap.filter(playerVT => playerVT.player == app.username).map(playerVisibleTiles => playerVisibleTiles.tiles )
             event.eventData.forEach(playerTiles => {
                 console.log(playerTiles);
                 if(playerTiles.player == app.username) {
@@ -151,19 +150,7 @@ function handleEvent(event) {
             
             //update my tiles here?
             app.myTiles = event.eventData.tiles;
-            console.log("other players: " + app.otherPlayers);
             console.log("all players: " + app.players);
-            app.otherPlayers.forEach(player => {
-                console.log(event.eventData.activePlayerID);
-                console.log(player.playerIdentifier)
-                if(event.eventData.activePlayerID === player.playerIdentifier) {
-                    console.log("Setting active!");
-                    player.isActive = true;
-                } else {
-                    console.log("Setting inactive!");
-                    player.isActive = false;
-                }
-            });
             break;
         case 'OtherPlayerRespondedToCheck':
             updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
@@ -175,6 +162,8 @@ function handleEvent(event) {
             updateStatus('Successful Check Response');
             app.activeTiles = [];
             app.inCheckPhase = false;
+            app.waitingForYourCheck = false;
+            document.title = base_title;
             break;
         case 'AlreadySubmittedCheckResponse':
             updateStatus('Response already submitted');
