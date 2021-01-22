@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 RUN npm install
 
 # Bundle app source
-COPY * /usr/src/app/
+COPY ./ /usr/src/app/
 
 EXPOSE 8888/tcp
 CMD [ "node", "src/server.js" ]
