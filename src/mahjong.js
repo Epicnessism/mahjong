@@ -140,6 +140,11 @@ class MahjongGame {
                     });
                 });
                 break;
+            
+            case 'UpdateTileOrder':
+                player.tiles = event.eventData.tiles
+                console.log(player.identifier + " just updated their tiles to: " + player.tiles);
+                break;
 
             case 'Win':
             case 'Gang':
