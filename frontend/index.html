@@ -24,10 +24,12 @@
                         </span>
                     </div>
                 </div>
+                <h2>
                     Your Hand
                 </h2>
-                <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false">
+                <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
                     <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                    <!-- <button slot="footer" @click="saveTilePositions()">Save Tile Position</button> -->
                 </draggable>
                 <h2>
                     Actively Selected Tiles
