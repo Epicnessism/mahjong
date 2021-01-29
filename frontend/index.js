@@ -20,9 +20,26 @@ const app = new Vue({
         inCheckPhase: false,
         activeTile: null,
         activePlayerName: null,
+        testAXIOSdata: null,
+        loadingData: true,
+        errored: false,
     },
     computed: {
-        
+    },
+    mounted() {
+        axios
+        .get("http://localhost:80/currentUser")
+        .then( res => {
+            console.log(res);
+            this.testAXIOSdata = res.data
+        })
+        .catch( error => {
+            console.log(error);
+            this.errored = true
+        })
+        .finally( () => {
+            this.loadingData = false
+        })
     },
     methods: {
         activePlayer: function(player) {            
@@ -80,6 +97,11 @@ const app = new Vue({
         
     }
 });
+
+function signIn() {
+    //http post to api backend
+    //send username and pwd
+}
 
 function updateStatus(status) {
     app.status = status;

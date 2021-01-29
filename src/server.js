@@ -8,23 +8,81 @@ var path = require('path');
 
 console.log('Starting Server...');
 
-const apiApp = Express();
+const api = Express();
 
-apiApp.use('/', Express.static(path.join(__dirname, '../frontend')))
+api.use('/', Express.static(path.join(__dirname, '../frontend')))
 
-apiApp.use(CookieSession({
+api.use(CookieSession({
     name: 'session',
     keys: ['key1', 'key2']
   }))
 
-apiApp.get('/currentUser', (req, res) => {
-    console.log(req);
+api.get('/currentUser', (req, res) => {
+    console.log(req.session);
     res.send('Hello World!');
 });
 
-/*apiApp.listen(config.apiPort, () => {
+/*api.listen(config.apiPort, () => {
     console.log('Express endpoints started on port ' + config.apiPort)
 })*/
+
+api.post('/signIn', (req, res, next) => {
+    console.log(req);
+    //TODO authentication logic with username/pwd in db
+    //use bcrypt for passwords
+    res.session.username = req.body.username
+})
+
+api.get('/signout', (req,res,next) => {
+    console.log(req);
+    //something like req.session = null? nah that doesn't work
+    //TODO do the logout lmao
+})
+
+//loop through games and return the first game found with this username found in the cookie
+api.get('/getCurrentGame', (req,res,next)=> {
+    console.log(req.session);
+    var currentGame = null;
+
+    //stackoverflow reference found here: NOT TESTED
+    //https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
+    games.some( game => {
+        if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
+            currentGame = game;
+            return true; //return true causes some to stop iterating, optimizing response time
+        }
+    })
+
+    //unoptimized method as a backup, delete later if don't need
+    // games.forEach( game => {
+    //     if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
+    //         currentGame = game;
+    //         break;
+    //     }
+    // })
+
+    if (currentGame) {
+        res.status(200).json({currentGame})
+    } else if (currentGame == null) {
+        res.status(404).json({ //TODO implement centralized error handling with next later...
+            message: "404 Not Found"
+        })
+    }
+    
+})
+
+api.get('/getUsername', (req,res,next)=> {
+    //TODO might need to check more than just if the session exists
+    if(req.session) {
+        res.status(200).json({username: req.session.username})   
+    } else {
+        res.status(403).json( {
+            message: 'unauthorized???'
+        })
+    }
+})
+
+
 
 var server = require('http').createServer();
 
@@ -33,7 +91,7 @@ var wss = new WebSocket.Server({
     perMessageDeflate: false
 });
 
-server.on('request', apiApp);
+server.on('request', api);
 
 server.listen(config.port, function() {
     console.log('Listening for WS and HTTP traffic on port ' + config.port);
