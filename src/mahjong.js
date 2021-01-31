@@ -251,6 +251,8 @@ class MahjongGame {
                 tile: newTile
             });
             nextPlayer = gang.player;
+            giveNextPlayerTile = false;
+
         } else if(match) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
@@ -263,6 +265,8 @@ class MahjongGame {
                 })
             })
             nextPlayer = match.player;
+            giveNextPlayerTile = false;
+            
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
