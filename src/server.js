@@ -1,9 +1,32 @@
 const WebSocket = require('ws');
 const Express = require('express');
+const bodyParser = require('body-parser');
 const CookieSession = require('cookie-session');
 const Player = require('./player.js');
 const MahjongGame = require('./mahjong.js');
 const config = require('./config.js');
+
+// var AWS = require('aws-sdk/dist/aws-sdk-react-native');
+// AWS.config.update({region: 'us-east-2'});
+// var ddb = new AWS.DynamoDB({apiVersion: "2006-03-01"});
+
+// (async function () {
+//     const { DynamoDBClient, 
+//             ListTablesCommand 
+//     }= require('@aws-sdk/client-dynamodb');
+//     const dbclient = new DynamoDBClient({ region: 'us-east-2'});
+  
+//    try {
+//      const results = await dbclient.send(new ListTablesCommand);
+//      results.Tables.forEach(function (item, index) {
+//        console.log(item.Name);
+//      });
+//    } catch (err) {
+//      console.error(err)
+//    }
+//  })();
+ 
+
 var path = require('path');
 
 console.log('Starting Server...');
@@ -11,6 +34,9 @@ console.log('Starting Server...');
 const api = Express();
 
 api.use('/', Express.static(path.join(__dirname, '../frontend')))
+api.use(bodyParser.urlencoded({ extended: true }));
+api.use(bodyParser.json());
+// api.use(Express.json());
 
 api.use(CookieSession({
     name: 'session',
@@ -18,8 +44,9 @@ api.use(CookieSession({
   }))
 
 api.get('/currentUser', (req, res) => {
-    console.log(req.session);
-    res.send('Hello World!');
+    res.status(200).json({
+        currentUser: req.session.username
+    });
 });
 
 /*api.listen(config.apiPort, () => {
@@ -27,16 +54,32 @@ api.get('/currentUser', (req, res) => {
 })*/
 
 api.post('/signIn', (req, res, next) => {
-    console.log(req);
+    req.session.username = req.body.username
     //TODO authentication logic with username/pwd in db
     //use bcrypt for passwords
-    res.session.username = req.body.username
+    // res.session.username = req.body.username
+    res.status(200).json({
+        message: "Signed in successfully"
+    })
+})
+
+api.post('/signUp', (req,res,next) => {
+    console.log(req.body);
+    req.session.username = req.body.username
+    //TODO authentication logic with username/pwd in db
+    //use bcrypt for passwords
+    // res.session.username = req.body.username
+    console.log(req.session);
+    res.status(203).json( {
+        message: "Signed up successfully"
+    })
 })
 
 api.get('/signout', (req,res,next) => {
-    console.log(req);
-    //something like req.session = null? nah that doesn't work
-    //TODO do the logout lmao
+    req.session = null
+    res.status(200).json( {
+        message: "Signed out successfully"
+    })
 })
 
 //loop through games and return the first game found with this username found in the cookie

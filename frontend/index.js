@@ -8,8 +8,12 @@ var socket = new WebSocket(socket_protocol + '//' + socket_host);
 const app = new Vue({
     el: '#app',
     data: {
+        signedIn: false,
+        signUp: false,
         joined: false,
-        username: 'anonymous' + Math.floor(Math.random() * 100),
+        username: '',
+        password: '',
+        
         players: [],
         status: 'Waiting for connection...',
         myTiles: [],
@@ -23,25 +27,60 @@ const app = new Vue({
         testAXIOSdata: null,
         loadingData: true,
         errored: false,
+        
     },
     computed: {
     },
-    mounted() {
-        axios
-        .get("http://localhost:80/currentUser")
-        .then( res => {
-            console.log(res);
-            this.testAXIOSdata = res.data
-        })
-        .catch( error => {
-            console.log(error);
-            this.errored = true
-        })
-        .finally( () => {
-            this.loadingData = false
-        })
+    mounted() { 
     },
     methods: {
+        getCurrentUser: function() {
+            axios
+                .get("http://localhost:80/currentUser")
+                .then( res => {
+                    console.log(res);
+                    this.username = res.data.username //this doesn't seem to update the page as expected hmm, not important now but maybe later
+                })
+                .catch( error => {
+                    console.log(error);
+                    this.errored = true
+                })
+                .finally( () => {
+                    this.loadingData = false
+                })
+        },
+        toggleSignUp: function() {
+            this.signUp = !this.signUp
+        },
+        signIn: function() {
+            axios
+            .post('http://localhost:80/signIn', {
+                username: this.username,
+                password: this.password
+            }
+            )
+            .then( function(response) {
+                console.log(response.data);
+            })
+            .catch( function(error) {
+                console.log(error);
+            })
+            this.password = '' //do this immediately after the http request is sent out
+        },
+        signUp: function() {
+            axios
+            .post('http://localhost:80/signUp', {
+                username: this.username,
+                password: this.password
+            })
+            .then( function(response) {
+                console.log(response);
+            })
+            .catch( function(error) {
+                console.log(error);
+            })
+            this.password = '' //do this immediately after the http request is sent out
+        },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
             return { 

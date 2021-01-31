@@ -6,12 +6,25 @@
     </head>
     <body>
         <div id="app">
-            <div v-if="!joined">
+            <button v-on:click="getCurrentUser()">Get Current User</button>
+            <div v-if="!signedIn && !signUp">
                 <span>Username: </span>
                 <input v-model="username">
+                <input v-model="password">
+                <button v-on:click="signIn()">Sign In</button>
+                <button v-on:click="toggleSignUp()">Create Account</button>
+            </div>
+            <div v-if="signUp">
+                <span>Username: </span>
+                <input v-model="username">
+                <input v-model="password">
+                <button v-on:click="signUp()">Create Account</button>
+                <button v-on:click="toggleSignUp()">Go Back to Sign In</button>
+            </div>
+            <div v-if="signedIn && !joined">
                 <button v-on:click="joinQueue()">Play Now</button>
             </div>
-            <div id="main-game" v-if="joined">
+            <div id="main-game" v-if="signedIn && joined">
                 <span>Playing as: {{ username }} </span>
                 <br>
                 <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
@@ -54,25 +67,6 @@
                 </div>
             </div>
         </div>
-
-        <section v-if="errored">
-            <p>We're sorry, we're not able to retrieve this information at the moment, please try back later</p>
-          </section>
-        
-          <section v-else>
-            <div v-if="loading">Loading...</div>
-        
-            <div
-              v-else
-              v-for="currency in info"
-              class="currency"
-            >
-              {{ currency.description }}:
-              <span class="lighten">
-                <span v-html="currency.symbol"></span>{{ currency.rate_float | currencydecimal }}
-              </span>
-            </div>
-        </section>
 
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
         
