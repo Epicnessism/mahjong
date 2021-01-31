@@ -5,65 +5,68 @@
         <link rel="stylesheet" href="main.css">
     </head>
     <body>
-        <div id="app">
-            <button v-on:click="getCurrentUser()">Get Current User</button>
-            <div v-if="!signedIn && !signUp">
-                <span>Username: </span>
-                <input v-model="username">
-                <input v-model="password">
-                <button v-on:click="signIn()">Sign In</button>
-                <button v-on:click="toggleSignUp()">Create Account</button>
+        <div id="app" v-cloak>
+            <div v-if="loadingData && !errored">
+                Loading...
             </div>
-            <div v-if="signUp">
-                <span>Username: </span>
-                <input v-model="username">
-                <input v-model="password">
-                <button v-on:click="signUp()">Create Account</button>
-                <button v-on:click="toggleSignUp()">Go Back to Sign In</button>
+            <div v-if="errored">
+                Something went wrong, please try again.
             </div>
-            <div v-if="signedIn && !joined">
-                <button v-on:click="joinQueue()">Play Now</button>
-            </div>
-            <div id="main-game" v-if="signedIn && joined">
-                <span>Playing as: {{ username }} </span>
-                <br>
-                <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
-                <h2>Other Players: </h2>
-                <div id="other-player-section">
-                    <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
-                        <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
-                        <span v-for="set in player.visibleTiles">
-                            <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                        </span>
-                    </div>
+            <div v-if="!loadingData && !errored">
+                <div v-if="!signedIn">
+                    <span>Username: </span>
+                    <input v-model="promptUsername">
+                    <input v-model="promptPassword" type="password">
+                    <button v-on:click="signIn()">Sign In</button>
+                    <button v-on:click="signUp()">Create Account</button>
                 </div>
-                <h2>
-                    Your Hand
-                </h2>
-                <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
-                    <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                    <!-- <button slot="footer" @click="saveTilePositions()">Save Tile Position</button> -->
-                </draggable>
-                <h2>
-                    Actively Selected Tiles
-                </h2>
-                <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-                <div v-if="inCheckPhase && waitingForYourCheck">
-                    <button v-on:click="sendEvent('Win')">
-                        Win (胡) literally win the game
-                    </button>
-                    <button v-on:click="sendEvent('Gang')">
-                        Gang (杠) Four of a kind
-                    </button>
-                    <button v-on:click="sendEvent('Match')">
-                        Match (碰) Three of a kind
-                    </button>
-                    <button v-on:click="sendEvent('Eat', activeTiles)">
-                        Eat (吃) Straight (can only eat person directly upstream of you)
-                    </button>
-                    <button v-on:click="sendEvent('Pass')">
-                        Pass (Do Nothing)
-                    </button>
+                <div v-if="signedIn">
+                    <span>Signed in as {{ username }} </span>
+                    <button v-on:click="signOut()">Sign Out</button>
+                    <div v-if="!joined">
+                        <button v-on:click="joinQueue()">Play Now</button>
+                    </div>
+                    <div id="main-game" v-if="joined">
+                        <br>
+                        <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
+                        <h2>Other Players: </h2>
+                        <div id="other-player-section">
+                            <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
+                                <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
+                                <span v-for="set in player.visibleTiles">
+                                    <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                                </span>
+                            </div>
+                        </div>
+                        <h2>
+                            Your Hand
+                        </h2>
+                        <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
+                            <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                            <!-- <button slot="footer" @click="saveTilePositions()">Save Tile Position</button> -->
+                        </draggable>
+                        <h2>
+                            Actively Selected Tiles
+                        </h2>
+                        <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+                        <div v-if="inCheckPhase && waitingForYourCheck">
+                            <button v-on:click="sendEvent('Win')">
+                                Win (胡) literally win the game
+                            </button>
+                            <button v-on:click="sendEvent('Gang')">
+                                Gang (杠) Four of a kind
+                            </button>
+                            <button v-on:click="sendEvent('Match')">
+                                Match (碰) Three of a kind
+                            </button>
+                            <button v-on:click="sendEvent('Eat', activeTiles)">
+                                Eat (吃) Straight (can only eat person directly upstream of you)
+                            </button>
+                            <button v-on:click="sendEvent('Pass')">
+                                Pass (Do Nothing)
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

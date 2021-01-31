@@ -18,3 +18,5 @@ html, body {
     color: #50de7b;
     padding: 10px;
 }
+
+[v-cloak] { display: none; }

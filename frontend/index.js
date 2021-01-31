@@ -9,10 +9,10 @@ const app = new Vue({
     el: '#app',
     data: {
         signedIn: false,
-        signUp: false,
         joined: false,
-        username: '',
-        password: '',
+        username: null,
+        promptUsername: "",
+        promptPassword: "",
         
         players: [],
         status: 'Waiting for connection...',
@@ -34,33 +34,58 @@ const app = new Vue({
     mounted() { 
     },
     methods: {
-        getCurrentUser: function() {
+        checkCurrentUser: function() {
+            console.log("Checking logged in status...")
             axios
-                .get("http://localhost:80/currentUser")
+                .get("/currentUser")
                 .then( res => {
                     console.log(res);
-                    this.username = res.data.username //this doesn't seem to update the page as expected hmm, not important now but maybe later
+                    if(res.data.currentUser) {
+                        console.log("You are already signed in as " + res.data.currentUser)
+                        app.username = res.data.currentUser
+                        app.signedIn = true
+                    }else {
+                        console.log("You are not logged in")
+                    }
                 })
                 .catch( error => {
                     console.log(error);
-                    this.errored = true
+                    app.errored = true
                 })
                 .finally( () => {
-                    this.loadingData = false
+                    app.loadingData = false
                 })
         },
-        toggleSignUp: function() {
-            this.signUp = !this.signUp
+        signOut: function() {
+            axios
+                .get("/signOut")
+                .then( res => {
+                    console.log(res);
+                    app.signedIn = false;
+                })
+                .catch( error => {
+                    console.log(error);
+                    app.errored = true
+                })
+                .finally( () => {
+                    app.loadingData = false
+                })
         },
         signIn: function() {
             axios
-            .post('http://localhost:80/signIn', {
-                username: this.username,
-                password: this.password
+            .post('/signIn', {
+                username: this.promptUsername,
+                password: this.promptPassword
             }
             )
             .then( function(response) {
                 console.log(response.data);
+                if(response.data.username) {
+                    console.log("You have been signed in as " + response.data.username);
+                    app.username = response.data.username
+                    app.signedIn = true
+                }
+                
             })
             .catch( function(error) {
                 console.log(error);
@@ -70,16 +95,21 @@ const app = new Vue({
         signUp: function() {
             axios
             .post('http://localhost:80/signUp', {
-                username: this.username,
-                password: this.password
+                username: this.promptUsername,
+                password: this.promptPassword
             })
             .then( function(response) {
                 console.log(response);
+                if(response.data.username) {
+                    console.log("You have been signed up as " + response.data.username);
+                    app.signedIn = true;
+                    app.username = response.data.username;
+                }
             })
             .catch( function(error) {
                 console.log(error);
             })
-            this.password = '' //do this immediately after the http request is sent out
+            this.promptPassword = '' //do this immediately after the http request is sent out
         },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
@@ -137,10 +167,7 @@ const app = new Vue({
     }
 });
 
-function signIn() {
-    //http post to api backend
-    //send username and pwd
-}
+app.checkCurrentUser();
 
 function updateStatus(status) {
     app.status = status;

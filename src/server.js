@@ -36,7 +36,6 @@ const api = Express();
 api.use('/', Express.static(path.join(__dirname, '../frontend')))
 api.use(bodyParser.urlencoded({ extended: true }));
 api.use(bodyParser.json());
-// api.use(Express.json());
 
 api.use(CookieSession({
     name: 'session',
@@ -44,17 +43,28 @@ api.use(CookieSession({
   }))
 
 api.get('/currentUser', (req, res) => {
+    console.log("current user check: " + req.session.username)
     res.status(200).json({
         currentUser: req.session.username
     });
 });
 
-/*api.listen(config.apiPort, () => {
-    console.log('Express endpoints started on port ' + config.apiPort)
-})*/
 
 api.post('/signIn', (req, res, next) => {
     req.session.username = req.body.username
+    console.log("User signin: " + req.body.username)
+    //TODO authentication logic with username/pwd in db
+    //use bcrypt for passwords
+    // res.session.username = req.body.username
+    res.status(200).json({
+        message: "Signed in successfully",
+        username: req.session.username
+    })
+})
+
+api.post('/signOut', (req, res, next) => {
+    console.log("User signout: " + req.session.username)
+    req.session.username = null
     //TODO authentication logic with username/pwd in db
     //use bcrypt for passwords
     // res.session.username = req.body.username
@@ -66,12 +76,14 @@ api.post('/signIn', (req, res, next) => {
 api.post('/signUp', (req,res,next) => {
     console.log(req.body);
     req.session.username = req.body.username
+    console.log("User signup: " + req.body.username)
     //TODO authentication logic with username/pwd in db
     //use bcrypt for passwords
     // res.session.username = req.body.username
     console.log(req.session);
     res.status(203).json( {
-        message: "Signed up successfully"
+        message: "Signed up successfully",
+        username: req.session.username
     })
 })
 
@@ -124,8 +136,6 @@ api.get('/getUsername', (req,res,next)=> {
         })
     }
 })
-
-
 
 var server = require('http').createServer();
 
