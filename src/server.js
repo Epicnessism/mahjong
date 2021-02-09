@@ -6,24 +6,59 @@ const Player = require('./player.js');
 const MahjongGame = require('./mahjong.js');
 const config = require('./config.js');
 
-// var AWS = require('aws-sdk/dist/aws-sdk-react-native');
+// var AWS = require('aws-sdk');
 // AWS.config.update({region: 'us-east-2'});
 // var ddb = new AWS.DynamoDB({apiVersion: "2006-03-01"});
 
+var AWS = require("aws-sdk");
+
+AWS.config.update({
+  region: "us-east-2",
+  endpoint: "https://dynamodb.us-east-2.amazonaws.com"
+});
+var docClient = new AWS.DynamoDB.DocumentClient();
+
+var table = "users";
+
+var username = "testusername";
+var password = "testpwd";
+
+var params = {
+    TableName: table,
+    Key:{
+        "username": username,
+    }
+};
+
+
+
+// docClient.get(params, function(err, data) {
+//     if (err) {
+//         console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+//     } else {
+//         console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+//     }
+// });
+
+
+
+// const { DynamoDBClient, 
+//     ListTablesCommand 
+// }= require('@aws-sdk/client-dynamodb');
+
+
 // (async function () {
-//     const { DynamoDBClient, 
-//             ListTablesCommand 
-//     }= require('@aws-sdk/client-dynamodb');
 //     const dbclient = new DynamoDBClient({ region: 'us-east-2'});
-  
-//    try {
-//      const results = await dbclient.send(new ListTablesCommand);
-//      results.Tables.forEach(function (item, index) {
-//        console.log(item.Name);
-//      });
-//    } catch (err) {
-//      console.error(err)
-//    }
+//     try {
+//         console.log(dbclient);
+//         const results = await dbclient.send(new ListTablesCommand);
+//         console.log(results); 
+//         results.Tables.forEach(function (item, index) {
+//         console.log(item.Name);
+//         });
+//     } catch (err) {
+//         console.error(err)
+//     }
 //  })();
  
 
@@ -75,16 +110,37 @@ api.post('/signOut', (req, res, next) => {
 
 api.post('/signUp', (req,res,next) => {
     console.log(req.body);
-    req.session.username = req.body.username
-    console.log("User signup: " + req.body.username)
+    
+    
     //TODO authentication logic with username/pwd in db
     //use bcrypt for passwords
     // res.session.username = req.body.username
-    console.log(req.session);
-    res.status(203).json( {
-        message: "Signed up successfully",
-        username: req.session.username
-    })
+
+    var insertParams = {
+        TableName:table,
+        Item:{
+            "username": req.body.username,
+            "password": req.body.password,
+        }
+    };
+
+    docClient.put(insertParams, function(err, data) {
+        if (err) {
+            console.error("User failed to signup. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("User signup: " + req.body.username)
+            req.session.username = req.body.username
+            console.log(data)
+            console.log("Added item:", JSON.stringify(data, null, 2));
+            res.status(203).json( {
+                message: "Signed up successfully",
+                username: req.session.username
+            })
+        }
+    });
+
+
+    
 })
 
 api.get('/signout', (req,res,next) => {

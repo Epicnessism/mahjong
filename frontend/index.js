@@ -94,7 +94,7 @@ const app = new Vue({
         },
         signUp: function() {
             axios
-            .post('http://localhost:80/signUp', {
+            .post('/signUp', {
                 username: this.promptUsername,
                 password: this.promptPassword
             })
