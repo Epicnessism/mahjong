@@ -119,7 +119,7 @@ api.post('/signUp', async (req,res,next) => {
     });
 })
 
-api.post('/signOut', (req, res, next) => {
+api.get('/signOut', (req, res, next) => {
     console.log("User signout: " + req.session.username)
     req.session = null
     res.status(200).json({

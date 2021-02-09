@@ -1,6 +1,8 @@
 const util = require('./util');
 const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
+const { customAlphabet  } = require("nanoid")
+const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
 
 //referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
 //TODO add the rest
@@ -19,6 +21,8 @@ class MahjongGame {
     constructor(players, tileSet='no-flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
+        this.gameId = nanoid();
+        console.log(this.gameId);
         // this.ruleset = ruleset;
         // this.mahjongLogic = mahjongLogic;
 
