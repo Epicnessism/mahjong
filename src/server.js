@@ -7,6 +7,7 @@ const MahjongGame = require('./mahjong.js');
 const config = require('./config.js');
 var AWS = require("aws-sdk");
 const bcrypt = require('bcrypt');
+const createError = require('http-errors')
 
 
 //todo AWS CONFIG STUFF...........organize this
@@ -82,10 +83,7 @@ api.post('/signUp', async (req,res,next) => {
     try {
         const usernameExists = await docClient.get(lookUpUsername).promise()
         if(usernameExists.Item != undefined) {
-            res.status(409).json( {
-                message: 'Username already exists...'
-            })
-            return false //TODO send this to the error handler instead of returning randomly here
+            return next(createError(409, 'Username already exists...'))
         }
     } catch(err) {
         console.log(err);
@@ -102,9 +100,7 @@ api.post('/signUp', async (req,res,next) => {
     docClient.put(insertUser, function(err, data) {
         if (err) {
             console.error("User failed to signup. Error JSON:", JSON.stringify(err, null, 2));
-            res.status(400).json( {
-                message: "Something went wrong lol"
-            })
+            next(createError(500, err))
         } else {
             console.log("User signup: " + req.body.username)
             req.session.username = req.body.username
@@ -170,6 +166,20 @@ api.get('/getUsername', (req,res,next)=> {
         })
     }
 })
+
+
+//catch all error handling level 1
+api.use(function(err, req, res, next) {
+    console.log(err);
+    return res.status(err.status || 500).json({
+        status: err.status,
+        message: err.message
+    })
+});
+
+
+
+
 
 var server = require('http').createServer();
 
