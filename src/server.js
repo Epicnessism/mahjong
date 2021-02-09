@@ -24,6 +24,7 @@ const saltRounds = 7;
 //end bcrypt config stuff
  
 var path = require('path');
+const { create } = require('domain');
 
 console.log('Starting Server...');
 
@@ -49,31 +50,37 @@ api.get('/currentUser', (req, res) => {
 });
 
 
-api.post('/signIn', (req, res, next) => {
-    req.session.username = req.body.username
-    console.log("User signin: " + req.body.username)
-    //TODO authentication logic with username/pwd in db
-    //use bcrypt for passwords
-    // res.session.username = req.body.username
-    res.status(200).json({
-        message: "Signed in successfully",
-        username: req.session.username
-    })
-})
-
-api.post('/signOut', (req, res, next) => {
-    console.log("User signout: " + req.session.username)
-    req.session.username = null
-    //TODO authentication logic with username/pwd in db
-    //use bcrypt for passwords
-    // res.session.username = req.body.username
-    res.status(200).json({
-        message: "Signed in successfully"
-    })
+api.post('/signIn', async (req, res, next) => {
+    console.log("User signin attempt: " + req.body.username)
+    const lookUpUser = {
+        TableName : UserTable,
+        Key: {
+          username: req.body.username
+        }
+    };
+    try {
+        const usernameExists = await docClient.get(lookUpUser).promise()
+        if(usernameExists.Item == undefined) {
+            return next(createError(404, "Credentials Invalid"));
+        }
+        const validPassword = await bcrypt.compare(req.body.password, usernameExists.Item.password); //returns a boolean?
+        console.log(validPassword);
+        if(validPassword) {
+            req.session.username = req.body.username
+            res.status(200).json({
+                message: "Signed in successfully",
+                username: req.session.username
+            });
+        } else {
+            next(createError(401, "Credentials Invalid"));
+        }
+    } catch(err) {
+        console.log(err);
+        next(err) //TODO not actually sure if this works lmao
+    }
 })
 
 api.post('/signUp', async (req,res,next) => {
-    //check if username already exists
     const lookUpUsername = {
         TableName : UserTable,
         Key: {
@@ -88,7 +95,6 @@ api.post('/signUp', async (req,res,next) => {
     } catch(err) {
         console.log(err);
     }
-
     const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
     var insertUser = {
         TableName: UserTable,
@@ -104,7 +110,6 @@ api.post('/signUp', async (req,res,next) => {
         } else {
             console.log("User signup: " + req.body.username)
             req.session.username = req.body.username
-            console.log(data)
             console.log("Added item:", JSON.stringify(data, null, 2));
             res.status(203).json( {
                 message: "Signed up successfully",
@@ -112,14 +117,12 @@ api.post('/signUp', async (req,res,next) => {
             })
         }
     });
-
-
-    
 })
 
-api.get('/signout', (req,res,next) => {
+api.post('/signOut', (req, res, next) => {
+    console.log("User signout: " + req.session.username)
     req.session = null
-    res.status(200).json( {
+    res.status(200).json({
         message: "Signed out successfully"
     })
 })
@@ -149,11 +152,8 @@ api.get('/getCurrentGame', (req,res,next)=> {
     if (currentGame) {
         res.status(200).json({currentGame})
     } else if (currentGame == null) {
-        res.status(404).json({ //TODO implement centralized error handling with next later...
-            message: "404 Not Found"
-        })
+        return next(createError(404, "Current Game not found"))
     }
-    
 })
 
 api.get('/getUsername', (req,res,next)=> {
@@ -176,7 +176,6 @@ api.use(function(err, req, res, next) {
         message: err.message
     })
 });
-
 
 
 
