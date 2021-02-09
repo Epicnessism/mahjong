@@ -5,63 +5,23 @@ const CookieSession = require('cookie-session');
 const Player = require('./player.js');
 const MahjongGame = require('./mahjong.js');
 const config = require('./config.js');
-
-// var AWS = require('aws-sdk');
-// AWS.config.update({region: 'us-east-2'});
-// var ddb = new AWS.DynamoDB({apiVersion: "2006-03-01"});
-
 var AWS = require("aws-sdk");
+const bcrypt = require('bcrypt');
 
+
+//todo AWS CONFIG STUFF...........organize this
 AWS.config.update({
   region: "us-east-2",
   endpoint: "https://dynamodb.us-east-2.amazonaws.com"
 });
 var docClient = new AWS.DynamoDB.DocumentClient();
+var UserTable = "users";
+//end aws config stuff
 
-var table = "users";
-
-var username = "testusername";
-var password = "testpwd";
-
-var params = {
-    TableName: table,
-    Key:{
-        "username": username,
-    }
-};
-
-
-
-// docClient.get(params, function(err, data) {
-//     if (err) {
-//         console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-//     } else {
-//         console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
-//     }
-// });
-
-
-
-// const { DynamoDBClient, 
-//     ListTablesCommand 
-// }= require('@aws-sdk/client-dynamodb');
-
-
-// (async function () {
-//     const dbclient = new DynamoDBClient({ region: 'us-east-2'});
-//     try {
-//         console.log(dbclient);
-//         const results = await dbclient.send(new ListTablesCommand);
-//         console.log(results); 
-//         results.Tables.forEach(function (item, index) {
-//         console.log(item.Name);
-//         });
-//     } catch (err) {
-//         console.error(err)
-//     }
-//  })();
+//TODO organize Bcrypt config stuff
+const saltRounds = 7;
+//end bcrypt config stuff
  
-
 var path = require('path');
 
 console.log('Starting Server...');
@@ -75,8 +35,11 @@ api.use(bodyParser.json());
 api.use(CookieSession({
     name: 'session',
     keys: ['key1', 'key2']
-  }))
+}));
 
+
+
+//ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
     console.log("current user check: " + req.session.username)
     res.status(200).json({
@@ -108,25 +71,40 @@ api.post('/signOut', (req, res, next) => {
     })
 })
 
-api.post('/signUp', (req,res,next) => {
-    console.log(req.body);
-    
-    
-    //TODO authentication logic with username/pwd in db
-    //use bcrypt for passwords
-    // res.session.username = req.body.username
+api.post('/signUp', async (req,res,next) => {
+    //check if username already exists
+    const lookUpUsername = {
+        TableName : UserTable,
+        Key: {
+          username: req.body.username
+        }
+      };
+    try {
+        const usernameExists = await docClient.get(lookUpUsername).promise()
+        if(usernameExists.Item != undefined) {
+            res.status(409).json( {
+                message: 'Username already exists...'
+            })
+            return false //TODO send this to the error handler instead of returning randomly here
+        }
+    } catch(err) {
+        console.log(err);
+    }
 
-    var insertParams = {
-        TableName:table,
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+    var insertUser = {
+        TableName: UserTable,
         Item:{
             "username": req.body.username,
-            "password": req.body.password,
+            "password": hashedPassword,
         }
     };
-
-    docClient.put(insertParams, function(err, data) {
+    docClient.put(insertUser, function(err, data) {
         if (err) {
             console.error("User failed to signup. Error JSON:", JSON.stringify(err, null, 2));
+            res.status(400).json( {
+                message: "Something went wrong lol"
+            })
         } else {
             console.log("User signup: " + req.body.username)
             req.session.username = req.body.username
