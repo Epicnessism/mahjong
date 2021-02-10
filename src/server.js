@@ -10,6 +10,15 @@ const bcrypt = require('bcrypt');
 const createError = require('http-errors')
 
 
+const { customAlphabet  } = require("nanoid")
+const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
+
+
+//nobody actually knows if lists are threadsafe in node
+waitingPlayers = [];
+games = [];
+
+
 //todo AWS CONFIG STUFF...........organize this
 AWS.config.update({
   region: "us-east-2",
@@ -49,6 +58,47 @@ api.get('/currentUser', (req, res) => {
         currentUser: req.session.username
     });
 });
+
+api.post('/createGame', (req,res,next) => {
+    const newGameId = nanoid()
+    console.log(newGameId)
+    console.log(req.session)
+    console.log(req.body)
+    newGame = new MahjongGame(newGameId)
+    games.push(newGame)
+    req.session.currentGameId = newGameId
+    res.status(200).json( {
+        gameId: newGameId
+    })
+})
+
+api.get('/joinGame/:gameId', (req,res,next)=> {
+    if(req.session.currentGameId != undefined) {
+        return next(createError(400, "not your current game"))
+    }
+    games.forEach( game => {
+        if(game.gameId == req.params.gameId) {
+            game.addPlayer(req.session.username) //add the player username
+        }
+    })
+    return res.status(200).json({
+        message: "Successfully joined the game"
+    })
+})
+
+api.post('/startGame/:gameId', (req,res,next)=> {
+    const gameId = req.params.gameId
+    if(req.session.currentGameId == gameId) {
+        if(games.filter( game => game.gameId == gameId).length == 1) {
+            //TODO also need a flag to check if game started, that can be done later
+            games.filter( game => game.gameId == gameId)[0].start() //starts the game
+            return res.status(201).json({
+                message: "Game successfully started"
+            })
+        }
+    }
+    return next(createError(400, "couldn't start game for one reason or another..."))
+})
 
 
 api.post('/signIn', async (req, res, next) => {
@@ -189,17 +239,13 @@ api.ws('/ws', function(ws, req) {
 api.listen(config.port)
 console.log('Listening for WS and HTTP traffic on port ' + config.port);
 
-//nobody actually knows if lists are threadsafe in node
-waitingPlayers = [];
-games = [];
-
 playerCounter = 1
 
 function handleQueueJoin(newPlayer) {
     waitingPlayers.push(newPlayer);
 
     if(waitingPlayers.length >= 4) {
-        newGame = new MahjongGame(waitingPlayers);
+        newGame = new MahjongGame(nanoid());
         games.push(newGame);
         newGame.start();
 
