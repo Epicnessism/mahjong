@@ -1,8 +1,7 @@
 const util = require('./util');
 const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
-const { customAlphabet  } = require("nanoid")
-const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
+
 
 //referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
 //TODO add the rest
@@ -18,17 +17,14 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 
 
 class MahjongGame {
-    constructor(players, tileSet='no-flowers', ruleset='southernRuleset') {
+    constructor(gameId, tileSet='no-flowers', ruleset='southernRuleset') {
         this.discardedTiles = [];
         this.checkResponses = [];
-        this.gameId = nanoid();
-        console.log(this.gameId);
+        this.gameId = gameId
         // this.ruleset = ruleset;
         // this.mahjongLogic = mahjongLogic;
 
-        this.players = players;
-        
-        this.players.forEach(player => player.currentGame = this);
+        this.players = [];
 
         this.activePlayer = 0;
 
@@ -40,6 +36,10 @@ class MahjongGame {
         util.shuffleArray(this.tiles);
         this.tileFrontIdx = 0;
         this.tileBackIdx = this.tiles.length - 1;
+    }
+
+    set addPlayer(playerUsername) {
+        this.players.push(playerUsername)
     }
 
     get tilesLeft() {
@@ -61,6 +61,8 @@ class MahjongGame {
     }
 
     start() {
+        //moved this here so this doesnt happen until the game actually starts
+        this.players.forEach(player => player.currentGame = this);
         console.log("New game starting");
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13));

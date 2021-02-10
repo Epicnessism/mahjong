@@ -111,6 +111,9 @@ const app = new Vue({
             })
             this.promptPassword = '' //do this immediately after the http request is sent out
         },
+        createGame: function() {
+            
+        },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
             return { 

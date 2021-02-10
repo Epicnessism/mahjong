@@ -24,6 +24,8 @@
                     <span>Signed in as {{ username }} </span>
                     <button v-on:click="signOut()">Sign Out</button>
                     <div v-if="!joined">
+                        <button v-on:click="createGame()">Create Game</button>
+                        <!-- <button v-on:click="createGame(true)">Create Private Game</button> -->
                         <button v-on:click="joinQueue()">Play Now</button>
                     </div>
                     <div id="main-game" v-if="joined">
