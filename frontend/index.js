@@ -3,7 +3,7 @@ console.log('Starting Mahjong Client');
 
 const socket_protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:'
 const socket_host = window.location.host
-var socket = new WebSocket(socket_protocol + '//' + socket_host);
+var socket = new WebSocket(socket_protocol + '//' + socket_host + '/ws');
 
 const app = new Vue({
     el: '#app',

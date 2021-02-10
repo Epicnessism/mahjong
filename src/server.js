@@ -29,6 +29,7 @@ const { create } = require('domain');
 console.log('Starting Server...');
 
 const api = Express();
+var expressWs = require('express-ws')(api);
 
 api.use('/', Express.static(path.join(__dirname, '../frontend')))
 api.use(bodyParser.urlencoded({ extended: true }));
@@ -177,23 +178,16 @@ api.use(function(err, req, res, next) {
     })
 });
 
-
-
-
-var server = require('http').createServer();
-
-var wss = new WebSocket.Server({
-    server: server,
-    perMessageDeflate: false
+api.ws('/ws', function(ws, req) {
+    console.log("Get ws connection from " + req.session.username)
+    ws.on('message', function(msg) {
+        console.log(msg)
+    })
 });
 
-server.on('request', api);
 
-server.listen(config.port, function() {
-    console.log('Listening for WS and HTTP traffic on port ' + config.port);
-});
-
-wss.on('connection', handleNewConnection);
+api.listen(config.port)
+console.log('Listening for WS and HTTP traffic on port ' + config.port);
 
 //nobody actually knows if lists are threadsafe in node
 waitingPlayers = [];
