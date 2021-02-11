@@ -207,9 +207,6 @@ const app = new Vue({
         },
         handleEvent(event) {
             switch(event.eventName) {
-                case 'QueueStatus':
-                    app.updateStatus('In Queue[' + event.eventData.playerCount + '/4]');
-                    break;
                 case 'GameStart': 
                     app.updateStatus('Game starting...');
                     app.myTiles = event.eventData.tiles;

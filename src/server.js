@@ -1,4 +1,3 @@
-const WebSocket = require('ws');
 const Express = require('express');
 const bodyParser = require('body-parser');
 const CookieSession = require('cookie-session');
@@ -32,12 +31,11 @@ const saltRounds = 7;
 //end bcrypt config stuff
  
 var path = require('path');
-const { create } = require('domain');
 
 console.log('Starting Server...');
 
 const api = Express();
-var expressWs = require('express-ws')(api);
+require('express-ws')(api);
 
 api.use('/', Express.static(path.join(__dirname, '../frontend')))
 api.use(bodyParser.urlencoded({ extended: true }));
