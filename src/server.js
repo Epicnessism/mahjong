@@ -16,8 +16,7 @@ const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
 
 //nobody actually knows if lists are threadsafe in node
 waitingPlayers = [];
-games = [];
-
+games = {} //{gameId: gameObject}
 
 //todo AWS CONFIG STUFF...........organize this
 AWS.config.update({
@@ -61,41 +60,36 @@ api.get('/currentUser', (req, res) => {
 
 api.post('/createGame', (req,res,next) => {
     const newGameId = nanoid()
-    console.log(newGameId)
-    console.log(req.session)
-    console.log(req.body)
     newGame = new MahjongGame(newGameId)
-    games.push(newGame)
+    games[newGameId] = newGame
     req.session.currentGameId = newGameId
     res.status(200).json( {
         gameId: newGameId
     })
 })
 
-api.get('/joinGame/:gameId', (req,res,next)=> {
+api.post('/joinGame/:gameId', (req,res,next)=> {
     if(req.session.currentGameId != undefined) {
         return next(createError(400, "not your current game"))
     }
-    games.forEach( game => {
-        if(game.gameId == req.params.gameId) {
-            game.addPlayer(req.session.username) //add the player username
-        }
-    })
+    var newPlayer = new Player(req.session.username)
+    newPlayer.currentGame = games[req.params.gameId]
+    games[req.params.gameId].addPlayer(newPlayer)
+    req.session.currentGameId = req.params.gameId
     return res.status(200).json({
-        message: "Successfully joined the game"
+        message: "Successfully joined the game",
+        gameId: req.params.gameId
     })
 })
 
 api.post('/startGame/:gameId', (req,res,next)=> {
     const gameId = req.params.gameId
     if(req.session.currentGameId == gameId) {
-        if(games.filter( game => game.gameId == gameId).length == 1) {
-            //TODO also need a flag to check if game started, that can be done later
-            games.filter( game => game.gameId == gameId)[0].start() //starts the game
-            return res.status(201).json({
-                message: "Game successfully started"
-            })
-        }
+        //TODO wrap this in a try block later
+        games[req.params.gameId].start()
+        return res.status(201).json({
+            message: "Game successfully started"
+        })
     }
     return next(createError(400, "couldn't start game for one reason or another..."))
 })
@@ -212,9 +206,7 @@ api.get('/getUsername', (req,res,next)=> {
     if(req.session) {
         res.status(200).json({username: req.session.username})   
     } else {
-        res.status(403).json( {
-            message: 'unauthorized???'
-        })
+        next(createError(403, "adl_kfjadkl_gjakflbv"))
     }
 })
 
@@ -228,47 +220,11 @@ api.use(function(err, req, res, next) {
     })
 });
 
-api.ws('/ws', function(ws, req) {
+api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
-    ws.on('message', function(msg) {
-        console.log(msg)
-    })
+    games[req.session.currentGameId].players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
 });
 
 
 api.listen(config.port)
 console.log('Listening for WS and HTTP traffic on port ' + config.port);
-
-playerCounter = 1
-
-function handleQueueJoin(newPlayer) {
-    waitingPlayers.push(newPlayer);
-
-    if(waitingPlayers.length >= 4) {
-        newGame = new MahjongGame(nanoid());
-        games.push(newGame);
-        newGame.start();
-
-        //todo this lobby system is super hacky lmao
-        waitingPlayers = [];
-    } else {
-        waitingPlayers.forEach(player => {
-            player.sendEvent('QueueStatus', {
-                playerCount: waitingPlayers.length
-            });
-        });
-        
-    }
-}
-
-function handleNewConnection(ws) {
-    console.log('Got new connection!');
-    ws.on('message', function(data) {
-        message = JSON.parse(data);
-        if(message.eventName == 'QueueJoin') {
-            console.log('Player ' + message.eventData.username + ' has joined the queue');
-            var newPlayer = new Player(message.eventData.username, ws);
-            handleQueueJoin(newPlayer)
-        }
-    });
-}

@@ -38,8 +38,8 @@ class MahjongGame {
         this.tileBackIdx = this.tiles.length - 1;
     }
 
-    set addPlayer(playerUsername) {
-        this.players.push(playerUsername)
+    set addPlayer(playerObject) {
+        this.players.push(playerObject)
     }
 
     get tilesLeft() {
@@ -61,8 +61,6 @@ class MahjongGame {
     }
 
     start() {
-        //moved this here so this doesnt happen until the game actually starts
-        this.players.forEach(player => player.currentGame = this);
         console.log("New game starting");
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13));

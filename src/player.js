@@ -1,12 +1,17 @@
 class Player {
-    constructor(identifier, ws) {
+    constructor(identifier) {
         this.identifier = identifier;
-        this.ws = ws;
+        this.ws = null;
         this.activeTurn = false;
         this.visibleTiles = [];
         this.tiles = [];
         this.currentGame = null;
         var curPlayer = this;
+        
+    }
+
+    setWsConnection(ws) {
+        this.ws = ws
         ws.on('message', function(data) {
             curPlayer.handleRecv(data);
         });

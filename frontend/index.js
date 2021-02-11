@@ -3,7 +3,6 @@ console.log('Starting Mahjong Client');
 
 const socket_protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:'
 const socket_host = window.location.host
-var socket = new WebSocket(socket_protocol + '//' + socket_host + '/ws');
 
 const app = new Vue({
     el: '#app',
@@ -14,6 +13,8 @@ const app = new Vue({
         promptUsername: "",
         promptPassword: "",
         
+
+        socket: null,
         players: [],
         status: 'Waiting for connection...',
         myTiles: [],
@@ -24,6 +25,9 @@ const app = new Vue({
         inCheckPhase: false,
         activeTile: null,
         activePlayerName: null,
+        currentGameId: null,
+        joinGameInputField: null,
+
         testAXIOSdata: null,
         loadingData: true,
         errored: false,
@@ -34,6 +38,18 @@ const app = new Vue({
     mounted() { 
     },
     methods: {
+        joinGame: function() {
+            axios
+            .post('/joinGame/:gameId', {})
+            .then( response => {
+                console.log(response);
+                app.currentGameId = app.
+                app.establishWsConnection()
+            })
+        },
+        establishWsConnection: function() {
+            app.socket = new WebSocket(socket_protocol + '//' + socket_host + '/ws')
+        },
         checkCurrentUser: function() {
             console.log("Checking logged in status...")
             axios
@@ -112,7 +128,12 @@ const app = new Vue({
             this.promptPassword = '' //do this immediately after the http request is sent out
         },
         createGame: function() {
-            
+            axios.post('/createGame')
+            .then( response => {
+                console.log(response);
+                app.currentGameId = response.data.gameId
+                app.establishWsConnection() //creat the connection
+            })
         },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
