@@ -75,9 +75,6 @@ api.post('/createGame', (req,res,next) => {
 })
 
 api.post('/joinGame/:gameId', (req,res,next)=> {
-    if(req.session.currentGameId != undefined) {
-        return next(createError(400, "not your current game"))
-    }
 
     console.log("Player " + req.session.username + " joined game " + req.params.gameId)
     var newPlayer = new Player(req.session.username)
