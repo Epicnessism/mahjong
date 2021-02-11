@@ -19,10 +19,12 @@ const app = new Vue({
         myTiles: [],
         myVisibleTiles: [],
         activeTiles: [],
+
         yourTurn: false,
         waitingForYourCheck: false,
         inCheckPhase: false,
         activeTile: null,
+        
         activePlayerName: null,
         currentGameId: null,
         joinGameInputField: null,
@@ -263,7 +265,7 @@ const app = new Vue({
                     app.updateStatus('Illegal Response!');
                     break;
                 case 'SuccessfulCheckResponse': 
-                    updateStatus('Successful Check Response');
+                    app.updateStatus('Successful Check Response');
                     app.activeTiles = [];
                     app.inCheckPhase = false;
                     app.waitingForYourCheck = false;
