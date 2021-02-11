@@ -6,12 +6,13 @@ class Player {
         this.visibleTiles = [];
         this.tiles = [];
         this.currentGame = null;
-        var curPlayer = this;
+        
         
     }
 
     setWsConnection(ws) {
         this.ws = ws
+        var curPlayer = this;
         ws.on('message', function(data) {
             curPlayer.handleRecv(data);
         });

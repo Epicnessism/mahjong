@@ -62,7 +62,13 @@ api.post('/createGame', (req,res,next) => {
     const newGameId = nanoid()
     newGame = new MahjongGame(newGameId)
     games[newGameId] = newGame
+
+    var newPlayer = new Player(req.session.username)
+    newPlayer.currentGame = newGame
+    newGame.addPlayer(newPlayer)
+
     req.session.currentGameId = newGameId
+    console.log("Player " + req.session.username + " created game " + newGameId)
     res.status(200).json( {
         gameId: newGameId
     })
@@ -72,9 +78,12 @@ api.post('/joinGame/:gameId', (req,res,next)=> {
     if(req.session.currentGameId != undefined) {
         return next(createError(400, "not your current game"))
     }
+
+    console.log("Player " + req.session.username + " joined game " + req.params.gameId)
     var newPlayer = new Player(req.session.username)
     newPlayer.currentGame = games[req.params.gameId]
     games[req.params.gameId].addPlayer(newPlayer)
+
     req.session.currentGameId = req.params.gameId
     return res.status(200).json({
         message: "Successfully joined the game",
@@ -223,6 +232,10 @@ api.use(function(err, req, res, next) {
 api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
     games[req.session.currentGameId].players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
+    
+    if(games[req.session.currentGameId].players.length >= 4) {
+        games[req.session.currentGameId].start()
+    }
 });
 
 

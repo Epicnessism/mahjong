@@ -38,7 +38,7 @@ class MahjongGame {
         this.tileBackIdx = this.tiles.length - 1;
     }
 
-    set addPlayer(playerObject) {
+    addPlayer(playerObject) {
         this.players.push(playerObject)
     }
 

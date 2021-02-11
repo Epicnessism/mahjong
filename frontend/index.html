@@ -26,9 +26,11 @@
                     <div v-if="!joined">
                         <button v-on:click="createGame()">Create Game</button>
                         <!-- <button v-on:click="createGame(true)">Create Private Game</button> -->
-                        <button v-on:click="joinQueue()">Play Now</button>
+                        <button v-on:click="joinGame()">Join Game: </button>
+                        <input v-model="joinGameInputField" placeholder="GameID">
                     </div>
                     <div id="main-game" v-if="joined">
+                        <span>Game ID: <b>{{ currentGameId }}</b></span>
                         <br>
                         <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
                         <h2>Other Players: </h2>
