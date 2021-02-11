@@ -16,6 +16,7 @@ const app = new Vue({
         showPassword: false,
         
         socket: null,
+        waitingForPlayers: false,
         players: [],
         status: 'Waiting for connection...',
         myTiles: [],
@@ -44,6 +45,7 @@ const app = new Vue({
                 console.log(response);
                 app.currentGameId = app.joinGameInputField
                 app.establishWsConnection()
+                app.waitingForPlayers = true
             })
         },
         createGame: function() {
@@ -52,6 +54,7 @@ const app = new Vue({
                 console.log(response);
                 app.currentGameId = response.data.gameId
                 app.establishWsConnection()
+                app.waitingForPlayers = true
             })
         },
         establishWsConnection: function() {
@@ -211,6 +214,7 @@ const app = new Vue({
             switch(event.eventName) {
                 case 'GameStart': 
                     app.updateStatus('Game starting...');
+                    app.waitingForPlayers = false;
                     app.myTiles = event.eventData.tiles;
                     app.players = event.eventData.players;
                     app.activePlayerName = event.eventData.activePlayerName;
