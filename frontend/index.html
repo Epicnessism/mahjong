@@ -3,143 +3,126 @@
     <head>
         <title>Online Mahjong</title>
         <link rel="icon" type="image/png" href="/favicon.png"/>
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <link rel="stylesheet" href="main.css">
+
     </head>
     <body>
         <div id="app" v-cloak>
-            <div v-if="loadingData && !errored">
-                Loading...
-            </div>
-            <div v-if="errored">
-                Something went wrong, please try again.
-            </div>
-            <div v-if="!loadingData && !errored">
-                <v-form>
-                    <v-container fluid>
-                        <v-row>
-                            <v-col>
-                                <div v-if="!signedIn">
-                                    <v-text-field label="Username"
-                                        v-model="promptUsername" outlined>
+            <v-app>
+                <div v-if="loadingData && !errored">
+                    Loading...
+                </div>
+                <div v-if="errored">
+                    Something went wrong, please try again.
+                </div>
+                <div v-if="!loadingData && !errored">
+                    <v-form>
+                        <v-container fluid>
+                            <v-row>
+                                <v-col>
+                                    <div v-if="!signedIn">
+                                        <v-text-field label="Username"
+                                            v-model="promptUsername" outlined>
+                                        </v-text-field>
+                                    </div>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col>
+                                    <v-text-field
+                                        v-model="password"
+                                        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                                
+                                        :type="showPassword ? 'text' : 'password'"
+                                
+                                        label="Password"
+                                        hint="At least 8 characters"
+                                        counter
+                                        @click:append="showPassword = !showPassword" outlined>
+                                        <!--
+                                        :rules="[rules.required, rules.min]"
+                                        name="input-10-1"
+                                        -->
                                     </v-text-field>
-                                </div>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col>
-                                <v-text-field
-                                    v-model="password"
-                                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                            
-                                    :type="showPassword ? 'text' : 'password'"
-                            
-                                    label="Password"
-                                    hint="At least 8 characters"
-                                    counter
-                                    @click:append="showPassword = !showPassword" outlined>
-                                    <!--
-                                    :rules="[rules.required, rules.min]"
-                                    name="input-10-1"
-                                    -->
-                                </v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row justify="center">
-                            <v-col :order="12">
-                                <v-btn v-on:click="signIn()" >Sign In</v-btn>
-                            </v-col>
-                            <v-col :order="1">
-                                <v-btn v-on:click="signUp()" >Create Account</v-btn>
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-form>
-                <div v-if="signedIn">
-                    <v-btn v-on:click="signOut()">Sign Out</v-btn>
-                    <div v-if="!joined">
-                        <v-btn v-on:click="createGame()">Create Game</v-btn>
-                        <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
-                        <v-btn v-on:click="joinGame()">Join Game: </v-btn>
-                        <input v-model="joinGameInputField" placeholder="GameID">
-                    </div>
-                    <div id="main-game" v-if="joined">
-                        <span>Game ID: <b>{{ currentGameId }}</b></span>
-                        <br>
-                        <v-progress-circular
-                            indeterminate
-                            color="primary"
-                            v-if="waitingForPlayers"
-                            >
-                        </v-progress-circular>
-
-                        <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
-                        <h2>Other Players: </h2>
-                        <div id="other-player-section">
-                            <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
-                                <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
-                                <span v-for="set in player.visibleTiles">
-                                    <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                                </span>
-                            </div>
+                                </v-col>
+                            </v-row>
+                            <v-row justify="center">
+                                <v-col :order="12">
+                                    <v-btn v-on:click="signIn()" >Sign In</v-btn>
+                                </v-col>
+                                <v-col :order="1">
+                                    <v-btn v-on:click="signUp()" >Create Account</v-btn>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-form>
+                    <div v-if="signedIn">
+                        <v-btn v-on:click="signOut()">Sign Out</v-btn>
+                        <div v-if="!joined">
+                            <v-btn v-on:click="createGame()">Create Game</v-btn>
+                            <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
+                            <v-btn v-on:click="joinGame()">Join Game: </v-btn>
+                            <input v-model="joinGameInputField" placeholder="GameID">
                         </div>
-                        <h2>
-                            Your Hand
-                        </h2>
-                        <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
-                            <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                            <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
-                        </draggable>
-                        <h2>
-                            Actively Selected Tiles
-                        </h2>
-                        <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-                        <div v-if="inCheckPhase && waitingForYourCheck">
-                            <v-btn v-on:click="sendEvent('Win')">
-                                Win (胡) literally win the game
-                            </v-btn>
-                            <v-btn v-on:click="sendEvent('Gang')">
-                                Gang (杠) Four of a kind
-                            </v-btn>
-                            <v-btn v-on:click="sendEvent('Match')">
-                                Match (碰) Three of a kind
-                            </v-btn>
-                            <v-btn v-on:click="sendEvent('Eat', activeTiles)">
-                                Eat (吃) Straight (can only eat person directly upstream of you)
-                            </v-btn>
-                            <v-btn v-on:click="sendEvent('Pass')">
-                                Pass (Do Nothing)
-                            </v-btn>
+                        <div id="main-game" v-if="joined">
+                            <span>Game ID: <b>{{ currentGameId }}</b></span>
+                            <br>
+                            <v-progress-circular
+                                indeterminate
+                                color="primary"
+                                v-if="waitingForPlayers"
+                                >
+                            </v-progress-circular>
+
+                            <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
+                            <h2>Other Players: </h2>
+                            <div id="other-player-section">
+                                <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
+                                    <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
+                                    <span v-for="set in player.visibleTiles">
+                                        <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                                    </span>
+                                </div>
+                            </div>
+                            <h2>
+                                Your Hand
+                            </h2>
+                            <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
+                                <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                                <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
+                            </draggable>
+                            <h2>
+                                Actively Selected Tiles
+                            </h2>
+                            <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+                            <div v-if="inCheckPhase && waitingForYourCheck">
+                                <v-btn v-on:click="sendEvent('Win')">
+                                    Win (胡) literally win the game
+                                </v-btn>
+                                <v-btn v-on:click="sendEvent('Gang')">
+                                    Gang (杠) Four of a kind
+                                </v-btn>
+                                <v-btn v-on:click="sendEvent('Match')">
+                                    Match (碰) Three of a kind
+                                </v-btn>
+                                <v-btn v-on:click="sendEvent('Eat', activeTiles)">
+                                    Eat (吃) Straight (can only eat person directly upstream of you)
+                                </v-btn>
+                                <v-btn v-on:click="sendEvent('Pass')">
+                                    Pass (Do Nothing)
+                                </v-btn>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </v-app>
         </div>
 
-        <link rel="stylesheet" href="main.css">
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
-        
-
         <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-        <!-- idk if all of these are needed for vuetify -->
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.min.js"></script> -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.css">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.css.map">
-        
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/attributes.json">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/tags.json">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/web-types.json">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.min.css">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.js.map">
 
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.js"></script>
-        <script src=""></script>
-        <script src=""></script>
-        
-        <script src=""></script>
-        <script src=""></script> -->
-
-
-
-        
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script> -->
         <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
