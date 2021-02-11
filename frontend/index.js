@@ -6,12 +6,14 @@ const socket_host = window.location.host
 
 const app = new Vue({
     el: '#app',
+    vuetify: new Vuetify(),
     data: {
         signedIn: false,
         joined: false,
         username: null,
         promptUsername: "",
-        promptPassword: "",
+        password: "",
+        showPassword: false,
         
         socket: null,
         players: [],
@@ -121,7 +123,7 @@ const app = new Vue({
             axios
             .post('/signIn', {
                 username: this.promptUsername,
-                password: this.promptPassword
+                password: this.password
             }
             )
             .then( function(response) {
@@ -142,7 +144,7 @@ const app = new Vue({
             axios
             .post('/signUp', {
                 username: this.promptUsername,
-                password: this.promptPassword
+                password: this.password
             })
             .then( function(response) {
                 console.log(response);
@@ -155,7 +157,7 @@ const app = new Vue({
             .catch( function(error) {
                 console.log(error);
             })
-            this.promptPassword = '' //do this immediately after the http request is sent out
+            this.password = '' //do this immediately after the http request is sent out
         },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);

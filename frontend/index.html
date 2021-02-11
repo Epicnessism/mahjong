@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Online Mahjong</title>
-        <link rel="stylesheet" href="main.css">
+        <link rel="icon" type="image/png" href="/favicon.png"/>
     </head>
     <body>
         <div id="app" v-cloak>
@@ -13,20 +13,39 @@
                 Something went wrong, please try again.
             </div>
             <div v-if="!loadingData && !errored">
-                <div v-if="!signedIn">
-                    <span>Username: </span>
-                    <input v-model="promptUsername">
-                    <input v-model="promptPassword" type="password">
-                    <button v-on:click="signIn()">Sign In</button>
-                    <button v-on:click="signUp()">Create Account</button>
-                </div>
+                <v-form>
+                    <v-container fluid>
+                        <div v-if="!signedIn">
+                            <v-text-field label="Username"
+                                v-model="promptUsername" outlined>
+                            </v-text-field>
+                            <v-text-field
+                                v-model="password"
+                                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                        
+                                :type="showPassword ? 'text' : 'password'"
+                        
+                                label="Password"
+                                hint="At least 8 characters"
+                                counter
+                                @click:append="showPassword = !showPassword" outlined>
+                                <!--
+                                :rules="[rules.required, rules.min]"
+                                name="input-10-1"
+                                -->
+                            </v-text-field>
+                            <v-btn v-on:click="signIn()">Sign In</v-btn>
+                            <v-btn v-on:click="signUp()">Create Account</v-btn>
+                        </div>
+                    </v-container>
+                </v-form>
                 <div v-if="signedIn">
                     <span>Signed in as {{ username }} </span>
-                    <button v-on:click="signOut()">Sign Out</button>
+                    <v-btn v-on:click="signOut()">Sign Out</v-btn>
                     <div v-if="!joined">
-                        <button v-on:click="createGame()">Create Game</button>
-                        <!-- <button v-on:click="createGame(true)">Create Private Game</button> -->
-                        <button v-on:click="joinGame()">Join Game: </button>
+                        <v-btn v-on:click="createGame()">Create Game</v-btn>
+                        <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
+                        <v-btn v-on:click="joinGame()">Join Game: </v-btn>
                         <input v-model="joinGameInputField" placeholder="GameID">
                     </div>
                     <div id="main-game" v-if="joined">
@@ -47,36 +66,49 @@
                         </h2>
                         <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
                             <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                            <!-- <button slot="footer" @click="saveTilePositions()">Save Tile Position</button> -->
+                            <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
                         </draggable>
                         <h2>
                             Actively Selected Tiles
                         </h2>
                         <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
                         <div v-if="inCheckPhase && waitingForYourCheck">
-                            <button v-on:click="sendEvent('Win')">
+                            <v-btn v-on:click="sendEvent('Win')">
                                 Win (胡) literally win the game
-                            </button>
-                            <button v-on:click="sendEvent('Gang')">
+                            </v-btn>
+                            <v-btn v-on:click="sendEvent('Gang')">
                                 Gang (杠) Four of a kind
-                            </button>
-                            <button v-on:click="sendEvent('Match')">
+                            </v-btn>
+                            <v-btn v-on:click="sendEvent('Match')">
                                 Match (碰) Three of a kind
-                            </button>
-                            <button v-on:click="sendEvent('Eat', activeTiles)">
+                            </v-btn>
+                            <v-btn v-on:click="sendEvent('Eat', activeTiles)">
                                 Eat (吃) Straight (can only eat person directly upstream of you)
-                            </button>
-                            <button v-on:click="sendEvent('Pass')">
+                            </v-btn>
+                            <v-btn v-on:click="sendEvent('Pass')">
                                 Pass (Do Nothing)
-                            </button>
+                            </v-btn>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <link rel="stylesheet" href="main.css">
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
         
+
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script> -->
+        <!-- idk if all of these are needed for vuetify -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.css.map">
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.js.map"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/vuetify.min.css"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/attributes.json"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/tags.json"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.4.4/json/web-types.json"></script> -->
         
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script> -->
         <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
