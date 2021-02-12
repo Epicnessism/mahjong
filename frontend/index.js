@@ -87,6 +87,10 @@ const app = new Vue({
                     console.warn('Got unknown server message: ' + eventRaw.data);
                 }
             });
+            setInterval(function(){ 
+                app.sendEvent('KeepAlive', {})
+            }, 15000);
+
             console.log("Connection Established")
             app.joined = true;
         },
@@ -296,6 +300,8 @@ const app = new Vue({
         }
     }
 });
+
+
 
 app.checkCurrentUser();
 
