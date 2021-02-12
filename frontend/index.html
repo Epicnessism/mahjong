@@ -14,6 +14,45 @@
         <div id="app" v-cloak>
             <v-app>
                 <v-main>
+                    <v-app-bar
+                        color="deep-purple" dark>
+
+                        <v-app-bar-nav-icon @click="navDrawer = true"></v-app-bar-nav-icon>
+                        <img src="res/bamboo_1.png" @click="navDrawer = true">
+                        <v-toolbar-title>Online Mahjong</v-toolbar-title>
+
+                    </v-app-bar>
+
+                    <v-navigation-drawer
+                    v-model="navDrawer"
+                    absolute
+                    temporary
+                    >
+                        <v-list
+                        nav
+                        dense
+                        >
+                        <v-list-item-group
+                            v-model="group"
+                            active-class="deep-purple--text text--accent-4"
+                        >
+                            <v-list-item>
+                            <v-list-item-icon>
+                                <v-icon>mdi-home</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-title>Home</v-list-item-title>
+                            </v-list-item>
+                
+                            <v-list-item>
+                            <v-list-item-icon>
+                                <v-icon>mdi-account</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-title>Account</v-list-item-title>
+                            </v-list-item>
+                        </v-list-item-group>
+                        </v-list>
+                    </v-navigation-drawer>
+
                     <div v-if="loadingData && !errored">
                         Loading...
                     </div>
@@ -23,9 +62,9 @@
                     <div v-if="!loadingData && !errored">
                         <v-form v-if="!signedIn">
                             <v-container fluid class="signin-container">
-                                <div class="signin-title">
+                                <!-- <div class="signin-title">
                                     <img src="res/bamboo_1.png"><span>Online Mahjong</span>
-                                </div>
+                                </div> -->
                                 <v-row>
                                     <v-col>
                                         <div >
@@ -59,18 +98,20 @@
                                 <v-row>
                                     <v-col>
                                         <v-row justify="center">
-                                            <v-btn v-on:click="signIn()" >Sign In</v-btn>
+                                            <v-btn v-on:click="signIn()" color="light-blue">Sign In</v-btn>
                                         </v-row>
                                         
                                     </v-col>
                                     <v-col>
                                         <v-row justify="center">
-                                            <v-btn v-on:click="signUp()" >Create Account</v-btn>
+                                            <v-btn v-on:click="signUp()" color="deep-purple">Create Account</v-btn>
                                         </v-row>
                                     </v-col>
                                 </v-row>
                             </v-container>
                         </v-form>
+
+
                         <div v-if="signedIn">
                             <div>Signed in as: {{ username }}</div>
                             <v-btn v-on:click="signOut()">Sign Out</v-btn>
@@ -78,7 +119,9 @@
                                 <v-btn v-on:click="createGame()">Create Game</v-btn>
                                 <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
                                 <v-btn v-on:click="joinGame()">Join Game: </v-btn>
-                                <input v-model="joinGameInputField" placeholder="Enter GameID">
+                                <v-text-field label="Enter GameID"
+                                    v-model="joinGameInputField" outlined>
+                                </v-text-field>
                             </div>
                             <div id="main-game" v-if="joined">
                                 <span>Game ID: <b>{{ currentGameId }}</b></span>

@@ -27,6 +27,10 @@ const app = new Vue({
         waitingForYourCheck: false,
         inCheckPhase: false,
         activeTile: null,
+
+        //v-models for navbar and navdrawer
+        navDrawer: false,
+        group: null, //no clue what this does
         
         activePlayerName: null,
         currentGameId: null,
