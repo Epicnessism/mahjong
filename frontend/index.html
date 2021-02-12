@@ -29,7 +29,7 @@
                             <span v-if="signedIn">
                                 <v-menu offset-y>
                                     <template v-slot:activator="{ on, attrs }">
-                                      <v-col
+                                      <div
                                         class="height100"
                                         color="primary"
                                         dark
@@ -43,7 +43,11 @@
                                         <span>
                                             {{username}}
                                         </span>
-                                    </v-col>
+                                        <v-icon>
+                                            expand_more
+                                        </v-icon>
+                                    </div>
+
                                     </template>
                                     <v-list>
                                       <v-list-item @click="signOut()">
