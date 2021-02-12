@@ -285,6 +285,7 @@ const app = new Vue({
                     app.inCheckPhase = false;
                     app.waitingForYourCheck = false;
                     document.title = base_title;
+                    app.myTiles = event.eventData.playerTiles;
                     break;
                 case 'AlreadySubmittedCheckResponse':
                     app.updateStatus('Response already submitted');
