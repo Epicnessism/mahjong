@@ -179,7 +179,7 @@ class MahjongGame {
     handleCheckResponses(player, event) {
         // console.log(this.discardedTiles);
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
-        if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile)) {
+        if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile).winning) {
             player.sendEvent('InvalidCheckResponse', {});
             return false;
         } else if (event.eventName == 'Gang' && !mahjongLogic.checkGang(player.tiles, lastTile)) {
@@ -227,13 +227,13 @@ class MahjongGame {
         if(win) {
             lastTile = this.discardedTiles.pop();
             var winningHand = southernRuleset.checkAllWinConditions(win.player, lastTile)
-            if(winningHand) {
+            if(winningHand.winning) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
                     otherPlayer.sendEvent('Win', {
                         actingPlayerID: win.player.identifier,
                         action: "Win",
                         lastTile: lastTile,
-                        winningHand: winningHand
+                        winningHand: winningHand.hand
                     })
                 });
             }
