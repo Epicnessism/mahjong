@@ -4,7 +4,9 @@
         <title>Online Mahjong</title>
         <link rel="icon" type="image/png" href="/favicon.png"/>
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <!-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet"> -->
+        <!-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet"> -->
+        <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
         <link rel="stylesheet" href="main.css">
@@ -20,7 +22,17 @@
                         <v-app-bar-nav-icon @click="navDrawer = true"></v-app-bar-nav-icon>
                         <img src="res/bamboo_1.png" @click="navDrawer = true">
                         <v-toolbar-title>Online Mahjong</v-toolbar-title>
-
+                        <v-row justify="end">
+                            <v-icon v-if=!signedIn>
+                                person_outline
+                            </v-icon>
+                            <v-icon v-if="signedIn" @click="">
+                                person
+                            </v-icon>
+                            <span>
+                                {{username}}
+                            </span>
+                        </v-row>
                     </v-app-bar>
 
                     <v-navigation-drawer
@@ -112,67 +124,68 @@
                         </v-form>
 
 
-                        <div v-if="signedIn">
-                            <div>Signed in as: {{ username }}</div>
-                            <v-btn v-on:click="signOut()">Sign Out</v-btn>
-                            <div v-if="!joined">
-                                <v-btn v-on:click="createGame()">Create Game</v-btn>
-                                <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
-                                <v-btn v-on:click="joinGame()">Join Game: </v-btn>
-                                <v-text-field label="Enter GameID"
-                                    v-model="joinGameInputField" outlined>
-                                </v-text-field>
-                            </div>
-                            <div id="main-game" v-if="joined">
-                                <span>Game ID: <b>{{ currentGameId }}</b></span>
-                                <br>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="primary"
-                                    v-if="waitingForPlayers"
-                                    >
-                                </v-progress-circular>
-    
-                                <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
-                                <h2>Other Players: </h2>
-                                <div id="other-player-section">
-                                    <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
-                                        <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
-                                        <span v-for="set in player.visibleTiles">
-                                            <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                                        </span>
+                        <v-container fluid class="maingame-container">
+                            <div v-if="signedIn">
+                                <div>Signed in as: {{ username }}</div>
+                                <v-btn v-on:click="signOut()">Sign Out</v-btn>
+                                <div v-if="!joined">
+                                    <v-btn v-on:click="createGame()">Create Game</v-btn>
+                                    <!-- <v-btn v-on:click="createGame(true)">Create Private Game</v-btn> -->
+                                    <v-btn v-on:click="joinGame()">Join Game: </v-btn>
+                                    <v-text-field label="Enter GameID"
+                                        v-model="joinGameInputField" outlined>
+                                    </v-text-field>
+                                </div>
+                                <div id="main-game" v-if="joined">
+                                    <span>Game ID: <b>{{ currentGameId }}</b></span>
+                                    <br>
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="primary"
+                                        v-if="waitingForPlayers"
+                                        >
+                                    </v-progress-circular>
+                                    <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
+                                    <h2>Other Players: </h2>
+                                    <div id="other-player-section">
+                                        <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
+                                            <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
+                                            <span v-for="set in player.visibleTiles">
+                                                <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <h2>
+                                        Your Hand
+                                    </h2>
+                                    <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
+                                        <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                                        <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
+                                    </draggable>
+                                    <h2>
+                                        Actively Selected Tiles
+                                    </h2>
+                                    <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+                                    <div v-if="inCheckPhase && waitingForYourCheck">
+                                        <v-btn v-on:click="sendEvent('Win')">
+                                            Win (胡) literally win the game
+                                        </v-btn>
+                                        <v-btn v-on:click="sendEvent('Gang')">
+                                            Gang (杠) Four of a kind
+                                        </v-btn>
+                                        <v-btn v-on:click="sendEvent('Match')">
+                                            Match (碰) Three of a kind
+                                        </v-btn>
+                                        <v-btn v-on:click="sendEvent('Eat', activeTiles)">
+                                            Eat (吃) Straight (can only eat person directly upstream of you)
+                                        </v-btn>
+                                        <v-btn v-on:click="sendEvent('Pass')">
+                                            Pass (Do Nothing)
+                                        </v-btn>
                                     </div>
                                 </div>
-                                <h2>
-                                    Your Hand
-                                </h2>
-                                <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
-                                    <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                                    <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
-                                </draggable>
-                                <h2>
-                                    Actively Selected Tiles
-                                </h2>
-                                <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-                                <div v-if="inCheckPhase && waitingForYourCheck">
-                                    <v-btn v-on:click="sendEvent('Win')">
-                                        Win (胡) literally win the game
-                                    </v-btn>
-                                    <v-btn v-on:click="sendEvent('Gang')">
-                                        Gang (杠) Four of a kind
-                                    </v-btn>
-                                    <v-btn v-on:click="sendEvent('Match')">
-                                        Match (碰) Three of a kind
-                                    </v-btn>
-                                    <v-btn v-on:click="sendEvent('Eat', activeTiles)">
-                                        Eat (吃) Straight (can only eat person directly upstream of you)
-                                    </v-btn>
-                                    <v-btn v-on:click="sendEvent('Pass')">
-                                        Pass (Do Nothing)
-                                    </v-btn>
-                                </div>
                             </div>
-                        </div>
+                        </v-container>
                     </div>
                 </v-main>
             </v-app>

@@ -20,7 +20,7 @@ html, body {
 }
 
 .signin-container {
-    width: 50%;
+    width: 75%;
     height: 50vh;
     padding-top: 5%;
 }
@@ -28,6 +28,12 @@ html, body {
 .signin-title {
     font-size: 32pt;
     padding-bottom: 0.5vh;
+}
+
+.maingame-container {
+    width: 75%;
+    height: 50vh;
+    padding-top: 5%;
 }
 
 [v-cloak] { display: none; }

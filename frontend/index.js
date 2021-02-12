@@ -6,7 +6,10 @@ const socket_host = window.location.host
 
 const app = new Vue({
     el: '#app',
-    vuetify: new Vuetify(),
+    vuetify: new Vuetify({icons: {
+                            iconfont: 'md',
+                        },
+    }),
     data: {
         signedIn: false,
         joined: false,
