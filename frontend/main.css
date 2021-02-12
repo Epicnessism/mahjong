@@ -19,4 +19,15 @@ html, body {
     padding: 10px;
 }
 
+.signin-container {
+    width: 50%;
+    height: 50vh;
+    padding-top: 5%;
+}
+
+.signin-title {
+    font-size: 32pt;
+    padding-bottom: 0.5vh;
+}
+
 [v-cloak] { display: none; }
