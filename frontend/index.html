@@ -35,7 +35,8 @@
                                 </v-row>
                                 <v-row>
                                     <v-col>
-                                        <v-text-field
+                                        
+                                            <v-text-field
                                             v-model="password"
                                             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                                     
@@ -50,14 +51,20 @@
                                             name="input-10-1"
                                             -->
                                         </v-text-field>
+                                        
                                     </v-col>
                                 </v-row>
-                                <v-row justify="center">
-                                    <v-col :order="12">
-                                        <v-btn v-on:click="signIn()" >Sign In</v-btn>
+                                <v-row>
+                                    <v-col>
+                                        <v-row justify="center">
+                                            <v-btn v-on:click="signIn()" >Sign In</v-btn>
+                                        </v-row>
+                                        
                                     </v-col>
-                                    <v-col :order="1">
-                                        <v-btn v-on:click="signUp()" >Create Account</v-btn>
+                                    <v-col>
+                                        <v-row justify="center">
+                                            <v-btn v-on:click="signUp()" >Create Account</v-btn>
+                                        </v-row>
                                     </v-col>
                                 </v-row>
                             </v-container>
