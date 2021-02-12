@@ -20,7 +20,7 @@ html, body {
 }
 
 .signin-container {
-    width: 75%;
+    width: 50%;
     height: 50vh;
     padding-top: 5%;
 }
@@ -38,6 +38,15 @@ html, body {
 
 .height100 {
     height: 100%;
+}
+
+.createGameRow {
+    padding-top: 15vh;
+    padding-bottom: 15vh;
+}
+
+.width25 {
+    max-width: 15vh;
 }
 
 [v-cloak] { display: none; }

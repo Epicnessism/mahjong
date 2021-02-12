@@ -115,6 +115,7 @@ const app = new Vue({
         signOut: function() {
             app.socket = null;
             app.joined = false;
+            app.joinSpecificGame = false;
             axios
                 .get("/signOut")
                 .then( res => {
