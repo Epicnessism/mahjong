@@ -36,4 +36,8 @@ html, body {
     padding-top: 5%;
 }
 
+.height100 {
+    height: 100%;
+}
+
 [v-cloak] { display: none; }
