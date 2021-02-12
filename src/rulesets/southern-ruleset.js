@@ -22,14 +22,18 @@ const suits = ["tenk","dot", "bamboo"]
 //winning multiple rounds and depending on which of the win-cons you meet, can change score (money)
 //multiplier, like if you win 2 in a row as host a x or y, with the thirteenSingles its like x26 or something lol
 function checkAllWinConditions(player, winningTile) {
-    if(standardWin(player, winningTile)) {
-        return winningHand
+    var standardWin = standardWin(player, winningTile)
+    var thirteenSinglesWin = thirteenSingles(player, winningTile)
+    var sevenPairsWin = sevenPairs(player, winningTile)
+
+    if(standardWin.winning) {
+        return standardWin.winningHand
     }
-    if(thirteenSingles(player)) {
-        return winningHand
+    if(thirteenSinglesWin.winning) {
+        return thirteenSinglesWin.winningHand
     }
-    if(sevenPairs(player)) {
-        return winningHand
+    if(sevenPairsWin.winning) {
+        return sevenPairsWin.winningHand
     }
     return false
     //alternate code but looks terrible and probably wont work in the future
@@ -101,10 +105,16 @@ function standardWin(player, winningTile = null) {
     }
     if( tileValues.filter( suit => suit.length == 0).length == 3) {
         console.log("winning hand!");
-        return winningHand
+        return {
+            winning: true,
+            hand: winningHand
+        }
     } else {
         console.log("you lying piece of shit!");
-        return winningHand
+        return {
+            winning: false,
+            hand: winningHand
+        }
     }
 }
 
@@ -193,11 +203,17 @@ function thirteenSingles(player, winningTile = null) {
         var count = playerTilesSanitized.filter(tile).length
         if (count === 2) {
             //if you get here, then return true, you win
-            return true
+            return {
+                winning: true,
+                hand: playerTilesSanitized
+            }
         }
     })
     //otherwise you did not win
-    return false
+    return {
+        winning: false,
+        hand: playerTilesSanitized
+    }
 }
 
 
@@ -238,9 +254,15 @@ function sevenPairs(player, winningTile = null) {
         }
     });
     if (pair === 14) { //this should probably be rewritten with better logic buuuuut this works for now
-        return true
+        return {
+            winning: true,
+            hand: playerTilesSanitized
+        }
     }
-    return false
+    return {
+        winning: false,
+        hand: playerTilesSanitized
+    }
 
 }
 
