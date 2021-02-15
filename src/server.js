@@ -91,13 +91,25 @@ api.post('/savePreference', (req,res,next)=> {
     var prefName = req.body.preferenceName
     if(validPreferences.has(prefName)) {
         var insertPreference = {
-            TableName: UserTable,
-            Item:{
+            TableName:UserTable,
+            Key:{
                 "username": req.session.username,
-                prefName: req.body.preferenceValue,
-            }
+            },
+            UpdateExpression: "set autopass = :autoPass",
+            ExpressionAttributeValues:{
+                ":autoPass": req.body.preferenceValue,
+            },
+            ReturnValues:"UPDATED_NEW"
         };
-        docClient.set(insertPreference, function(err, data) {
+
+        // var insertPreference = {
+        //     TableName: UserTable,
+        //     Item:{
+        //         "username": req.session.username,
+        //         prefName: req.body.preferenceValue,
+        //     }
+        // };
+        docClient.update(insertPreference, function(err, data) {
             if (err) {
                 console.error(`User failed to update preference ${prefName}. Error JSON:`, JSON.stringify(err, null, 2));
                 next(createError(500, err))
