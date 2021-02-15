@@ -193,7 +193,9 @@ class MahjongGame {
             return false;
         }
 
-        player.sendEvent('SuccessfulCheckResponse', {})
+        player.sendEvent('SuccessfulCheckResponse', {
+            playerTiles: player.tiles
+        })
 
         if(this.checkResponses.filter(response => response.player == player).length > 0) {
             player.sendEvent('AlreadySubmittedCheckResponse', {});
