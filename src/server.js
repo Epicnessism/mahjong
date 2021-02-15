@@ -86,6 +86,30 @@ api.post('/joinGame/:gameId', (req,res,next)=> {
 })
 
 const validPreferences = new Set(["autoPass"])
+api.get('/getPreferences', (req,res,next)=> {
+    var getPreferences = {
+        TableName : UserTable,
+        Key: {
+          username: req.body.username
+        }
+    }
+    try {
+        const user = await docClient.get(getPreferences).promise()
+        if(user.Item == undefined) {
+            return next(createError(404, "User Not found"));
+        }
+        console.log(user);
+        res.status(200).json({
+            message: "Preferences Found",
+            userItem: user.Item
+        });
+    } catch(err) {
+        console.log(err);
+        next(err) //TODO not actually sure if this works lmao
+    }
+})
+
+
 api.post('/savePreference', (req,res,next)=> {
     console.log(req.body.preference); // a list?
     var prefName = req.body.preferenceName
@@ -102,13 +126,7 @@ api.post('/savePreference', (req,res,next)=> {
             ReturnValues:"UPDATED_NEW"
         };
 
-        // var insertPreference = {
-        //     TableName: UserTable,
-        //     Item:{
-        //         "username": req.session.username,
-        //         prefName: req.body.preferenceValue,
-        //     }
-        // };
+        //todo this probably needs to be in a trycatch block lmao
         docClient.update(insertPreference, function(err, data) {
             if (err) {
                 console.error(`User failed to update preference ${prefName}. Error JSON:`, JSON.stringify(err, null, 2));
@@ -150,7 +168,7 @@ api.post('/signIn', async (req, res, next) => {
     try {
         const usernameExists = await docClient.get(lookUpUser).promise()
         if(usernameExists.Item == undefined) {
-            return next(createError(404, "Credentials Invalid"));
+            return next(createError(401, "Credentials Invalid"));
         }
         const validPassword = await bcrypt.compare(req.body.password, usernameExists.Item.password); //returns a boolean?
         console.log(validPassword);

@@ -34,7 +34,7 @@ const app = new Vue({
         //v-models for navbar and navdrawer
         navDrawer: false,
         group: null, //no clue what this does
-        advancedMode: false,
+        autoPass: false,
 
         //check phase buttons
         winnable: false,
@@ -186,6 +186,14 @@ const app = new Vue({
             .post('/savePreference', {
                 preferenceName: prefName,
                 preferenceValue: prefValue,
+            })
+        },
+        getPreferences: function() {
+            axios
+            .get('/getPreferences')
+            .then( function(response) {
+                console.log(response);
+                app.autoPass = response.autoPass
             })
         },
         activePlayer: function(player) {            
