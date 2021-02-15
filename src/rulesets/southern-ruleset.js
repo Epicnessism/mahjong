@@ -22,7 +22,7 @@ const suits = ["tenk","dot", "bamboo"]
 //winning multiple rounds and depending on which of the win-cons you meet, can change score (money)
 //multiplier, like if you win 2 in a row as host a x or y, with the thirteenSingles its like x26 or something lol
 function checkAllWinConditions(player, winningTile) {
-    var standardWin = standardWin(player, winningTile)
+    var standardWin = standard(player, winningTile)
     var thirteenSinglesWin = thirteenSingles(player, winningTile)
     var sevenPairsWin = sevenPairs(player, winningTile)
 
@@ -42,7 +42,7 @@ function checkAllWinConditions(player, winningTile) {
 
 //this is actually the hardest one to calculate....
 //x1
-function standardWin(player, winningTile = null) {
+function standard(player, winningTile = null) {
     var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
     if(winningTile != null) {
         inHandTiles.push(winningTile)

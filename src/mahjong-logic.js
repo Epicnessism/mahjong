@@ -7,7 +7,8 @@ function checkGang(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length == 3
 }
 
-function checkEat(activeTiles, lastTile, playerIndex, discarderIndex) {
+
+function checkEat(playerTiles, lastTile, playerIndex, discarderIndex) {
 
     if(++discarderIndex % 4 != playerIndex) {
         console.log("Couldn't eat due to wrong order");
@@ -20,7 +21,7 @@ function checkEat(activeTiles, lastTile, playerIndex, discarderIndex) {
     var upperBound = value;
     while(true) {
         var nextTile = suit + "_" + (lowerBound - 1).toString()
-        if(activeTiles.filter(tile => tile == nextTile).length > 0) {
+        if(playerTiles.filter(tile => tile == nextTile).length > 0) {
             lowerBound--;
         }else {
             break;
@@ -28,7 +29,7 @@ function checkEat(activeTiles, lastTile, playerIndex, discarderIndex) {
     }
     while(true) {
         var nextTile = suit + "_" + (upperBound + 1).toString()
-        if(activeTiles.filter(tile => tile == nextTile).length > 0) {
+        if(playerTiles.filter(tile => tile == nextTile).length > 0) {
             upperBound++;
         }else {
             break;

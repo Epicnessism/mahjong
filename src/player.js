@@ -6,8 +6,6 @@ class Player {
         this.visibleTiles = [];
         this.tiles = [];
         this.currentGame = null;
-        
-        
     }
 
     setWsConnection(ws) {

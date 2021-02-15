@@ -180,17 +180,18 @@
                                         Actively Selected Tiles
                                     </h2>
                                     <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+
                                     <div v-if="inCheckPhase && waitingForYourCheck">
-                                        <v-btn v-on:click="sendEvent('Win')">
+                                        <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
                                             Win (胡) literally win the game
                                         </v-btn>
-                                        <v-btn v-on:click="sendEvent('Gang')">
+                                        <v-btn v-on:click="sendEvent('Gang')" v-if="gangable">
                                             Gang (杠) Four of a kind
                                         </v-btn>
-                                        <v-btn v-on:click="sendEvent('Match')">
+                                        <v-btn v-on:click="sendEvent('Match')" v-if="matchable">
                                             Match (碰) Three of a kind
                                         </v-btn>
-                                        <v-btn v-on:click="sendEvent('Eat', activeTiles)">
+                                        <v-btn v-on:click="sendEvent('Eat', activeTiles)" v-if="eatable">
                                             Eat (吃) Straight (can only eat person directly upstream of you)
                                         </v-btn>
                                         <v-btn v-on:click="sendEvent('Pass')">

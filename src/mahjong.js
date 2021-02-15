@@ -140,8 +140,10 @@ class MahjongGame {
                 //do the check phase
                 this.allOtherPlayers(player).forEach(otherPlayer => {
                     otherPlayer.sendEvent('CheckDiscardedTile', {
-                        tile: event.eventData.tile
+                        tile: event.eventData.tile,
+                        possibleActions: this.checkEligibileDiscardResponses(otherPlayer)
                     });
+
                 });
                 break;
             
@@ -165,7 +167,7 @@ class MahjongGame {
         var visibleTileMap =  this.players.map(curPlayer => {
             return  {
                     player: curPlayer.identifier,
-                    tiles: curPlayer.visibleTiles 
+                    tiles: curPlayer.visibleTiles
                 }
         });
 
@@ -174,6 +176,16 @@ class MahjongGame {
                visibleTileMap
             );
         })
+    }
+
+    checkEligibileDiscardResponses(player) {
+        var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
+        return {
+            win: southernRuleset.checkAllWinConditions(player, lastTile).winning,
+            gang: mahjongLogic.checkGang(player.tiles, lastTile),
+            match: mahjongLogic.checkMatch(player.tiles, lastTile),
+            eat: mahjongLogic.checkEat(player.tiles, lastTile, this.players.indexOf(player), this.activePlayer)
+        }
     }
 
     handleCheckResponses(player, event) {

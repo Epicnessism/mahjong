@@ -34,6 +34,12 @@ const app = new Vue({
         //v-models for navbar and navdrawer
         navDrawer: false,
         group: null, //no clue what this does
+
+        //check phase buttons
+        winnable: false,
+        gangable: false,
+        matchable: false,
+        eatable: false,
         
         activePlayerName: null,
         currentGameId: null,
@@ -212,6 +218,9 @@ const app = new Vue({
             });
         },
         sendEvent: function(event, eventData = {}) {
+            if(event == "Win" || event == "Gang" || event == "Match" || event == "Pass") {
+                app.toggleOffDiscardButtons()
+            }
             app.socket.send(
                 JSON.stringify({
                     eventName: event,
@@ -221,6 +230,12 @@ const app = new Vue({
         },
         updateStatus(status) {
             app.status = status;
+        },
+        toggleOffDiscardButtons() {
+            app.winnable = false;
+            app.gangable = false;
+            app.matchable = false;
+            app.eatable = false;
         },
         handleEvent(event) {
             switch(event.eventName) {
@@ -247,6 +262,11 @@ const app = new Vue({
                     app.inCheckPhase = true;
                     app.waitingForYourCheck = true;
                     document.title = '(*)' + base_title;
+
+                    app.winnable = event.eventData.possibleActions.win
+                    app.gangable = event.eventData.possibleActions.gang
+                    app.matchable = event.eventData.possibleActions.match
+                    app.eatable = event.eventData.possibleActions.eat
                     break;
                 case 'VisibleTileUpdate':
                     app.updateStatus('updating all visible tiles');
@@ -297,6 +317,7 @@ const app = new Vue({
                     break;
                 case 'Win':
                     app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has won the game! Winning hand is: ' + event.eventData.winningHand)  
+                    break;
             }
         }
     }
