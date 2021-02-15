@@ -73,7 +73,6 @@ api.post('/createGame', (req,res,next) => {
 })
 
 api.post('/joinGame/:gameId', (req,res,next)=> {
-
     console.log("Player " + req.session.username + " joined game " + req.params.gameId)
     var newPlayer = new Player(req.session.username)
     newPlayer.currentGame = games[req.params.gameId]
@@ -84,6 +83,35 @@ api.post('/joinGame/:gameId', (req,res,next)=> {
         message: "Successfully joined the game",
         gameId: req.params.gameId
     })
+})
+
+const validPreferences = new Set(["autoPass"])
+api.post('/savePreference', (req,res,next)=> {
+    console.log(req.body.preference); // a list?
+    var prefName = req.body.preferenceName
+    if(validPreferences.has(prefName)) {
+        var insertPreference = {
+            TableName: UserTable,
+            Item:{
+                "username": req.session.username,
+                prefName: req.body.preferenceValue,
+            }
+        };
+        docClient.set(insertPreference, function(err, data) {
+            if (err) {
+                console.error(`User failed to update preference ${prefName}. Error JSON:`, JSON.stringify(err, null, 2));
+                next(createError(500, err))
+            } else {
+                console.log(`User ${prefName} preference updated.`)
+                console.log("Added item:", JSON.stringify(data, null, 2));
+                res.status(203).json( {
+                    message: `${prefName} updated successfully`,
+                })
+            }
+        });
+    } else {
+        next(createError(400, `${prefName} does not exists!`))
+    }
 })
 
 api.post('/startGame/:gameId', (req,res,next)=> {

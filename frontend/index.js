@@ -34,6 +34,7 @@ const app = new Vue({
         //v-models for navbar and navdrawer
         navDrawer: false,
         group: null, //no clue what this does
+        advancedMode: false,
 
         //check phase buttons
         winnable: false,
@@ -179,6 +180,13 @@ const app = new Vue({
                 console.log(error);
             })
             this.password = '' //do this immediately after the http request is sent out
+        },
+        savePreference: function(prefName, prefValue) {
+            axios
+            .post('/savePreference', {
+                preferenceName: prefName,
+                preferenceValue: prefValue,
+            })
         },
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
