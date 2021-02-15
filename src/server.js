@@ -85,33 +85,34 @@ api.post('/joinGame/:gameId', (req,res,next)=> {
     })
 })
 
-const validPreferences = new Set(["autoPass"])
-api.get('/getPreferences', (req,res,next)=> {
-    var getPreferences = {
+api.get('/getPreferences', async (req,res,next)=> {
+    var getPreferencesParams = {
         TableName : UserTable,
         Key: {
-          username: req.body.username
+          "username": req.session.username
         }
     }
     try {
-        const user = await docClient.get(getPreferences).promise()
-        if(user.Item == undefined) {
-            return next(createError(404, "User Not found"));
+        const dbRes = await docClient.get(getPreferencesParams).promise()
+        
+        prefResponse = {}
+
+        if(dbRes != undefined && dbRes.Item != undefined) {
+            validPreferences.forEach(prefName => {
+                prefResponse[prefName] = dbRes.Item[prefName]
+            })
         }
-        console.log(user);
-        res.status(200).json({
-            message: "Preferences Found",
-            userItem: user.Item
-        });
+        
+        res.status(200).json(prefResponse);
     } catch(err) {
         console.log(err);
-        next(err) //TODO not actually sure if this works lmao
+        next(err)
     }
 })
 
-
+const validPreferences = new Set(["autopass"])
 api.post('/savePreference', (req,res,next)=> {
-    console.log(req.body.preference); // a list?
+    console.log(req.body.preference);
     var prefName = req.body.preferenceName
     if(validPreferences.has(prefName)) {
         var insertPreference = {
@@ -119,9 +120,9 @@ api.post('/savePreference', (req,res,next)=> {
             Key:{
                 "username": req.session.username,
             },
-            UpdateExpression: "set autopass = :autoPass",
+            UpdateExpression: "set " + prefName + " = :prefValue",
             ExpressionAttributeValues:{
-                ":autoPass": req.body.preferenceValue,
+                ":prefValue": req.body.preferenceValue,
             },
             ReturnValues:"UPDATED_NEW"
         };

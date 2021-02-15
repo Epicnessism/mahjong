@@ -34,7 +34,7 @@ const app = new Vue({
         //v-models for navbar and navdrawer
         navDrawer: false,
         group: null, //no clue what this does
-        autoPass: false,
+        autopass: false,
 
         //check phase buttons
         winnable: false,
@@ -46,7 +46,6 @@ const app = new Vue({
         currentGameId: null,
         joinGameInputField: null,
 
-        testAXIOSdata: null,
         loadingData: true,
         errored: false,
         
@@ -111,6 +110,7 @@ const app = new Vue({
                         console.log("You are already signed in as " + res.data.currentUser)
                         app.username = res.data.currentUser
                         app.signedIn = true
+                        app.getPreferences()
                     }else {
                         console.log("You are not logged in")
                     }
@@ -193,7 +193,7 @@ const app = new Vue({
             .get('/getPreferences')
             .then( function(response) {
                 console.log(response);
-                app.autoPass = response.autoPass
+                app.autopass = response.data.autopass
             })
         },
         activePlayer: function(player) {            
