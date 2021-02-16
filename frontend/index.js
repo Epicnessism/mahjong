@@ -335,7 +335,11 @@ const app = new Vue({
                 case 'CheckPhaseResolved':
                     app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has ' + event.eventData.action + " " + event.eventData.lastTile + "!")
                     app.activeTile = null
-                    app.activeTiles = [];
+                    app.activeTiles = []
+                    break;
+                case 'YourTiles':
+                    app.updateStatus('got YourTiles')
+                    app.myTiles = event.eventData.tiles
                     break;
                 case 'Win':
                     app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has won the game! Winning hand is: ' + event.eventData.winningHand)  

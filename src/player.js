@@ -24,7 +24,9 @@ class Player {
     }
 
     handleRecv(data) {
-        console.log('player ' + this.identifier + ' got data ' + data);
+        if(data.eventName != 'KeepAlive') {
+            console.log('player ' + this.identifier + ' got data ' + data);
+        }
         this.currentGame.handleClientResponse(this, JSON.parse(data));
     }
 

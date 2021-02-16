@@ -317,7 +317,8 @@ class MahjongGame {
     }
 
     sendPlayerTiles(player) {
-        player.sendEvent('yourTiles', {
+        console.log(player.tiles);
+        player.sendEvent('YourTiles', {
             tiles: player.tiles
         })
     }
