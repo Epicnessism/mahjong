@@ -24,6 +24,7 @@ const app = new Vue({
         status: 'Waiting for connection...',
         myTiles: [],
         myVisibleTiles: [],
+        myDiscardedTiles: [],
         activeTiles: [],
 
         yourTurn: false,
@@ -35,6 +36,9 @@ const app = new Vue({
         navDrawer: false,
         group: null, //no clue what this does
         autopass: false,
+
+        //v-cards
+        x: false,
 
         //check phase buttons
         winnable: false,
@@ -290,7 +294,7 @@ const app = new Vue({
                     app.eatable = event.eventData.possibleActions.eat
                     app.checkAutoPass()
                     break;
-                case 'VisibleTileUpdate':
+                case 'VisibleTilesUpdate':
                     app.updateStatus('updating all visible tiles');
                     console.log(event.eventData);
                     event.eventData.forEach(playerTiles => {
@@ -305,7 +309,18 @@ const app = new Vue({
                         app.players.filter(player => player.playerIdentifier == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
                     });
                     break;
-        
+                case 'DiscardedTilesUpdate':
+                    app.updateStatus('updating all discarded tiles')
+                    console.log(event.eventData)
+                    event.eventData.forEach(playerTiles => {
+                        console.log(playerTiles);
+                        if(playerTiles.player == app.username) {
+                            console.log('Got my own played tiles');
+                            app.myDiscardedTiles = playerTiles.tiles
+                        }
+                        app.players.filter(player => player.playerIdentifier == playerTiles.player)[0].discardedTiles = playerTiles.tiles
+                    })
+                    break;
                 case 'NextTurnNotYou':
                     app.updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
                     app.activeTile = null

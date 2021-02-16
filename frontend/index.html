@@ -166,44 +166,101 @@
                                         >
                                     </v-progress-circular>
                                     <span>{{ status }} <img v-if="activeTile"  v-bind:src="'res/' + activeTile + '.png'"></img></span>
-                                    <h2>Other Players: </h2>
-                                    <div id="other-player-section">
-                                        <div id="other-player-stub" v-for="player in players" v-bind:class="activePlayer(player)">
-                                            <span v-if="player.playerIdentifier == username">[You]</span><b>{{ player.playerIdentifier }}</b>
-                                            <span v-for="set in player.visibleTiles">
-                                                <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <h2>
-                                        Your Hand
-                                    </h2>
-                                    <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
-                                        <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                                        <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
-                                    </draggable>
-                                    <h2>
-                                        Actively Selected Tiles
-                                    </h2>
-                                    <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+                                    <h2>Player Order: </h2>
+                                    <v-row>
+                                            <v-card
+                                            
+                                            class="mx-auto my-6"
+                                            max-width="374"
+                                            v-for="player in players"
+                                        >
+                                            <v-progress-linear
+                                                color="deep-purple"
+                                                height="10"
+                                                indeterminate
+                                            ></v-progress-linear>
 
-                                    <div v-if="inCheckPhase && waitingForYourCheck">
-                                        <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
-                                            Win (胡) literally win the game
-                                        </v-btn>
-                                        <v-btn v-on:click="sendEvent('Gang')" v-if="gangable">
-                                            Gang (杠) Four of a kind
-                                        </v-btn>
-                                        <v-btn v-on:click="sendEvent('Match')" v-if="matchable">
-                                            Match (碰) Three of a kind
-                                        </v-btn>
-                                        <v-btn v-on:click="sendEvent('Eat', activeTiles)" v-if="eatable">
-                                            Eat (吃) Straight (can only eat person directly upstream of you)
-                                        </v-btn>
-                                        <v-btn v-on:click="sendEvent('Pass')">
-                                            Pass (Do Nothing)
-                                        </v-btn>
-                                    </div>
+                                            <!-- <v-img
+                                            height="250"
+                                            src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+                                            ></v-img> -->
+
+                                            <v-card-title>{{player.playerIdentifier}}</v-card-title>
+
+                                            <v-card-text>
+                                                <h3>
+                                                    Visible Tiles
+                                                </h3>
+                                                <span v-for="set in player.visibleTiles">
+                                                    <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                                                </span>
+
+                                            </v-card-text>
+
+                                            <v-divider class="mx-4"></v-divider>
+
+                                            <!-- <v-card-title></v-card-title> -->
+
+                                            <v-card-text>
+                                                <h3>
+                                                    Discarded Tiles
+                                                </h3>
+                                                <span v-for="tile in player.discardedTiles">
+                                                    <img v-bind:src="'res/' + tile + '.png'">
+                                                </span>
+                                                <!-- <v-chip-group
+                                                    v-model="selection"
+                                                    active-class="deep-purple accent-4 white--text"
+                                                    column
+                                                >
+                                                    <v-chip></v-chip>
+                                                </v-chip-group> -->
+                                            </v-card-text>
+
+                                            <!-- <v-card-actions>
+                                            <v-btn
+                                                color="deep-purple lighten-2"
+                                                text
+                                                @click="reserve"
+                                            >
+                                                Reserve
+                                            </v-btn>
+                                            </v-card-actions> -->
+                                        </v-card>
+                                    </v-row>
+                                    <v-row>
+                                        <h2>
+                                            Your Hand
+                                        </h2>
+                                        <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
+                                            <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                                            <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
+                                        </draggable>
+                                    </v-row>
+                                    <v-row>
+                                        <h2>
+                                            Actively Selected Tiles
+                                        </h2>
+                                        <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
+    
+                                        <div v-if="inCheckPhase && waitingForYourCheck">
+                                            <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
+                                                Win (胡) literally win the game
+                                            </v-btn>
+                                            <v-btn v-on:click="sendEvent('Gang')" v-if="gangable">
+                                                Gang (杠) Four of a kind
+                                            </v-btn>
+                                            <v-btn v-on:click="sendEvent('Match')" v-if="matchable">
+                                                Match (碰) Three of a kind
+                                            </v-btn>
+                                            <v-btn v-on:click="sendEvent('Eat', activeTiles)" v-if="eatable">
+                                                Eat (吃) Straight (can only eat person directly upstream of you)
+                                            </v-btn>
+                                            <v-btn v-on:click="sendEvent('Pass')">
+                                                Pass (Do Nothing)
+                                            </v-btn>
+                                        </div>
+                                    </v-row>
                                 </div>
                             </v-row>
 

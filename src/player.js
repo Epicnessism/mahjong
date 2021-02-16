@@ -4,6 +4,7 @@ class Player {
         this.ws = null;
         this.activeTurn = false;
         this.visibleTiles = [];
+        this.discardedTiles = [];
         this.tiles = [];
         this.currentGame = null;
     }
@@ -24,7 +25,7 @@ class Player {
     }
 
     handleRecv(data) {
-        if(data.eventName != 'KeepAlive') {
+        if(data.eventName != "KeepAlive") {
             console.log('player ' + this.identifier + ' got data ' + data);
         }
         this.currentGame.handleClientResponse(this, JSON.parse(data));
@@ -53,6 +54,11 @@ class Player {
     removeTile(tile) {
         this.tiles.splice(this.tiles.indexOf(tile), 1);
     }
+
+    addTileToDiscard(tile) {
+        this.discardedTiles.push(tile);
+    }
+    
 }
 
 module.exports = Player

@@ -136,6 +136,8 @@ class MahjongGame {
                 console.log('Player ' + player.identifier + ' has discarded ' + event.eventData.tile);
 
                 player.removeTile(event.eventData.tile);
+                player.addTileToDiscard(event.eventData.tile);
+                this.sendAllDiscardedTiles();
                 this.discardedTiles.push(event.eventData.tile);
                 //do the check phase
                 this.allOtherPlayers(player).forEach(otherPlayer => {
@@ -164,17 +166,27 @@ class MahjongGame {
 
     sendAllVisibleTiles() {
 
-        var visibleTileMap =  this.players.map(curPlayer => {
+        var visibleTilesMap =  this.players.map(curPlayer => {
             return  {
-                    player: curPlayer.identifier,
-                    tiles: curPlayer.visibleTiles
-                }
+                player: curPlayer.identifier,
+                tiles: curPlayer.visibleTiles
+            }
         });
 
         this.players.forEach(player => {
-            player.sendEvent('VisibleTileUpdate', 
-               visibleTileMap
-            );
+            player.sendEvent('VisibleTilesUpdate', visibleTilesMap);
+        })
+    }
+
+    sendAllDiscardedTiles() {
+        var discardedTilesMap = this.players.map( curPlayer => {
+            return {
+                player: curPlayer.identifier,
+                tiles: curPlayer.discardedTiles
+            }
+        })
+        this.players.forEach(player => {
+            player.sendEvent('DiscardedTilesUpdate', discardedTilesMap)
         })
     }
 
@@ -240,6 +252,7 @@ class MahjongGame {
 
         if(win) {
             lastTile = this.discardedTiles.pop();
+            this.players[this.activePlayer].discardedTiles.pop();
             var winningHand = southernRuleset.checkAllWinConditions(win.player, lastTile)
             if(winningHand.winning) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
@@ -255,6 +268,7 @@ class MahjongGame {
             
         } else if(gang) {
             lastTile = this.discardedTiles.pop();
+            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementGang(gang.player, lastTile);
             this.allOtherPlayers(gang.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
@@ -275,6 +289,7 @@ class MahjongGame {
 
         } else if(match) {
             lastTile = this.discardedTiles.pop();
+            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
             this.allOtherPlayers(match.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
@@ -290,6 +305,7 @@ class MahjongGame {
             
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
+            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
             this.allOtherPlayers(eat.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
@@ -313,6 +329,7 @@ class MahjongGame {
         }
         
         this.sendAllVisibleTiles();
+        this.sendAllDiscardedTiles();
         this.nextTurn(nextPlayer, giveNextPlayerTile);
     }
 
