@@ -253,6 +253,11 @@ const app = new Vue({
             app.matchable = false;
             app.eatable = false;
         },
+        checkAutoPass() {
+            if(app.autopass && !app.winnable && !app.gangable && !app.matchable && !app.eatable) {
+                app.sendEvent('Pass')
+            }
+        },
         handleEvent(event) {
             switch(event.eventName) {
                 case 'GameStart': 
@@ -283,6 +288,7 @@ const app = new Vue({
                     app.gangable = event.eventData.possibleActions.gang
                     app.matchable = event.eventData.possibleActions.match
                     app.eatable = event.eventData.possibleActions.eat
+                    app.checkAutoPass()
                     break;
                 case 'VisibleTileUpdate':
                     app.updateStatus('updating all visible tiles');
