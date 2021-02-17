@@ -55,6 +55,25 @@ const app = new Vue({
         
     },
     methods: {
+        updatePlayerStatus: function(username, statusType) {
+            console.log(username + " : " + statusType)
+
+            player = app.players.filter(p => p.playerIdentifier == username)[0];
+
+            if(statusType == "clear") {
+                player.statusColor = "gray"
+            }else if(statusType == "waitingTurn") {
+                player.statusColor = "green"
+            }else if(statusType == "waitingCheck") {
+                player.statusColor = "blue"
+            }
+
+        },
+        clearAllPlayerStatuses() {
+            app.players.forEach(player => {
+                app.updatePlayerStatus(player.playerIdentifier, "clear")
+            })
+        },
         joinGame: function() {
             axios
             .post('/joinGame/' + this.joinGameInputField, {})
@@ -218,6 +237,11 @@ const app = new Vue({
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
                 document.title = base_title;
+                app.players.forEach(player => {
+                    if(player.playerIdentifier != app.username) {
+                        app.updatePlayerStatus(player.playerIdentifier, "waitingCheck")
+                    }
+                })
             } else if(this.inCheckPhase) {
                 console.log("You chose: " + tile);
                 this.myTiles.splice(this.myTiles.indexOf(tile), 1);
@@ -277,6 +301,10 @@ const app = new Vue({
                     document.title = '(*)' + base_title;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
+
+                    app.clearAllPlayerStatuses()
+                    app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
+
                     if(event.eventData.newTile) {
                         app.myTiles.push(event.eventData.newTile)
                     }
@@ -287,6 +315,12 @@ const app = new Vue({
                     app.inCheckPhase = true;
                     app.waitingForYourCheck = true;
                     document.title = '(*)' + base_title;
+
+                    app.players.forEach(player => {
+                        if(player.playerIdentifier != app.activePlayerName) {
+                            app.updatePlayerStatus(player.playerIdentifier, "waitingCheck")
+                        }
+                    })
 
                     app.winnable = event.eventData.possibleActions.win
                     app.gangable = event.eventData.possibleActions.gang
@@ -325,13 +359,18 @@ const app = new Vue({
                     app.updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
                     app.activeTile = null
                     app.activePlayerName = event.eventData.activePlayerName
-                    
+
+                    app.clearAllPlayerStatuses()
+                    app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
+
                     //update my tiles here?
                     app.myTiles = event.eventData.tiles;
                     console.log("all players: " + app.players);
                     break;
                 case 'OtherPlayerRespondedToCheck':
                     app.updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
+                    app.updatePlayerStatus(event.eventData.otherPlayerID, "clear")
+
                     break;
                 case 'InvalidCheckResponse':
                     app.updateStatus('Illegal Response!');
@@ -342,6 +381,7 @@ const app = new Vue({
                     app.inCheckPhase = false;
                     app.waitingForYourCheck = false;
                     document.title = base_title;
+                    app.updatePlayerStatus(app.username, "clear")
                     app.myTiles = event.eventData.playerTiles;
                     break;
                 case 'AlreadySubmittedCheckResponse':
