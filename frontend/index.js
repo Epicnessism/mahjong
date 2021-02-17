@@ -37,9 +37,6 @@ const app = new Vue({
         group: null, //no clue what this does
         autopass: false,
 
-        //v-cards
-        x: false,
-
         //check phase buttons
         winnable: false,
         gangable: false,
@@ -398,6 +395,12 @@ const app = new Vue({
                     break;
                 case 'Win':
                     app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has won the game! Winning hand is: ' + event.eventData.winningHand)  
+                    break;
+                case 'Winning':
+                    app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
+                    break;
+                case 'Losing':
+                    app.updateStatus(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`)
                     break;
             }
         }

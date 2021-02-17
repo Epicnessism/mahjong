@@ -91,6 +91,26 @@ class MahjongGame {
         return this.players[playerIndex]
     }
 
+    checkWin(player, tile) { //returns boolean of winning or not
+        southernRuleset.checkAllWinConditions(player, tile).winning
+        
+        if(winning.winning) {
+            this.otherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
+                otherPlayer.sendEvent("Losing", {
+                    winningPlayer: this.players[this.activePlayer].identifier,
+                    winningHand: winning.winningHand
+                })
+            })
+            this.players[this.activePlayer].sendEvent("Winning", {
+                winningPlayer: this.players[this.activePlayer].identifier,
+                winningHand: winning.winningHand
+            })
+            return true
+        } else {
+            return false
+        }
+    }
+
     nextTurn(nextPlayer = null, giveTile = true) {
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
@@ -103,26 +123,42 @@ class MahjongGame {
             }
         }
         this.players[this.activePlayer].activeTurn = true;
-        if(giveTile) {
-            var newTile = this.takeTiles(1)[0];
-            this.players[this.activePlayer].addTile(newTile)
-            this.players[this.activePlayer].sendEvent("YourTurn", {
-                newTile: newTile,
-                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
-            });
-        } else {
-            this.players[this.activePlayer].sendEvent("YourTurn", {
-                newTile: null,
-                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
-            });
-        }
+
         
-        this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
-            otherPlayer.sendEvent('NextTurnNotYou', {
-                activePlayerID: this.players[this.activePlayer].identifier,
-                tiles: otherPlayer.tiles,
-                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
-            })});
+        var winning = false
+
+        if(giveTile) {
+            //before giving the tile, check if the player won
+            winning = this.checkWin(this.players[this.activePlayer], newTile)
+            if(!winning) {
+
+                var newTile = this.takeTiles(1)[0];
+                this.players[this.activePlayer].addTile(newTile)
+                this.players[this.activePlayer].sendEvent("YourTurn", {
+                    newTile: newTile,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                })
+            }
+        } else {
+            //before giving the tile, check if the player won
+            winning = this.checkWin(this.players[this.activePlayer])
+            if(!winning) {
+
+                this.players[this.activePlayer].sendEvent("YourTurn", {
+                    newTile: null,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                })
+            }
+        }
+
+        if(!winning) {
+            this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
+                otherPlayer.sendEvent('NextTurnNotYou', {
+                    activePlayerID: this.players[this.activePlayer].identifier,
+                    tiles: otherPlayer.tiles,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                })})
+        }
     }
 
     handleClientResponse(player, event) {
@@ -256,12 +292,16 @@ class MahjongGame {
             var winningHand = southernRuleset.checkAllWinConditions(win.player, lastTile)
             if(winningHand.winning) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
-                    otherPlayer.sendEvent('Win', {
+                    otherPlayer.sendEvent('Losing', {
                         actingPlayerID: win.player.identifier,
                         action: "Win",
                         lastTile: lastTile,
                         winningHand: winningHand.hand
                     })
+                })
+                win.player.sendEvent('Winning', {
+                    winningPlayer: win.player.identifier,
+                    winningHand: winningHand.hand
                 })
                 this.sendPlayerTiles(win.player)
             }
