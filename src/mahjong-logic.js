@@ -19,31 +19,36 @@ function checkEat(playerTiles, lastTile, playerIndex, discarderIndex) {
     var value = parseInt(lastTile.split("_")[1]);
     var lowerBound = value;
     var upperBound = value;
+    
+    if(suit == 'char' || suit == 'flower') {
+        console.log(`Couldn't eat due to incorrect suit: ${suit}`)
+        return false
+    }
+
     while(true) {
         var nextTile = suit + "_" + (lowerBound - 1).toString()
         if(playerTiles.filter(tile => tile == nextTile).length > 0) {
-            lowerBound--;
+            lowerBound--
         }else {
-            break;
+            break
         }
     }
     while(true) {
         var nextTile = suit + "_" + (upperBound + 1).toString()
         if(playerTiles.filter(tile => tile == nextTile).length > 0) {
-            upperBound++;
+            upperBound++
         }else {
-            break;
+            break
         }
     }
 
     var straightLength = upperBound - lowerBound + 1
     if(straightLength < 3) {
-        console.log("Couldn't eat due to incorrect tiles");
-        return false;
+        console.log("Couldn't eat due to incorrect tiles")
+        return false
     }
 
-    return true;
-    
+    return true
 }
 
 function implementGang(player, lastTile) {
@@ -67,7 +72,14 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     var eatenTiles = listOfSelectedTiles;
     eatenTiles.push(lastTile);
     player.visibleTiles.push(eatenTiles);
-    player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
+
+    var firstIndex = player.tiles.findIndex(listOfSelectedTiles[0])
+    var secondIndex = player.tiles.findIndex(listOfSelectedTiles[1])
+
+    player.tiles.splice(firstIndex, 1)
+    player.tiles.splice(secondIndex, 1)
+    
+    // player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
     console.log("Eat Visible Tiles: " + player.visibleTiles);
     
 }
