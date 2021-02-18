@@ -42,6 +42,9 @@ const app = new Vue({
         gangable: false,
         matchable: false,
         eatable: false,
+
+        //the new tile gotten
+        newTile: null,
         
         activePlayerName: null,
         currentGameId: null,
@@ -303,6 +306,7 @@ const app = new Vue({
                     app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
 
                     if(event.eventData.newTile) {
+                        app.newTile = event.eventData.newTile
                         app.myTiles.push(event.eventData.newTile)
                     }
                     break;
@@ -392,9 +396,6 @@ const app = new Vue({
                 case 'YourTiles':
                     app.updateStatus('got YourTiles')
                     app.myTiles = event.eventData.tiles
-                    break;
-                case 'Win':
-                    app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has won the game! Winning hand is: ' + event.eventData.winningHand)  
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)

@@ -92,7 +92,7 @@ class MahjongGame {
     }
 
     checkWin(player, tile) { //returns boolean of winning or not
-        southernRuleset.checkAllWinConditions(player, tile).winning
+        var winning = southernRuleset.checkAllWinConditions(player, tile)
         
         if(winning.winning) {
             this.otherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
@@ -112,6 +112,7 @@ class MahjongGame {
     }
 
     nextTurn(nextPlayer = null, giveTile = true) {
+        console.log(`going to nextTurn: ${nextPlayer} with giveTile: ${giveTile}`);
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
             this.activePlayer = this.players.indexOf(nextPlayer);
@@ -128,12 +129,13 @@ class MahjongGame {
         var winning = false
 
         if(giveTile) {
-            //before giving the tile, check if the player won
-            winning = this.checkWin(this.players[this.activePlayer], newTile)
-            if(!winning) {
+            console.log(`inside giveTile`);
+            var newTile = this.takeTiles(1)[0];
+            this.players[this.activePlayer].addTile(newTile)
 
-                var newTile = this.takeTiles(1)[0];
-                this.players[this.activePlayer].addTile(newTile)
+            winning = this.checkWin(this.players[this.activePlayer], newTile)
+            console.log(`winning: ${winning}`);
+            if(!winning) {    
                 this.players[this.activePlayer].sendEvent("YourTurn", {
                     newTile: newTile,
                     activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,

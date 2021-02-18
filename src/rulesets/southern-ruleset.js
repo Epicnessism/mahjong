@@ -27,13 +27,16 @@ function checkAllWinConditions(player, winningTile) {
     var sevenPairsWin = sevenPairs(player, winningTile)
 
     if(standardWin.winning) {
-        return standardWin.winningHand
+        console.log(`standardWin winning: ${standardWin}`);
+        return standardWin
     }
     if(thirteenSinglesWin.winning) {
-        return thirteenSinglesWin.winningHand
+        console.log(`thirteenSinglesWin winning: ${thirteenSinglesWin}`);
+        return thirteenSinglesWin
     }
     if(sevenPairsWin.winning) {
-        return sevenPairsWin.winningHand
+        console.log(`sevenPairsWin winning: ${sevenPairsWin}`);
+        return sevenPairsWin
     }
     return false
     //alternate code but looks terrible and probably wont work in the future
@@ -65,7 +68,10 @@ function standard(player, winningTile = null) {
     if (charResponse) {
         winningHand.concat(charResponse)
     } else {
-        return false
+        return {
+            winning: false,
+            hand: winningHand
+        }
     }
     // recursiveCharacterTiles(characterTiles, winningHand) ? winningHand.concat(charResponse) : false??
 
