@@ -47,6 +47,22 @@ api.use(CookieSession({
 }));
 
 
+//handleEmpty Games
+function killEmptyGames() {
+    // const object = {'a': 1, 'b': 2, 'c' : 3};
+    for (const [gameId, gameObject] of Object.entries(games)) {
+        console.log(`gameID: ${gameId}`)
+        if (gameObject.players.filter( player => player.ws != null).length == 0) {
+            //kill game
+            
+        }
+    }
+}
+
+setInterval(function() {
+    console.log(`running kill empty games...`);
+    killEmptyGames()
+}, 60000)
 
 //ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
