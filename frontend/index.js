@@ -288,12 +288,14 @@ const app = new Vue({
         },
         handleEvent(event) {
             switch(event.eventName) {
-                case 'GameStart': 
-                    app.updateStatus('Game starting...');
-                    app.waitingForPlayers = false;
+                case 'GameState': 
+                    app.updateStatus('Game State updated...');
                     app.myTiles = event.eventData.tiles;
                     app.players = event.eventData.players;
                     app.activePlayerName = event.eventData.activePlayerName;
+                    if(app.players.length == 4 && app.waitingForPlayers) {
+                        app.waitingForPlayers = false
+                    }
                     break;
                 case 'YourTurn':
                     app.activeTile = null;

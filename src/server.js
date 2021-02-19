@@ -334,6 +334,9 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     } else {
         console.log(`already in progress or finished`);
         //TODO something about sending an event to populate the game state again for the rejoined player
+        game.players.forEach( player => {
+            game.sendGameStateForPlayer(player)
+        })
     }
 });
 

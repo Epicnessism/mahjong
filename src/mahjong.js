@@ -91,31 +91,42 @@ class MahjongGame {
         this.stateOfGame = gameStates.inProgress
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13));
-            var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
-                return {
-                    playerIdentifier: otherPlayer.identifier
-                }
-            });
-            var allPlayers = this.players.map(player => {
-                return {
-                    playerIdentifier: player.identifier
-                }
-            });
-            // console.log(this.getPlayerOfIndex(this.activePlayer).identifier)
-            player.sendEvent('GameStart', {
-                tiles: player.tiles,
-                players: allPlayers,
-                activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
-                otherPlayers: otherPlayers
-            });
+            this.sendGameStateForPlayer(player)
             // //send all visible tiles at beginning of game too
             // this.sendAllVisibleTiles();
-        });
+        })
         this.nextTurn();
+    }
+
+    sendGameStateForPlayer(player) {
+        var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
+            return {
+                playerIdentifier: otherPlayer.identifier
+            }
+        });
+        var allPlayers = this.players.map(player => {
+            return {
+                playerIdentifier: player.identifier
+            }
+        });
+        // console.log(this.getPlayerOfIndex(this.activePlayer).identifier)
+        player.sendEvent('GameState', {
+            tiles: player.tiles,
+            players: allPlayers,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+            otherPlayers: otherPlayers
+        });
+        this.sendAllVisibleTiles()
+        this.sendAllDiscardedTiles()
+
     }
 
     getPlayerOfIndex(playerIndex) {
         return this.players[playerIndex]
+    }
+
+    getPlayerByName(playerName) {
+        return this.players.filter( player => player.identifier == playerName)[0]
     }
 
     checkWin(player, tile) { //returns boolean of winning or not
