@@ -73,7 +73,7 @@ function killEmptyGames() {
 setInterval(function() {
     console.log(`running kill empty games...`);
     killEmptyGames()
-}, 10000)
+}, 6000000)
 
 //ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
@@ -101,13 +101,26 @@ api.post('/createGame', (req,res,next) => {
 
 api.post('/joinGame/:gameId', (req,res,next)=> {
     console.log("Player " + req.session.username + " joined game " + req.params.gameId)
-    var newPlayer = new Player(req.session.username)
+    
     var foundGame = games.filter( game => game.gameId == req.params.gameId)[0]
-    // console.log(games.forEach( game => console.log(game) ));
-    newPlayer.currentGame = foundGame
-    foundGame.addPlayer(newPlayer)
+    
+    if (foundGame == undefined) {
+        return next(createError(404, "Game doesn't exist"))
+    }
 
+    if (foundGame.players.filter(player => player.identifier == req.session.username).length == 1) {
+        //they were already apart of this game, rejoin them
+        //set the ws connection again here somehow? or just create a new playerobject?
+    } else {
+        //they are a new player joining, add them to the game queue
+        var newPlayer = new Player(req.session.username)
+        foundGame.addPlayer(newPlayer)
+        newPlayer.currentGame = foundGame
+    }
+    console.log(`before setting session gameId: ${req.session.currentGameId}`);
     req.session.currentGameId = req.params.gameId
+    console.log(`after setting session gameId: ${req.session.currentGameId}`);
+
     return res.status(200).json({
         message: "Successfully joined the game",
         gameId: req.params.gameId
@@ -313,10 +326,14 @@ api.use(function(err, req, res, next) {
 
 api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
-    games.filter( game => game.gameId == req.session.currentGameId)[0].players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
-
-    if(games.filter( game => game.gameId == req.session.currentGameId)[0].players.length == 4) {
-        games.filter( game => game.gameId == req.session.currentGameId)[0].start()
+    var game = games.filter( game => game.gameId == req.session.currentGameId)[0]
+    game.players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
+    console.log(`soemthing amasdinadslk;gna alk; ja;eha;fkldsf`);
+    if(game.players.length == 4 && game.stateOfGame == "Waiting For Players") {
+        game.start()
+    } else {
+        console.log(`already in progress or finished`);
+        //TODO something about sending an event to populate the game state again for the rejoined player
     }
 });
 

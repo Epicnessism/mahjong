@@ -15,6 +15,13 @@ const tileSuitSetUnique = dotTiles.concat(bambooTiles).concat(tenkTiles).concat(
 const tileSetFullnoFlowers = tileSuitSetUnique.concat(tileSuitSetUnique).concat(tileSuitSetUnique).concat(tileSuitSetUnique);
 const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flowerTiles);
 
+// const gameStates = new Set(["waitingForPlayers", "In-Progress", "Finished"])
+const gameStates = {
+     waitingForPlayers: "Waiting For Players",
+     inProgress: "In-Progress",
+     finished: "Finished"
+}
+
 
 class MahjongGame {
     constructor(gameId, tileSet='no-flowers', ruleset='southernRuleset') {
@@ -26,6 +33,7 @@ class MahjongGame {
 
         this.players = [];
         this.joinedPlayers = 0;
+        this.stateOfGame = gameStates.waitingForPlayers
 
         this.activePlayer = 0;
 
@@ -80,6 +88,7 @@ class MahjongGame {
 
     start() {
         console.log("New game starting");
+        this.stateOfGame = gameStates.inProgress
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13));
             var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
@@ -123,6 +132,7 @@ class MahjongGame {
                 winningPlayer: this.players[this.activePlayer].identifier,
                 winningHand: winning.winningHand
             })
+            this.stateOfGame = gameStates.finished
             return true
         } else {
             return false

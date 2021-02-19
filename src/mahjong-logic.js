@@ -73,8 +73,8 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     eatenTiles.push(lastTile);
     player.visibleTiles.push(eatenTiles);
 
-    var firstIndex = player.tiles.findIndex(listOfSelectedTiles[0])
-    var secondIndex = player.tiles.findIndex(listOfSelectedTiles[1])
+    var firstIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[0])
+    var secondIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[1])
 
     player.tiles.splice(firstIndex, 1)
     player.tiles.splice(secondIndex, 1)
