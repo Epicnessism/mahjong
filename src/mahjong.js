@@ -25,6 +25,7 @@ class MahjongGame {
         // this.mahjongLogic = mahjongLogic;
 
         this.players = [];
+        this.joinedPlayers = 0;
 
         this.activePlayer = 0;
 
@@ -40,6 +41,23 @@ class MahjongGame {
 
     addPlayer(playerObject) {
         this.players.push(playerObject)
+        this.joinedPlayers++
+    }
+
+    allPlayersJoined() {
+        return this.joinedPlayers - this.players.length == 0
+    }
+
+    noActivePlayersConnected() {
+        return this.joinedPlayers == 0
+    }
+
+    removePlayer(playerName) {
+        //TODO actaully remove the player from the game
+    }
+
+    playerDisconnected() {
+        this.joinedPlayers--
     }
 
     get tilesLeft() {

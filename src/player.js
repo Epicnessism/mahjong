@@ -22,6 +22,7 @@ class Player {
 
     handleClose() {
         console.log('player ' + this.identifier + ' disconnected!');
+        this.currentGame.playerDisconnected()
         this.ws = null
     }
 

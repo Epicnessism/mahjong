@@ -15,7 +15,7 @@ const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
 
 //nobody actually knows if lists are threadsafe in node
 waitingPlayers = [];
-games = {} //{gameId: gameObject}
+games = [] //{gameId: gameObject}
 
 //todo AWS CONFIG STUFF...........organize this
 AWS.config.update({
@@ -49,20 +49,31 @@ api.use(CookieSession({
 
 //handleEmpty Games
 function killEmptyGames() {
-    // const object = {'a': 1, 'b': 2, 'c' : 3};
-    for (const [gameId, gameObject] of Object.entries(games)) {
-        console.log(`gameID: ${gameId}`)
-        if (gameObject.players.filter( player => player.ws != null).length == 0) {
-            //kill game
-            
+    console.log(`games before pruning: ${games.length}`);
+
+    var gamesToDelete = [];
+    games.forEach( game => {
+        console.log(`gamePlayers: ${game.players.length}`)
+        console.log(`joinedPlayers: ${game.joinedPlayers}`)
+        if(game.joinedPlayers == 0) {
+            gamesToDelete.push(game)
         }
-    }
+        // if (game.players != undefined && game.players.filter( player => { player.ws != null}).length > 1) {
+        //     gamesToDelete.push(game)
+        // }
+    })
+
+    gamesToDelete.forEach( gameToDelete => {
+        console.log(`gameToDelete: ${gameToDelete}`);
+        games.splice(games.findIndex( game => game.gameId == gameToDelete.gameId), 1)
+    })
+    console.log(`games after pruning: ${games.length}`);
 }
 
 setInterval(function() {
     console.log(`running kill empty games...`);
     killEmptyGames()
-}, 60000)
+}, 10000)
 
 //ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
@@ -73,9 +84,9 @@ api.get('/currentUser', (req, res) => {
 });
 
 api.post('/createGame', (req,res,next) => {
-    const newGameId = nanoid()
+    var newGameId = nanoid()
     newGame = new MahjongGame(newGameId)
-    games[newGameId] = newGame
+    games.push(newGame)
 
     var newPlayer = new Player(req.session.username)
     newPlayer.currentGame = newGame
@@ -91,8 +102,10 @@ api.post('/createGame', (req,res,next) => {
 api.post('/joinGame/:gameId', (req,res,next)=> {
     console.log("Player " + req.session.username + " joined game " + req.params.gameId)
     var newPlayer = new Player(req.session.username)
-    newPlayer.currentGame = games[req.params.gameId]
-    games[req.params.gameId].addPlayer(newPlayer)
+    var foundGame = games.filter( game => game.gameId == req.params.gameId)[0]
+    // console.log(games.forEach( game => console.log(game) ));
+    newPlayer.currentGame = foundGame
+    foundGame.addPlayer(newPlayer)
 
     req.session.currentGameId = req.params.gameId
     return res.status(200).json({
@@ -165,7 +178,7 @@ api.post('/startGame/:gameId', (req,res,next)=> {
     const gameId = req.params.gameId
     if(req.session.currentGameId == gameId) {
         //TODO wrap this in a try block later
-        games[req.params.gameId].start()
+        games.filter(game => game.gameId == req.params.gameId )[0].start()
         return res.status(201).json({
             message: "Game successfully started"
         })
@@ -258,20 +271,19 @@ api.get('/getCurrentGame', (req,res,next)=> {
 
     //stackoverflow reference found here: NOT TESTED
     //https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
-    games.some( game => {
-        if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
-            currentGame = game;
-            return true; //return true causes some to stop iterating, optimizing response time
-        }
-    })
-
-    //unoptimized method as a backup, delete later if don't need
-    // games.forEach( game => {
+    // games.some( game => {
     //     if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
     //         currentGame = game;
-    //         break;
+    //         return true; //return true causes some to stop iterating, optimizing response time
     //     }
     // })
+
+    //unoptimized method as a backup, delete later if don't need
+    games.forEach( game => {
+        if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
+            currentGame = game
+        }
+    })
 
     if (currentGame) {
         res.status(200).json({currentGame})
@@ -301,10 +313,10 @@ api.use(function(err, req, res, next) {
 
 api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
-    games[req.session.currentGameId].players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
-    
-    if(games[req.session.currentGameId].players.length >= 4) {
-        games[req.session.currentGameId].start()
+    games.filter( game => game.gameId == req.session.currentGameId)[0].players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
+
+    if(games.filter( game => game.gameId == req.session.currentGameId)[0].players.length == 4) {
+        games.filter( game => game.gameId == req.session.currentGameId)[0].start()
     }
 });
 
