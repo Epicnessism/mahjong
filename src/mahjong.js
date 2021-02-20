@@ -17,9 +17,9 @@ const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flow
 
 // const gameStates = new Set(["waitingForPlayers", "In-Progress", "Finished"])
 const gameStates = {
-     waitingForPlayers: "Waiting For Players",
-     inProgress: "In-Progress",
-     finished: "Finished"
+     waitingForPlayers: "initialized",
+     inProgress: "inProgress",
+     finished: "finished",
 }
 
 

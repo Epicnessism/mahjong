@@ -300,6 +300,44 @@
                             
                             
                         </v-container>
+
+                        <v-row justify="center">
+                            <v-dialog
+                                v-model="gameOver"
+                                persistent
+                                max-width="800"
+                            >
+                                <v-card>
+                                    <v-card-title class="headline">
+                                        you are {{stateOfGame}}!!!
+                                    </v-card-title>
+                                    <v-card-text>
+                                        {{winningHand}}
+                                        <span v-for="tile in winningHand">
+                                            <img v-bind:src="'res/' + tile + '.png'">
+                                        </span>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn
+                                        color="green darken-1"
+                                        text
+                                        @click="exitGame()"
+                                        >
+                                        Exit Game
+                                        </v-btn>
+                                        <v-btn
+                                        color="green darken-1"
+                                        text
+                                        @click=""
+                                        >
+                                        DONT CLICK THIS
+                                        </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+                          </v-row>
+
                     </div>
                 </v-main>
             </v-app>

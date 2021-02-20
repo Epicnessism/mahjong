@@ -74,9 +74,8 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     player.visibleTiles.push(eatenTiles);
 
     var firstIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[0])
-    var secondIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[1])
-
     player.tiles.splice(firstIndex, 1)
+    var secondIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[1])
     player.tiles.splice(secondIndex, 1)
     
     // player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list

@@ -329,7 +329,7 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     var game = games.filter( game => game.gameId == req.session.currentGameId)[0]
     game.players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
     console.log(`soemthing amasdinadslk;gna alk; ja;eha;fkldsf`);
-    if(game.players.length == 4 && game.stateOfGame == "Waiting For Players") {
+    if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()
     } else {
         console.log(`already in progress or finished`);

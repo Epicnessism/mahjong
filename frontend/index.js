@@ -53,8 +53,56 @@ const app = new Vue({
         loadingData: true,
         errored: false,
         
+        //winning stuff
+        stateOfGame: 'somethingHereLol',
+        winningHand: null,
+        gameOver: false
+
     },
     methods: {
+        exitGame: function() {
+            app.socket.close()
+            app.socket = null
+            app.waitingForPlayers = false
+            app.players = [],
+            app.status = 'Waiting for connection...'
+            app.myTiles = []
+            app.myVisibleTiles = []
+            app.myDiscardedTiles = []
+            app.activeTiles = []
+
+            app.yourTurn = false
+            app.waitingForYourCheck = false
+            app.inCheckPhase = false
+            app.activeTile = null
+
+            //v-models for navbar and navdrawer
+            // app.navDrawer = false
+            // app.group = null //no clue what this does
+            // app.autopass = false
+
+            //check phase buttons
+            app.winnable = false
+            app.gangable = false
+            app.matchable = false
+            app.eatable = false
+
+            //the new tile gotten
+            app.newTile = null
+            
+            app.activePlayerName = null
+            app.currentGameId = null
+            app.joinGameInputField = null
+
+            app.loadingData = true
+            app.errored = false
+            
+            //winning stuff
+            app.stateOfGame = 'somethingHereLol'
+            app.winningHand = null
+            app.gameOver = false
+
+        },
         updatePlayerStatus: function(username, statusType) {
             console.log(username + " : " + statusType)
 
@@ -401,9 +449,15 @@ const app = new Vue({
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
+                    app.stateOfGame = 'winning'
+                    app.winningHand = event.eventData.winningHand
+                    app.gameOver = true
                     break;
                 case 'Losing':
                     app.updateStatus(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`)
+                    app.stateOfGame = 'losing'
+                    app.gameOver = true
+                    app.winningHand = event.eventData.winningHand
                     break;
             }
         }
