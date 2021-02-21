@@ -1,6 +1,6 @@
 class Player {
-    constructor(identifier) {
-        this.identifier = identifier;
+    constructor(username) {
+        this.username = username;
         this.ws = null;
         this.activeTurn = false;
         this.visibleTiles = [];
@@ -21,14 +21,14 @@ class Player {
     }
 
     handleClose() {
-        console.log('player ' + this.identifier + ' disconnected!');
+        console.log('player ' + this.username + ' disconnected!');
         this.currentGame.playerDisconnected()
         this.ws = null
     }
 
     handleRecv(data) {
         if(data.eventName != "KeepAlive") {
-            console.log('player ' + this.identifier + ' got data ' + data);
+            console.log('player ' + this.username + ' got data ' + data);
         }
         this.currentGame.handleClientResponse(this, JSON.parse(data));
     }

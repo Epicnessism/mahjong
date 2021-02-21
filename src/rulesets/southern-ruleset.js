@@ -18,7 +18,7 @@ const thirteenSinglesUniqueSet = [
 const suits = ["tenk","dot", "bamboo"]
 
 // returns a boolean value for now???
-//actually it will probably need to return an identifier for future meta-play where
+//actually it will probably need to return an username for future meta-play where
 //winning multiple rounds and depending on which of the win-cons you meet, can change score (money)
 //multiplier, like if you win 2 in a row as host a x or y, with the thirteenSingles its like x26 or something lol
 function checkAllWinConditions(player, winningTile) {

@@ -106,7 +106,7 @@ const app = new Vue({
         updatePlayerStatus: function(username, statusType) {
             console.log(username + " : " + statusType)
 
-            player = app.players.filter(p => p.playerIdentifier == username)[0];
+            player = app.players.filter(p => p.username == username)[0];
 
             if(statusType == "clear") {
                 player.statusColor = "gray"
@@ -119,7 +119,7 @@ const app = new Vue({
         },
         clearAllPlayerStatuses() {
             app.players.forEach(player => {
-                app.updatePlayerStatus(player.playerIdentifier, "clear")
+                app.updatePlayerStatus(player.username, "clear")
             })
         },
         joinGame: function() {
@@ -270,8 +270,8 @@ const app = new Vue({
         activePlayer: function(player) {            
             console.log("activePlayerName: " + this.activePlayerName);
             return { 
-                activePlayerStyle : player.playerIdentifier == this.activePlayerName,
-                notActivePlayerStyle : player.playerIdentifier != this.activePlayerName,
+                activePlayerStyle : player.username == this.activePlayerName,
+                notActivePlayerStyle : player.username != this.activePlayerName,
              }            
         },        
         clickTile: function(tile) {
@@ -286,8 +286,8 @@ const app = new Vue({
                 this.yourTurn = false;
                 document.title = base_title;
                 app.players.forEach(player => {
-                    if(player.playerIdentifier != app.username) {
-                        app.updatePlayerStatus(player.playerIdentifier, "waitingCheck")
+                    if(player.username != app.username) {
+                        app.updatePlayerStatus(player.username, "waitingCheck")
                     }
                 })
             } else if(this.inCheckPhase) {
@@ -368,8 +368,8 @@ const app = new Vue({
                     document.title = '(*)' + base_title;
 
                     app.players.forEach(player => {
-                        if(player.playerIdentifier != app.activePlayerName) {
-                            app.updatePlayerStatus(player.playerIdentifier, "waitingCheck")
+                        if(player.username != app.activePlayerName) {
+                            app.updatePlayerStatus(player.username, "waitingCheck")
                         }
                     })
 
@@ -391,7 +391,7 @@ const app = new Vue({
                             console.log('Got other played tilies')
                         }
                         console.log(playerTiles.tiles);
-                        app.players.filter(player => player.playerIdentifier == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
+                        app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
                     });
                     break;
                 case 'DiscardedTilesUpdate':
@@ -403,7 +403,7 @@ const app = new Vue({
                             console.log('Got my own played tiles');
                             app.myDiscardedTiles = playerTiles.tiles
                         }
-                        app.players.filter(player => player.playerIdentifier == playerTiles.player)[0].discardedTiles = playerTiles.tiles
+                        app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
                     })
                     break;
                 case 'NextTurnNotYou':

@@ -108,7 +108,7 @@ api.post('/joinGame/:gameId', (req,res,next)=> {
         return next(createError(404, "Game doesn't exist"))
     }
 
-    if (foundGame.players.filter(player => player.identifier == req.session.username).length == 1) {
+    if (foundGame.players.filter(player => player.username == req.session.username).length == 1) {
         //they were already apart of this game, rejoin them
         //set the ws connection again here somehow? or just create a new playerobject?
     } else {
@@ -285,7 +285,7 @@ api.get('/getCurrentGame', (req,res,next)=> {
     //stackoverflow reference found here: NOT TESTED
     //https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
     // games.some( game => {
-    //     if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
+    //     if (game.players.filter( player => player.username == req.session.username) ) { //if game has this username
     //         currentGame = game;
     //         return true; //return true causes some to stop iterating, optimizing response time
     //     }
@@ -293,7 +293,7 @@ api.get('/getCurrentGame', (req,res,next)=> {
 
     //unoptimized method as a backup, delete later if don't need
     games.forEach( game => {
-        if (game.players.filter( player => player.identifier == req.session.username) ) { //if game has this username
+        if (game.players.filter( player => player.username == req.session.username) ) { //if game has this username
             currentGame = game
         }
     })
@@ -327,7 +327,7 @@ api.use(function(err, req, res, next) {
 api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
     var game = games.filter( game => game.gameId == req.session.currentGameId)[0]
-    game.players.filter(player => player.identifier == req.session.username)[0].setWsConnection(ws)
+    game.players.filter(player => player.username == req.session.username)[0].setWsConnection(ws)
     console.log(`soemthing amasdinadslk;gna alk; ja;eha;fkldsf`);
     if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()

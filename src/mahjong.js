@@ -101,19 +101,19 @@ class MahjongGame {
     sendGameStateForPlayer(player) {
         var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
             return {
-                playerIdentifier: otherPlayer.identifier
+                username: otherPlayer.username
             }
         });
         var allPlayers = this.players.map(player => {
             return {
-                playerIdentifier: player.identifier
+                username: player.username
             }
         });
-        // console.log(this.getPlayerOfIndex(this.activePlayer).identifier)
+        // console.log(this.getPlayerOfIndex(this.activePlayer).username)
         player.sendEvent('GameState', {
             tiles: player.tiles,
             players: allPlayers,
-            activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
             otherPlayers: otherPlayers
         });
         this.sendAllVisibleTiles()
@@ -126,7 +126,7 @@ class MahjongGame {
     }
 
     getPlayerByName(playerName) {
-        return this.players.filter( player => player.identifier == playerName)[0]
+        return this.players.filter( player => player.username == playerName)[0]
     }
 
     checkWin(player, tile) { //returns boolean of winning or not
@@ -135,12 +135,12 @@ class MahjongGame {
         if(winning.winning) {
             this.otherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
                 otherPlayer.sendEvent("Losing", {
-                    winningPlayer: this.players[this.activePlayer].identifier,
+                    winningPlayer: this.players[this.activePlayer].username,
                     winningHand: winning.winningHand
                 })
             })
             this.players[this.activePlayer].sendEvent("Winning", {
-                winningPlayer: this.players[this.activePlayer].identifier,
+                winningPlayer: this.players[this.activePlayer].username,
                 winningHand: winning.winningHand
             })
             this.stateOfGame = gameStates.finished
@@ -177,7 +177,7 @@ class MahjongGame {
             if(!winning) {    
                 this.players[this.activePlayer].sendEvent("YourTurn", {
                     newTile: newTile,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
                 })
             }
         } else {
@@ -187,7 +187,7 @@ class MahjongGame {
 
                 this.players[this.activePlayer].sendEvent("YourTurn", {
                     newTile: null,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
                 })
             }
         }
@@ -195,9 +195,9 @@ class MahjongGame {
         if(!winning) {
             this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
                 otherPlayer.sendEvent('NextTurnNotYou', {
-                    activePlayerID: this.players[this.activePlayer].identifier,
+                    activePlayerID: this.players[this.activePlayer].username,
                     tiles: otherPlayer.tiles,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).identifier,
+                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
                 })})
         }
     }
@@ -210,7 +210,7 @@ class MahjongGame {
                     console.log('Nonactive player tried to discard tile!');
                     return
                 }
-                console.log('Player ' + player.identifier + ' has discarded ' + event.eventData.tile);
+                console.log('Player ' + player.username + ' has discarded ' + event.eventData.tile);
 
                 player.removeTile(event.eventData.tile);
                 player.addTileToDiscard(event.eventData.tile);
@@ -228,7 +228,7 @@ class MahjongGame {
             
             case 'UpdateTileOrder':
                 player.tiles = event.eventData.tiles
-                console.log(player.identifier + " just updated their tiles to: " + player.tiles);
+                console.log(player.username + " just updated their tiles to: " + player.tiles);
                 break;
 
             case 'Win':
@@ -245,7 +245,7 @@ class MahjongGame {
 
         var visibleTilesMap =  this.players.map(curPlayer => {
             return  {
-                player: curPlayer.identifier,
+                player: curPlayer.username,
                 tiles: curPlayer.visibleTiles
             }
         });
@@ -258,7 +258,7 @@ class MahjongGame {
     sendAllDiscardedTiles() {
         var discardedTilesMap = this.players.map( curPlayer => {
             return {
-                player: curPlayer.identifier,
+                player: curPlayer.username,
                 tiles: curPlayer.discardedTiles
             }
         })
@@ -311,7 +311,7 @@ class MahjongGame {
 
         this.allOtherPlayers(player).forEach(otherPlayer => otherPlayer.sendEvent('OtherPlayerRespondedToCheck', {
             checkAction: event.eventName,
-            otherPlayerID: player.identifier
+            otherPlayerID: player.username
         }))
 
         if (this.checkResponses.length < 3) {
@@ -334,14 +334,14 @@ class MahjongGame {
             if(winningHand.winning) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
                     otherPlayer.sendEvent('Losing', {
-                        actingPlayerID: win.player.identifier,
+                        actingPlayerID: win.player.username,
                         action: "Win",
                         lastTile: lastTile,
                         winningHand: winningHand.hand
                     })
                 })
                 win.player.sendEvent('Winning', {
-                    winningPlayer: win.player.identifier,
+                    winningPlayer: win.player.username,
                     winningHand: winningHand.hand
                 })
                 this.sendPlayerTiles(win.player)
@@ -353,7 +353,7 @@ class MahjongGame {
             mahjongLogic.implementGang(gang.player, lastTile);
             this.allOtherPlayers(gang.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
-                    actingPlayerID: gang.player.identifier,
+                    actingPlayerID: gang.player.username,
                     action: "Gang",
                     lastTile: lastTile,
                 })
@@ -374,7 +374,7 @@ class MahjongGame {
             mahjongLogic.implementMatch(match.player, lastTile);
             this.allOtherPlayers(match.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
-                    actingPlayerID: match.player.identifier,
+                    actingPlayerID: match.player.username,
                     action: "Matched",
                     lastTile: lastTile,
                     //are we passing stuff here or no?
@@ -390,7 +390,7 @@ class MahjongGame {
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
             this.allOtherPlayers(eat.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
-                    actingPlayerID: eat.player.identifier,
+                    actingPlayerID: eat.player.username,
                     action: "Ate",
                     lastTile: lastTile,
                 })
@@ -421,8 +421,8 @@ class MahjongGame {
         })
     }
 
-    findByPlayerID(identifier) {
-        return this.players.filter(player => player.identifier == identifier)[0];
+    findByPlayerID(username) {
+        return this.players.filter(player => player.username == username)[0];
     }
 
     allOtherPlayers(excludedPlayer) {
