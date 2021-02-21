@@ -47,9 +47,11 @@ function checkAllWinConditions(player, winningTile) {
 //x1
 function standard(player, winningTile = null) {
     var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
+    console.log(`inHandTiles: ${inHandTiles}`);
     if(winningTile != null) {
         inHandTiles.push(winningTile)
     }
+    console.log(`inHandTiles after winningTile: ${inHandTiles}`);
     
     var visibleTiles = Array.from(player.visibleTiles); //shallow copy this too
 
@@ -65,6 +67,7 @@ function standard(player, winningTile = null) {
     //check characters tiles
     var characterTiles = inHandTiles.filter( tile => tile.split("_")[0] == "char")
     var charResponse = recursiveCharacterTiles(characterTiles, winningHand)
+    console.log(`charResponse: ${charResponse}`);
     if (charResponse) {
         winningHand.concat(charResponse)
     } else {
@@ -81,7 +84,7 @@ function standard(player, winningTile = null) {
     var dotTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "dot").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var bambooTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "bamboo").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var tileValues = [tenkTileValues, dotTileValues, bambooTileValues]
-    console.log(tileValues);
+    console.log(`tileValues: `, tileValues);
     
 
     //calculate sum values of each suit
@@ -89,7 +92,7 @@ function standard(player, winningTile = null) {
     listOfRemainders.push(tenkTileValues.length > 0 ? tenkTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
     listOfRemainders.push(dotTileValues.length > 0 ? dotTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
     listOfRemainders.push(bambooTileValues.length > 0 ? bambooTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
-    console.log("listOfRemainders: ", listOfRemainders);
+    console.log(`listOfRemainders: `, listOfRemainders);
     //find applicable pairs to check
     var pairsToCheck = []
     for(i=0; i < listOfRemainders.length; i++) {
@@ -102,7 +105,7 @@ function standard(player, winningTile = null) {
                 pairsToCheck = [1,4,7]
             }
         }
-        
+        console.log(`pairsToCheck: `, pairsToCheck);
         findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
             
         if (removeSets(i, tileValues, winningHand)) { //returns true if tileValues is empty

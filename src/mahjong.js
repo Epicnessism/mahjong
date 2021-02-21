@@ -134,7 +134,7 @@ class MahjongGame {
         var winning = southernRuleset.checkAllWinConditions(player, tile)
         
         if(winning.winning) {
-            this.otherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
+            this.allOtherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
                 otherPlayer.sendEvent("Losing", {
                     winningPlayer: this.players[this.activePlayer].username,
                     winningHand: winning.winningHand
@@ -172,10 +172,10 @@ class MahjongGame {
         if(giveTile) {
             newTile = this.takeTiles(1)[0];
             newActivePlayer.addTile(newTile)
-            winning = this.checkWin(newActivePlayer, newTile)
-        } else {
-            winning = this.checkWin(newActivePlayer)   
         }
+
+        winning = this.checkWin(newActivePlayer)
+
         if(!winning) {
             newActivePlayer.sendEvent("YourTurn", {
                 newTile: newTile,
@@ -191,32 +191,31 @@ class MahjongGame {
     }
 
     handleClientResponse(player, event) {
-        console.log('Handling input event ' + event);
+        if(event.eventName != "KeepAlive") {
+            console.log('player ' + this.username + ' got event ' + event);
+        }
+        // console.log('Handling input event ' + event);
         switch(event.eventName) {
             case 'DiscardTile':
                 if(!player.activeTurn) {
-                    console.log('Nonactive player tried to discard tile!');
                     return
                 }
-                console.log('Player ' + player.username + ' has discarded ' + event.eventData.tile);
+                player.removeTile(event.eventData.tile)
+                player.addTileToDiscard(event.eventData.tile)
+                this.discardedTiles.push(event.eventData.tile)
 
-                player.removeTile(event.eventData.tile);
-                player.addTileToDiscard(event.eventData.tile);
-                this.sendAllDiscardedTiles();
-                this.discardedTiles.push(event.eventData.tile);
                 //do the check phase
+                this.sendGameStateForPlayer(player)
                 this.allOtherPlayers(player).forEach(otherPlayer => {
                     otherPlayer.sendEvent('CheckDiscardedTile', {
                         tile: event.eventData.tile,
                         possibleActions: this.checkEligibileDiscardResponses(otherPlayer)
-                    });
-
-                });
-                break;
+                    })
+                })
+                break
             
             case 'UpdateTileOrder':
                 player.tiles = event.eventData.tiles
-                console.log(player.username + " just updated their tiles to: " + player.tiles);
                 break;
 
             case 'Win':
