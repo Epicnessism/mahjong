@@ -51,14 +51,11 @@ api.use(CookieSession({
     keys: ['key1', 'key2']
 }));
 
-//set games at the beginning to pass games into mahjong-utils.....
-// mahjongUtil.setGames(games)
-
 setInterval(function() {
     console.log(`running kill empty games...`);
     mahjongUtil.setGames(games)
     mahjongUtil.killEmptyGames()
-}, 5000)
+}, 6000000) //100 minutes
 
 //ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
