@@ -94,12 +94,10 @@ class MahjongGame {
         console.log("New game starting");
         this.stateOfGame = gameStates.inProgress
         this.players.forEach(player => {
-            player.setTiles(this.takeTiles(13));
+            player.setTiles(this.takeTiles(13))
             this.sendGameStateForPlayer(player)
-            // //send all visible tiles at beginning of game too
-            // this.sendAllVisibleTiles();
         })
-        this.nextTurn();
+        this.nextTurn()
     }
 
     sendGameStateForPlayer(player) {
@@ -120,9 +118,8 @@ class MahjongGame {
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
             otherPlayers: otherPlayers
         });
-        this.sendAllVisibleTiles()
-        this.sendAllDiscardedTiles()
-
+        this.sendAllVisibleTilesToPlayer(player)
+        this.sendAllDiscardedTilesToPlayer(player)
     }
 
     getPlayerOfIndex(playerIndex) {
@@ -155,7 +152,6 @@ class MahjongGame {
     }
 
     nextTurn(nextPlayer = null, giveTile = true) {
-        console.log(`going to nextTurn: ${nextPlayer} with giveTile: ${giveTile}`);
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
             this.activePlayer = this.players.indexOf(nextPlayer);
@@ -166,40 +162,28 @@ class MahjongGame {
                 this.activePlayer++;
             }
         }
-        this.players[this.activePlayer].activeTurn = true;
+        var newActivePlayer = this.players[this.activePlayer]
+        newActivePlayer.activeTurn = true;
 
         
         var winning = false
+        var newTile = null
 
         if(giveTile) {
-            console.log(`inside giveTile`);
-            var newTile = this.takeTiles(1)[0];
-            this.players[this.activePlayer].addTile(newTile)
-
-            winning = this.checkWin(this.players[this.activePlayer], newTile)
-            console.log(`winning: ${winning}`);
-            if(!winning) {    
-                this.players[this.activePlayer].sendEvent("YourTurn", {
-                    newTile: newTile,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-                })
-            }
+            newTile = this.takeTiles(1)[0];
+            newActivePlayer.addTile(newTile)
+            winning = this.checkWin(newActivePlayer, newTile)
         } else {
-            //before giving the tile, check if the player won
-            winning = this.checkWin(this.players[this.activePlayer])
-            if(!winning) {
-
-                this.players[this.activePlayer].sendEvent("YourTurn", {
-                    newTile: null,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-                })
-            }
+            winning = this.checkWin(newActivePlayer)   
         }
-
         if(!winning) {
-            this.allOtherPlayers(this.players[this.activePlayer]).forEach( otherPlayer => {
+            newActivePlayer.sendEvent("YourTurn", {
+                newTile: newTile,
+                activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
+            })
+            this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
                 otherPlayer.sendEvent('NextTurnNotYou', {
-                    activePlayerID: this.players[this.activePlayer].username,
+                    activePlayerID: newActivePlayer.username,
                     tiles: otherPlayer.tiles,
                     activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
                 })})
@@ -245,30 +229,24 @@ class MahjongGame {
         }
     }
 
-    sendAllVisibleTiles() {
-
+    sendAllVisibleTilesToPlayer(player) {
         var visibleTilesMap =  this.players.map(curPlayer => {
             return  {
                 player: curPlayer.username,
                 tiles: curPlayer.visibleTiles
             }
         });
-
-        this.players.forEach(player => {
-            player.sendEvent('VisibleTilesUpdate', visibleTilesMap);
-        })
+        player.sendEvent('VisibleTilesUpdate', visibleTilesMap);
     }
 
-    sendAllDiscardedTiles() {
+    sendAllDiscardedTilesToPlayer(player) {
         var discardedTilesMap = this.players.map( curPlayer => {
             return {
                 player: curPlayer.username,
                 tiles: curPlayer.discardedTiles
             }
         })
-        this.players.forEach(player => {
-            player.sendEvent('DiscardedTilesUpdate', discardedTilesMap)
-        })
+        player.sendEvent('DiscardedTilesUpdate', discardedTilesMap)
     }
 
     checkEligibileDiscardResponses(player) {
@@ -413,8 +391,11 @@ class MahjongGame {
             })
         }
         
-        this.sendAllVisibleTiles();
-        this.sendAllDiscardedTiles();
+        //just send the entire gamestate, this wraps visible and discarded tiles
+        this.players.forEach(player => {
+            this.sendGameStateForPlayer(player)
+        })
+        
         this.nextTurn(nextPlayer, giveNextPlayerTile);
     }
 

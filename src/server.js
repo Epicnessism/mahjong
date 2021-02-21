@@ -267,17 +267,6 @@ api.get('/signOut', (req, res, next) => {
 api.get('/getCurrentGame', (req,res,next)=> {
     console.log(req.session);
     var currentGame = null;
-
-    //stackoverflow reference found here: NOT TESTED
-    //https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
-    // games.some( game => {
-    //     if (game.players.filter( player => player.username == req.session.username) ) { //if game has this username
-    //         currentGame = game;
-    //         return true; //return true causes some to stop iterating, optimizing response time
-    //     }
-    // })
-
-    //unoptimized method as a backup, delete later if don't need
     games.forEach( game => {
         if (game.players.filter( player => player.username == req.session.username) ) { //if game has this username
             currentGame = game
@@ -317,8 +306,6 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()
     } else {
-        console.log(`already in progress or finished`);
-        //TODO something about sending an event to populate the game state again for the rejoined player
         game.players.forEach( player => {
             game.sendGameStateForPlayer(player)
         })
