@@ -13,9 +13,14 @@ const { customAlphabet  } = require("nanoid")
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)
 
 
+//custom imports?
+const mahjongUtil = require('./mahjong-util')
+
+
 //nobody actually knows if lists are threadsafe in node
 waitingPlayers = [];
-games = [] //{gameId: gameObject}
+// var games = mahjongUtil.games //{gameId: gameObject}
+var games = []
 
 //todo AWS CONFIG STUFF...........organize this
 AWS.config.update({
@@ -46,34 +51,14 @@ api.use(CookieSession({
     keys: ['key1', 'key2']
 }));
 
-
-//handleEmpty Games
-function killEmptyGames() {
-    console.log(`games before pruning: ${games.length}`);
-
-    var gamesToDelete = [];
-    games.forEach( game => {
-        console.log(`gamePlayers: ${game.players.length}`)
-        console.log(`joinedPlayers: ${game.joinedPlayers}`)
-        if(game.joinedPlayers == 0) {
-            gamesToDelete.push(game)
-        }
-        // if (game.players != undefined && game.players.filter( player => { player.ws != null}).length > 1) {
-        //     gamesToDelete.push(game)
-        // }
-    })
-
-    gamesToDelete.forEach( gameToDelete => {
-        console.log(`gameToDelete: ${gameToDelete}`);
-        games.splice(games.findIndex( game => game.gameId == gameToDelete.gameId), 1)
-    })
-    console.log(`games after pruning: ${games.length}`);
-}
+//set games at the beginning to pass games into mahjong-utils.....
+// mahjongUtil.setGames(games)
 
 setInterval(function() {
     console.log(`running kill empty games...`);
-    killEmptyGames()
-}, 6000000)
+    mahjongUtil.setGames(games)
+    mahjongUtil.killEmptyGames()
+}, 5000)
 
 //ENDPOINTS BEGIN HERE
 api.get('/currentUser', (req, res) => {
@@ -87,6 +72,7 @@ api.post('/createGame', (req,res,next) => {
     var newGameId = nanoid()
     newGame = new MahjongGame(newGameId)
     games.push(newGame)
+    mahjongUtil.setGames(games)
 
     var newPlayer = new Player(req.session.username)
     newPlayer.currentGame = newGame
@@ -328,7 +314,6 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
     var game = games.filter( game => game.gameId == req.session.currentGameId)[0]
     game.players.filter(player => player.username == req.session.username)[0].setWsConnection(ws)
-    console.log(`soemthing amasdinadslk;gna alk; ja;eha;fkldsf`);
     if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()
     } else {
@@ -340,6 +325,6 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     }
 });
 
-
 api.listen(config.port)
 console.log('Listening for WS and HTTP traffic on port ' + config.port);
+

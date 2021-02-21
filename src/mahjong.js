@@ -1,4 +1,5 @@
 const util = require('./util');
+const mahjongUtil = require('./mahjong-util')
 const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
 
@@ -31,6 +32,8 @@ class MahjongGame {
         // this.ruleset = ruleset;
         // this.mahjongLogic = mahjongLogic;
 
+        this.createdDate = Date.now()
+        console.log(`game created at: ${this.createdDate}`);
         this.players = [];
         this.joinedPlayers = 0;
         this.stateOfGame = gameStates.waitingForPlayers
@@ -66,6 +69,7 @@ class MahjongGame {
 
     playerDisconnected() {
         this.joinedPlayers--
+        mahjongUtil.killEmptyGames()
     }
 
     get tilesLeft() {
