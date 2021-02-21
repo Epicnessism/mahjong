@@ -150,21 +150,25 @@ api.post('/savePreference', (req,res,next)=> {
                 ":prefValue": req.body.preferenceValue,
             },
             ReturnValues:"UPDATED_NEW"
-        };
+        }
 
-        //todo this probably needs to be in a trycatch block lmao
-        docClient.update(insertPreference, function(err, data) {
-            if (err) {
-                console.error(`User failed to update preference ${prefName}. Error JSON:`, JSON.stringify(err, null, 2));
-                next(createError(500, err))
-            } else {
-                console.log(`User ${prefName} preference updated.`)
-                console.log("Added item:", JSON.stringify(data, null, 2));
-                res.status(203).json( {
-                    message: `${prefName} updated successfully`,
-                })
-            }
-        });
+        try {
+            docClient.update(insertPreference, function(err, data) {
+                if (err) {
+                    console.error(`User failed to update preference ${prefName}. Error JSON:`, JSON.stringify(err, null, 2));
+                    next(createError(500, err))
+                } else {
+                    console.log(`User ${prefName} preference updated.`)
+                    console.log("Added item:", JSON.stringify(data, null, 2));
+                    res.status(203).json( {
+                        message: `${prefName} updated successfully`,
+                    })
+                }
+            })
+        } catch(err) {
+            console.log(err)
+            next(err)
+        }
     } else {
         next(createError(400, `${prefName} does not exists!`))
     }
