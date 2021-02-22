@@ -107,27 +107,21 @@ function standard(player, winningTile = null) {
             }
         }
         console.log(`pairsToCheck: `, pairsToCheck);
-        var removedPair = null
+
         if(!removedPairAlready) {
-            removedPair = findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
+            removedPairAlready = findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
         }
-        console.log(`removePair: `, removedPair);
-        // if(removedPair == false) {
-        //     return {
-        //         winning: false,
-        //         hand: winningHand
-        //     }
-        // }
+        console.log(`removedPairAlready: `, removedPairAlready);
         removeSets(i, tileValues, winningHand)
     }
     if( tileValues.filter( suit => suit.length == 0).length == 3) {
-        console.log("winning hand!");
+        console.log("winning hand!: ", winningHand);
         return {
             winning: true,
             hand: winningHand
         }
     } else {
-        console.log("you lying piece of shit!");
+        console.log("you lying piece of shit!: ", winningHand);
         return {
             winning: false,
             hand: winningHand
@@ -160,7 +154,7 @@ function removeSets(i, tileValues, winningHand) {
         //check if there is a match
         if(tileValues[i][0] == tileValues[i][1] && tileValues[i][0] == tileValues[i][2] ) {
             //there is a match
-            winningHand.push(tileValues[i].splice(0,3)) //remove the first 3 elements and add to winning hand
+            winningHand.push(tileValues[i].splice(0,3).map(tileValue => suits[i] + "_" + tileValue)) //remove the first 3 elements and add to winning hand
         } else if (tileValues[i].find(tileValue => tileValue == tileValues[i][0]+1) && tileValues[i].find(tileValue => tileValue == tileValues[i][0]+2) ) {
             //there is a straight
             var straight = []

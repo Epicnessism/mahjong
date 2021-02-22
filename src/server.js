@@ -36,6 +36,7 @@ const saltRounds = 7;
 //end bcrypt config stuff
  
 var path = require('path');
+const { networkInterfaces } = require('os');
 
 console.log('Starting Server...');
 
@@ -74,6 +75,17 @@ api.post('/createGame', (req,res,next) => {
     var newPlayer = new Player(req.session.username)
     newPlayer.currentGame = newGame
     newGame.addPlayer(newPlayer)
+
+    if(req.body.otherPlayerNamesList != null) {
+        req.body.otherPlayerNamesList.forEach(playerName => {
+            var otherPlayer = new Player(playerName)
+            otherPlayer.currentGame = newGame
+            newGame.addPlayer(otherPlayer)
+
+            //send them a response
+            //TODO but now...
+        })
+    }
 
     req.session.currentGameId = newGameId
     console.log("Player " + req.session.username + " created game " + newGameId)

@@ -12,12 +12,13 @@ const app = new Vue({
     }),
     data: {
         signedIn: false,
-        joined: false,
+        
         username: null,
         promptUsername: "",
         password: "",
         showPassword: false,
         
+        joined: false,
         socket: null,
         waitingForPlayers: false,
         players: [],
@@ -63,23 +64,23 @@ const app = new Vue({
         exitGame: function() {
             app.socket.close()
             app.socket = null
-            app.waitingForPlayers = false
-            app.players = [],
+            app.joined = false
             app.status = 'Waiting for connection...'
+
+            this.cleanGameState()
+        },
+        cleanGameState: function() {
+            //Clean Game
+            app.waitingForPlayers = false
+            app.players = []
             app.myTiles = []
             app.myVisibleTiles = []
             app.myDiscardedTiles = []
             app.activeTiles = []
-
             app.yourTurn = false
             app.waitingForYourCheck = false
             app.inCheckPhase = false
             app.activeTile = null
-
-            //v-models for navbar and navdrawer
-            // app.navDrawer = false
-            // app.group = null //no clue what this does
-            // app.autopass = false
 
             //check phase buttons
             app.winnable = false
@@ -92,16 +93,17 @@ const app = new Vue({
             
             app.activePlayerName = null
             app.currentGameId = null
-            app.joinGameInputField = null
-
-            app.loadingData = true
-            app.errored = false
             
             //winning stuff
-            app.stateOfGame = 'somethingHereLol'
+            app.stateOfGame = null
             app.winningHand = null
             app.gameOver = false
-
+        },
+        nextGame: function() {
+            var otherPlayerUsernames = app.players.map( player => player.username)
+            this.cleanGameState()
+            //generate and send new gameIds to other players
+            this.createGame(otherPlayerUsernames)
         },
         updatePlayerStatus: function(username, statusType) {
             console.log(username + " : " + statusType)
@@ -132,8 +134,8 @@ const app = new Vue({
                 app.waitingForPlayers = true
             })
         },
-        createGame: function() {
-            axios.post('/createGame')
+        createGame: function(otherPlayerUsernames = null) {
+            axios.post('/createGame', {otherPlayerNamesList})
             .then( response => {
                 console.log(response);
                 app.currentGameId = response.data.gameId
@@ -449,12 +451,14 @@ const app = new Vue({
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
+                    console.log(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'winning'
                     app.winningHand = event.eventData.winningHand
                     app.gameOver = true
                     break;
                 case 'Losing':
                     app.updateStatus(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`)
+                    console.log(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'losing'
                     app.gameOver = true
                     app.winningHand = event.eventData.winningHand

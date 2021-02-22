@@ -140,12 +140,12 @@ class MahjongGame {
             this.allOtherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
                 otherPlayer.sendEvent("Losing", {
                     winningPlayer: this.players[this.activePlayer].username,
-                    winningHand: winning.winningHand
+                    winningHand: winning.hand
                 })
             })
             this.players[this.activePlayer].sendEvent("Winning", {
                 winningPlayer: this.players[this.activePlayer].username,
-                winningHand: winning.winningHand
+                winningHand: winning.hand
             })
             this.stateOfGame = gameStates.finished
             return true
@@ -186,7 +186,7 @@ class MahjongGame {
                 activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
             })})
 
-        this.checkWin(newActivePlayer , newTile)
+        this.checkWin(newActivePlayer)
     }
 
     handleClientResponse(player, event) {
@@ -320,6 +320,7 @@ class MahjongGame {
                         winningHand: winningHand.hand
                     })
                 })
+                console.log(`winningHand: `, winningHand);
                 win.player.sendEvent('Winning', {
                     winningPlayer: win.player.username,
                     winningHand: winningHand.hand
