@@ -38,7 +38,7 @@ class MahjongGame {
         this.joinedPlayers = 0;
         this.stateOfGame = gameStates.waitingForPlayers
 
-        this.activePlayer = 0;
+        this.activePlayer = 3;
 
         if(tileSet == "flowers") {
             this.tiles = Array.from(tileSetFullwFlowers);
