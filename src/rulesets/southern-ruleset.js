@@ -95,6 +95,7 @@ function standard(player, winningTile = null) {
     console.log(`listOfRemainders: `, listOfRemainders);
     //find applicable pairs to check
     var pairsToCheck = []
+    var removedPairAlready = false
     for(i=0; i < listOfRemainders.length; i++) {
         if(listOfRemainders[i] != null) {
             if(listOfRemainders[i] == 0) {
@@ -106,11 +107,18 @@ function standard(player, winningTile = null) {
             }
         }
         console.log(`pairsToCheck: `, pairsToCheck);
-        findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
-            
-        if (removeSets(i, tileValues, winningHand)) { //returns true if tileValues is empty
-            continue;
+        var removedPair = null
+        if(!removedPairAlready) {
+            removedPair = findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
         }
+        console.log(`removePair: `, removedPair);
+        // if(removedPair == false) {
+        //     return {
+        //         winning: false,
+        //         hand: winningHand
+        //     }
+        // }
+        removeSets(i, tileValues, winningHand)
     }
     if( tileValues.filter( suit => suit.length == 0).length == 3) {
         console.log("winning hand!");
@@ -156,6 +164,9 @@ function removeSets(i, tileValues, winningHand) {
         } else if (tileValues[i].find(tileValue => tileValue == tileValues[i][0]+1) && tileValues[i].find(tileValue => tileValue == tileValues[i][0]+2) ) {
             //there is a straight
             var straight = []
+            // var oneUp = tileValues[i][0] + 1
+            // var twoUp = tileValues[i][0] + 2
+            
             straight.push(suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+2),1)[0])
             straight.push(suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(tileValues[i][0]+1),1)[0])
             straight.push(suits[i] + "_" + tileValues[i].splice(0,1)[0])
@@ -177,10 +188,15 @@ function findAndRemovePair(i, pairsToCheck, tileValues, winningHand) {
     for(p=0; p < pairsToCheck.length; p++) {
         var pairCount = tileValues[i].filter(tileValue => tileValue == pairsToCheck[p])
         if(pairCount.length >= 2) {
-            //pair is removed from the suit
-            foundPair = [suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[0]), 1)[0], suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[1]), 1)[0]]
-            winningHand.push(foundPair) //add to winning hand
-            return true
+            //check its not part of a double straight
+            if(tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+2).length < 2
+                && tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+1).length < 2
+            ) {
+                //pair is removed from the suit
+                foundPair = [suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[0]), 1)[0], suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[1]), 1)[0]]
+                winningHand.push(foundPair) //add to winning hand
+                return true
+            }
         }
     }
     return false

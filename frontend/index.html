@@ -305,12 +305,9 @@
                                     <v-card-title class="headline">
                                         you are {{stateOfGame}}!!!
                                     </v-card-title>
-                                    <v-card-text>
-                                        {{winningHand}}
-                                        <!-- <span v-for="set in winningHand">
-                                            <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
-                                        </span> -->
-                                    </v-card-text>
+                                    <span v-for="set in winningHand">
+                                        <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
+                                    </span>
                                     <v-card-actions>
                                         <v-spacer></v-spacer>
                                         <v-btn
