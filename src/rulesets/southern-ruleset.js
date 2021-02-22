@@ -21,7 +21,7 @@ const suits = ["tenk","dot", "bamboo"]
 //actually it will probably need to return an username for future meta-play where
 //winning multiple rounds and depending on which of the win-cons you meet, can change score (money)
 //multiplier, like if you win 2 in a row as host a x or y, with the thirteenSingles its like x26 or something lol
-function checkAllWinConditions(player, winningTile) {
+function checkAllWinConditions(player, winningTile = null) {
     var standardWin = standard(player, winningTile)
     var thirteenSinglesWin = thirteenSingles(player, winningTile)
     var sevenPairsWin = sevenPairs(player, winningTile)

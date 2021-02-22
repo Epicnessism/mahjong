@@ -129,8 +129,11 @@ class MahjongGame {
     getPlayerByName(playerName) {
         return this.players.filter( player => player.username == playerName)[0]
     }
-
-    checkWin(player, tile) { //returns boolean of winning or not
+    /*
+        returns boolean of winning or not
+        tile can be null
+    */
+    checkWin(player, tile = null) { 
         var winning = southernRuleset.checkAllWinConditions(player, tile)
         
         if(winning.winning) {
@@ -165,8 +168,6 @@ class MahjongGame {
         var newActivePlayer = this.players[this.activePlayer]
         newActivePlayer.activeTurn = true;
 
-        
-        var winning = false
         var newTile = null
 
         if(giveTile) {
@@ -174,20 +175,18 @@ class MahjongGame {
             newActivePlayer.addTile(newTile)
         }
 
-        winning = this.checkWin(newActivePlayer)
-
-        if(!winning) {
-            newActivePlayer.sendEvent("YourTurn", {
-                newTile: newTile,
+        newActivePlayer.sendEvent("YourTurn", {
+            newTile: newTile,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
+        })
+        this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
+            otherPlayer.sendEvent('NextTurnNotYou', {
+                activePlayerID: newActivePlayer.username,
+                tiles: otherPlayer.tiles,
                 activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-            })
-            this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
-                otherPlayer.sendEvent('NextTurnNotYou', {
-                    activePlayerID: newActivePlayer.username,
-                    tiles: otherPlayer.tiles,
-                    activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-                })})
-        }
+            })})
+
+        winning = this.checkWin(newActivePlayer , newTile)
     }
 
     handleClientResponse(player, event) {
