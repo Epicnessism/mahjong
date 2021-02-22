@@ -186,7 +186,7 @@ class MahjongGame {
                 activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
             })})
 
-        winning = this.checkWin(newActivePlayer , newTile)
+        this.checkWin(newActivePlayer , newTile)
     }
 
     handleClientResponse(player, event) {
