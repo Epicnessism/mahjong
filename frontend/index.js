@@ -135,7 +135,7 @@ const app = new Vue({
             })
         },
         createGame: function(otherPlayerUsernames = null) {
-            axios.post('/createGame', {otherPlayerNamesList})
+            axios.post('/createGame', {otherPlayerUsernames})
             .then( response => {
                 console.log(response);
                 app.currentGameId = response.data.gameId
