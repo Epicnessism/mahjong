@@ -191,7 +191,8 @@ class MahjongGame {
 
     handleClientResponse(player, event) {
         if(event.eventName != "KeepAlive") {
-            console.log('player ' + this.username + ' got event ' + event);
+            console.log(player);
+            console.log('player ' + player.username + ' got event ' + event);
         }
         // console.log('Handling input event ' + event);
         switch(event.eventName) {
@@ -224,6 +225,17 @@ class MahjongGame {
             case 'Pass':
                 this.handleCheckResponses(player, event);
                 break;
+
+            case 'NextGameCreated':
+                console.log('Got NextGameCreated: ', event.eventData.newGameId);
+                this.allOtherPlayers(player).forEach( otherPlayer => {
+                    console.log(otherPlayer);
+                    otherPlayer.sendEvent('NextGameInvite', {
+                        creatingPlayer: player.username,
+                        newGameId: event.eventData.newGameId
+                    })
+                })
+                break
         }
     }
 

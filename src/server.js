@@ -76,11 +76,11 @@ api.post('/createGame', (req,res,next) => {
     newPlayer.currentGame = newGame
     newGame.addPlayer(newPlayer)
 
-    if(req.body.otherPlayerNamesList != null) {
-        req.body.otherPlayerNamesList.forEach(playerName => {
-            var otherPlayer = new Player(playerName)
-            otherPlayer.currentGame = newGame
-            newGame.addPlayer(otherPlayer)
+    if(req.body.otherPlayers != null) {
+        req.body.otherPlayers.forEach(otherPlayer => {
+            var newOtherPlayer = new Player(otherPlayer.username)
+            newOtherPlayer.currentGame = newGame
+            newGame.addPlayer(newOtherPlayer)
 
             //send them a response
             //TODO but now...
@@ -315,7 +315,9 @@ api.use(function(err, req, res, next) {
 api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("Get ws connection from " + req.session.username)
     var game = games.filter( game => game.gameId == req.session.currentGameId)[0]
+    console.log("game: ", game);
     game.players.filter(player => player.username == req.session.username)[0].setWsConnection(ws)
+    console.log("found player and setWSConnection");
     if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()
     } else {

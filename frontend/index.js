@@ -57,7 +57,9 @@ const app = new Vue({
         //winning stuff
         stateOfGame: 'somethingHereLol',
         winningHand: null,
-        gameOver: false
+        gameOver: false,
+
+        nextGameId: null
 
     },
     methods: {
@@ -100,10 +102,10 @@ const app = new Vue({
             app.gameOver = false
         },
         nextGame: function() {
-            var otherPlayerUsernames = app.players.map( player => player.username)
+            var otherPlayers = app.players
             this.cleanGameState()
             //generate and send new gameIds to other players
-            this.createGame(otherPlayerUsernames)
+            this.createGame(otherPlayers)
         },
         updatePlayerStatus: function(username, statusType) {
             console.log(username + " : " + statusType)
@@ -125,25 +127,48 @@ const app = new Vue({
             })
         },
         joinGame: function() {
-            axios
-            .post('/joinGame/' + this.joinGameInputField, {})
-            .then( response => {
-                console.log(response);
-                app.currentGameId = app.joinGameInputField
-                app.establishWsConnection()
-                app.waitingForPlayers = true
-            })
+            if(this.nextGameId != null) {
+                axios
+                .post('/joinGame/' + this.newGameId, {})
+                .then( response => {
+                    console.log(response);
+                    // app.currentGameId = app.joinGameInputField
+                    app.socket.close()
+                    app.socket = null
+                    app.establishWsConnection()
+                    app.waitingForPlayers = true
+                    this.nextGameId = null
+                })
+            } else {
+                axios
+                .post('/joinGame/' + this.joinGameInputField, {})
+                .then( response => {
+                    console.log(response);
+                    // app.currentGameId = app.joinGameInputField
+                    app.establishWsConnection()
+                    app.waitingForPlayers = true
+                })
+            }
+            
         },
-        createGame: function(otherPlayerUsernames = null) {
-            axios.post('/createGame', {otherPlayerUsernames})
+        createGame: function(otherPlayers = null) {
+            axios.post('/createGame', {otherPlayers})
             .then( response => {
                 console.log(response);
                 app.currentGameId = response.data.gameId
-                app.establishWsConnection()
+                app.establishWsConnection(otherPlayers, response.data.gameId)
                 app.waitingForPlayers = true
             })
         },
-        establishWsConnection: function() {
+        establishWsConnection: function(otherPlayers = null, newGameId = null) {
+            //before establishing a new connection, send to the old game
+            if(otherPlayers != null) {
+                app.sendEvent("NextGameCreated", {
+                    otherPlayers: otherPlayers,
+                    newGameId: newGameId
+                })
+            }
+
             console.log("Starting WS connection...")
             app.socket = new WebSocket(socket_protocol + '//' + socket_host + '/ws')
             
@@ -463,6 +488,10 @@ const app = new Vue({
                     app.gameOver = true
                     app.winningHand = event.eventData.winningHand
                     break;
+                case 'NextGameInvite':
+                    app.updateStatus(`Youy have been invited to the next game by ${event.eventData.creatingPlayer}, GameId: ${event.eventData.newGameId}`)
+                    nextGameId = event.eventData.newGameId
+                    break
             }
         }
     }

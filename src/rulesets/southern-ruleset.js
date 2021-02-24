@@ -56,7 +56,7 @@ function standard(player, winningTile = null) {
     var visibleTiles = Array.from(player.visibleTiles); //shallow copy this too
 
     var winningHand = []; //2D array of winning hand + sets
-
+    var removedPairAlready = false
     // console.log("STANDARD: playerTiles concated: ", playerTiles)
 
     //get rid of flowers
@@ -67,8 +67,11 @@ function standard(player, winningTile = null) {
     //check characters tiles
     var characterTiles = inHandTiles.filter( tile => tile.split("_")[0] == "char")
     var charResponse = recursiveCharacterTiles(characterTiles, winningHand)
-    console.log(`charResponse: ${charResponse}`);
+    console.log(`charResponse: `, charResponse);
     if (charResponse) {
+        if(charResponse.filter( charSet => charSet.length == 2).length == 1) {
+            removedPairAlready = true
+        }
         winningHand.concat(charResponse)
     } else {
         return {
@@ -95,7 +98,7 @@ function standard(player, winningTile = null) {
     console.log(`listOfRemainders: `, listOfRemainders);
     //find applicable pairs to check
     var pairsToCheck = []
-    var removedPairAlready = false
+    
     for(i=0; i < listOfRemainders.length; i++) {
         if(listOfRemainders[i] != null) {
             if(listOfRemainders[i] == 0) {
@@ -129,10 +132,10 @@ function standard(player, winningTile = null) {
     }
 }
 
-function recursiveCharacterTiles(characterTiles, winningHand) {
+function recursiveCharacterTiles(characterTiles, winningHand, pairRemoved) {
     if(characterTiles.length == 0) {
         // console.log("winning return in recursive characters: ",winningHand);
-        return winningHand //winning
+        return winningHand //winning //list of lists
     }
     var activeSet = characterTiles.filter(charTile => charTile == characterTiles[0]) //filter by the first element
     characterTiles = characterTiles.filter(charTile => !activeSet.includes(charTile))
@@ -181,10 +184,12 @@ function findAndRemovePair(i, pairsToCheck, tileValues, winningHand) {
     var foundPair = []
     for(p=0; p < pairsToCheck.length; p++) {
         var pairCount = tileValues[i].filter(tileValue => tileValue == pairsToCheck[p])
-        if(pairCount.length >= 2) {
+        if(
+            (pairCount.length >= 2 && pairCount.length != 3 && pairCount.length != 4)
+        ) {
             //check its not part of a double straight
-            if(tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+2).length < 2
-                && tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+1).length < 2
+            if(
+                (tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+2).length < 2 && tileValues[i].filter(tileValue => tileValue == tileValues[i][0]+1).length < 2)
             ) {
                 //pair is removed from the suit
                 foundPair = [suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[0]), 1)[0], suits[i] + "_" + tileValues[i].splice(tileValues[i].indexOf(pairCount[1]), 1)[0]]

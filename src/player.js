@@ -18,6 +18,7 @@ class Player {
         ws.on('close', function() {
             curPlayer.handleClose();
         });
+        console.log("setWS connection");
     }
 
     handleClose() {
