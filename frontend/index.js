@@ -102,10 +102,16 @@ const app = new Vue({
             app.gameOver = false
         },
         nextGame: function() {
-            var otherPlayers = app.players
-            this.cleanGameState()
-            //generate and send new gameIds to other players
-            this.createGame(otherPlayers)
+            if(app.nextGameId != null) {
+                //gameInvite for next game already exists, just join the next game
+                app.joinGame()
+                this.cleanGameState()
+            } else {
+                var players = app.players
+                this.cleanGameState()
+                //generate and send new gameIds to other players
+                this.createGame(players)
+            }
         },
         updatePlayerStatus: function(username, statusType) {
             console.log(username + " : " + statusType)
@@ -127,9 +133,9 @@ const app = new Vue({
             })
         },
         joinGame: function() {
-            if(this.nextGameId != null) {
+            if(app.nextGameId != null) {
                 axios
-                .post('/joinGame/' + this.newGameId, {})
+                .post('/joinGame/' + app.nextGameId, {})
                 .then( response => {
                     console.log(response);
                     // app.currentGameId = app.joinGameInputField
@@ -151,20 +157,25 @@ const app = new Vue({
             }
             
         },
-        createGame: function(otherPlayers = null) {
-            axios.post('/createGame', {otherPlayers})
+        createGame: function(players = null) {
+            if(players == null) {
+                players = [
+                    {username: app.username}
+                ]
+            }
+            console.log("players before create game: ", players);
+            axios.post('/createGame', {players})
             .then( response => {
                 console.log(response);
                 app.currentGameId = response.data.gameId
-                app.establishWsConnection(otherPlayers, response.data.gameId)
+                app.establishWsConnection(players.length, response.data.gameId)
                 app.waitingForPlayers = true
             })
         },
-        establishWsConnection: function(otherPlayers = null, newGameId = null) {
+        establishWsConnection: function(lengthOfPlayers = 1, newGameId = null) {
             //before establishing a new connection, send to the old game
-            if(otherPlayers != null) {
+            if(lengthOfPlayers > 1) {
                 app.sendEvent("NextGameCreated", {
-                    otherPlayers: otherPlayers,
                     newGameId: newGameId
                 })
             }
@@ -197,6 +208,7 @@ const app = new Vue({
 
             console.log("Connection Established")
             app.joined = true;
+            app.nextGameId = null
         },
         checkCurrentUser: function() {
             console.log("Checking logged in status...")
@@ -490,7 +502,7 @@ const app = new Vue({
                     break;
                 case 'NextGameInvite':
                     app.updateStatus(`Youy have been invited to the next game by ${event.eventData.creatingPlayer}, GameId: ${event.eventData.newGameId}`)
-                    nextGameId = event.eventData.newGameId
+                    app.nextGameId = event.eventData.newGameId
                     break
             }
         }

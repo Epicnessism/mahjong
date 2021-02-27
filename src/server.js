@@ -76,16 +76,13 @@ api.post('/createGame', (req,res,next) => {
     newPlayer.currentGame = newGame
     newGame.addPlayer(newPlayer)
 
-    if(req.body.otherPlayers != null) {
-        req.body.otherPlayers.forEach(otherPlayer => {
-            var newOtherPlayer = new Player(otherPlayer.username)
-            newOtherPlayer.currentGame = newGame
-            newGame.addPlayer(newOtherPlayer)
-
-            //send them a response
-            //TODO but now...
-        })
-    }
+    // if(req.body.players != null) {
+    //     req.body.players.forEach(player => {
+    //         var newPlayer = new Player(player.username)
+    //         newPlayer.currentGame = newGame
+    //         newGame.addPlayer(newPlayer)
+    //     })
+    // }
 
     req.session.currentGameId = newGameId
     console.log("Player " + req.session.username + " created game " + newGameId)
@@ -318,6 +315,9 @@ api.ws('/ws', function(ws, req) { //only happens on websocket establishment
     console.log("game: ", game);
     game.players.filter(player => player.username == req.session.username)[0].setWsConnection(ws)
     console.log("found player and setWSConnection");
+    console.log(game.players.length == 4 && game.stateOfGame == "initialized");
+    console.log("state of game: ",game.stateOfGame);
+    console.log("players in game: ",game.players.length);
     if(game.players.length == 4 && game.stateOfGame == "initialized") {
         game.start()
     } else {
