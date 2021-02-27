@@ -47,11 +47,11 @@ function checkAllWinConditions(player, winningTile = null) {
 //x1
 function standard(player, winningTile = null) {
     var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
-    console.log(`inHandTiles: ${inHandTiles}`);
+    // console.log(`inHandTiles: ${inHandTiles}`);
     if(winningTile != null) {
         inHandTiles.push(winningTile)
     }
-    console.log(`inHandTiles after winningTile: ${inHandTiles}`);
+    // console.log(`inHandTiles after winningTile: ${inHandTiles}`);
     
     var visibleTiles = Array.from(player.visibleTiles); //shallow copy this too
 
@@ -67,7 +67,7 @@ function standard(player, winningTile = null) {
     //check characters tiles
     var characterTiles = inHandTiles.filter( tile => tile.split("_")[0] == "char")
     var charResponse = recursiveCharacterTiles(characterTiles, winningHand)
-    console.log(`charResponse: `, charResponse);
+    // console.log(`charResponse: `, charResponse);
     if (charResponse) {
         if(charResponse.filter( charSet => charSet.length == 2).length == 1) {
             removedPairAlready = true
@@ -87,7 +87,7 @@ function standard(player, winningTile = null) {
     var dotTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "dot").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var bambooTileValues = inHandTiles.filter( tile => tile.split("_")[0] == "bamboo").map( tile => parseInt(tile.split("_")[1])).sort(function(a, b){return a-b})
     var tileValues = [tenkTileValues, dotTileValues, bambooTileValues]
-    console.log(`tileValues: `, tileValues);
+    // console.log(`tileValues: `, tileValues);
     
 
     //calculate sum values of each suit
@@ -95,7 +95,7 @@ function standard(player, winningTile = null) {
     listOfRemainders.push(tenkTileValues.length > 0 ? tenkTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
     listOfRemainders.push(dotTileValues.length > 0 ? dotTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
     listOfRemainders.push(bambooTileValues.length > 0 ? bambooTileValues.reduce((accumulator, currentValue) => accumulator + currentValue) % 3 : null)
-    console.log(`listOfRemainders: `, listOfRemainders);
+    // console.log(`listOfRemainders: `, listOfRemainders);
     //find applicable pairs to check
     var pairsToCheck = []
     
@@ -109,16 +109,16 @@ function standard(player, winningTile = null) {
                 pairsToCheck = [1,4,7]
             }
         }
-        console.log(`pairsToCheck: `, pairsToCheck);
+        // console.log(`pairsToCheck: `, pairsToCheck);
 
         if(!removedPairAlready) {
             removedPairAlready = findAndRemovePair(i, pairsToCheck, tileValues, winningHand)
         }
-        console.log(`removedPairAlready: `, removedPairAlready);
+        // console.log(`removedPairAlready: `, removedPairAlready);
         removeSets(i, tileValues, winningHand)
     }
     if( tileValues.filter( suit => suit.length == 0).length == 3) {
-        console.log("winning hand!: ", winningHand);
+        // console.log("winning hand!: ", winningHand);
         return {
             winning: true,
             hand: winningHand
@@ -151,7 +151,7 @@ function recursiveCharacterTiles(characterTiles, winningHand, pairRemoved) {
 }
 
 function removeSets(i, tileValues, winningHand) {
-    console.log("TileValues[i]: ", tileValues[i]);
+    // console.log("TileValues[i]: ", tileValues[i]);
     while(tileValues[i].length % 3 == 0 && tileValues[i].length != 0) { //if the length is ever less than 2 and NOT 0, fail, not a winning hand
         
         //check if there is a match
