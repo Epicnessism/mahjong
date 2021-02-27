@@ -240,16 +240,19 @@
                                             <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
                                             <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
                                         </draggable>
-                                        <v-btn v-on:click="autoSort()" v-if="myTiles.length > 0" color="light-green">
-                                            Auto Sort
-                                        </v-btn>
+                                        
                                     </v-row>
                                     <v-row>
                                         <h2>
                                             Actively Selected Tiles
                                         </h2>
                                         <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-    
+
+                                        <div>
+                                            <v-btn v-on:click="autoSort()" v-if="myTiles.length > 0" color="light-green">
+                                                Auto Sort
+                                            </v-btn>
+                                        </div>
                                         <div v-if="inCheckPhase && waitingForYourCheck">
                                             <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
                                                 Win (胡) literally win the game
