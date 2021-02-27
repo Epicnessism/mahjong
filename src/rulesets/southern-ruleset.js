@@ -294,7 +294,8 @@ function sevenPairs(player, winningTile = null) {
 
 
 module.exports = {
-    checkAllWinConditions
+    checkAllWinConditions,
+    standard
 }
 
 

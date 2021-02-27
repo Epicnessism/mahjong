@@ -348,6 +348,9 @@ const app = new Vue({
                 tiles: this.myTiles
             });
         },
+        autoSort: function() {
+            this.sendEvent("RequestAutoSort", {});
+        },
         sendEvent: function(event, eventData = {}) {
             if(event == "Win" || event == "Gang" || event == "Match" || event == "Pass") {
                 app.toggleOffDiscardButtons()
