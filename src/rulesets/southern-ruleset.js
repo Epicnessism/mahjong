@@ -46,6 +46,84 @@ function checkAllWinConditions(player, winningTile = null) {
 //this is actually the hardest one to calculate....
 //x1
 function standard(player, winningTile = null) {
+    var playerTiles = player.tiles.sort()
+    var winningHand = []
+
+    winningHand = recursiveStandard(player.tiles, [])
+    // console.log(player.visibleTiles);
+    
+    // console.log("log winningHand: ", winningHand);
+    if(winningHand != false) {
+        winningHand = winningHand.concat(player.visibleTiles)
+        if (winningHand.length >= 5) {
+            //you win
+            return {
+                winning: true,
+                winningHand: winningHand
+            }
+        }
+    }
+    return {
+        winning: false,
+        winningHand: null
+    }
+}
+
+function recursiveStandard(playerTiles, winningHand) {
+    if(playerTiles.length == 0) {
+        // console.log("winning return in recursive: ",winningHand);
+        return winningHand//winning //list of lists
+    }
+    var activeSuit = playerTiles[0].split("_")[0] //gets the suit of the first tile
+    var activeValue = parseInt(playerTiles[0].split("_")[1]) //get the value of the first tile
+
+    var playerTilesMap = playerTiles.map( tile => { return { suit: tile.split("_")[0], value: tile.split("_")[1] } })
+    // console.log(playerTilesMap);
+    var activeSet = playerTiles.filter( tile => tile == playerTiles[0])
+
+    //for matching and ganging
+    // var activeSet = playerTilesMap.filter(tile => tile.suit == activeSuit && tile.value == activeValue) //filter by the first element
+    //for eating
+    var nextTile1 = playerTilesMap.filter(tile => tile.suit == activeSuit && tile.value == activeValue+1)
+    var nextTile2 = playerTilesMap.filter(tile => tile.suit == activeSuit && tile.value == activeValue+2)
+    // console.log("nextTile1: ", nextTile1);
+    // console.log("nextTile2: ", nextTile2);
+    
+    
+    if(activeSet.length == 4 || activeSet.length == 3) { //that means its a gang or a match
+        // console.log("4/3");
+        playerTiles = playerTiles.filter(tile => !activeSet.includes(tile))
+        // console.log("playerTiles: ", playerTiles);
+        winningHand.push(activeSet)
+        return recursiveStandard(playerTiles, winningHand) //continue winning
+    }
+    if(activeSet.length == 2) {
+        // console.log("2");
+        playerTiles = playerTiles.filter(tile => !activeSet.includes(tile))
+        // console.log("playerTiles: ", playerTiles);
+        winningHand.push(activeSet) //it's a pair
+        return recursiveStandard(playerTiles, winningHand) //continue winning
+    }
+    if(activeSet.length >= 1 && activeSuit != "char" && nextTile1.length > 0 && nextTile2.length > 0 ) {
+        // console.log("eat")
+        var firstTile = playerTiles.splice(0,1)[0]
+        // console.log("firstTIle", firstTile);
+        var indexNextTile1 = playerTiles.indexOf((nextTile1[0].suit + "_" + nextTile1[0].value).toString())
+        // console.log(nextTile1.suit, nextTile1.value);
+        nextTile1 = playerTiles.splice(indexNextTile1, 1)[0]
+        var indexNextTile2 = playerTiles.indexOf((nextTile2[0].suit + "_" + nextTile2[0].value).toString())
+        // console.log(indexNextTile2);
+        nextTile2 = playerTiles.splice(indexNextTile2, 1)[0]
+        var eatSet = [firstTile, nextTile2, nextTile2]
+        // console.log("playerTIles: ", playerTiles);
+        winningHand.push(eatSet)
+        return recursiveStandard(playerTiles, winningHand)
+    }
+    return false //losing
+
+}
+
+function oldstandard(player, winningTile = null) {
     var inHandTiles = player.tiles.map(tile => tile) //shallow copy player tiles so we don't mess with the original
     // console.log(`inHandTiles: ${inHandTiles}`);
     if(winningTile != null) {
