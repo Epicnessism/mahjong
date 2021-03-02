@@ -46,6 +46,9 @@ function checkAllWinConditions(player, winningTile = null) {
 //x1
 function standard(player, winningTile = null) {
     var playerTiles = player.tiles.sort()
+    if(winningTile != null) {
+        playerTiles.push(winningTile)
+    }
     var winningHand = []
     winningHand = recursiveStandard(playerTiles, [])
     if(winningHand != false) {
