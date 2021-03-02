@@ -342,12 +342,6 @@ const app = new Vue({
             this.activeTiles.splice(this.activeTiles.indexOf(tile), 1);
             this.myTiles.push(tile);
         },
-        updateTileOrder: function() {
-            console.log(this.myTiles)
-            this.sendEvent("UpdateTileOrder", {
-                tiles: this.myTiles
-            });
-        },
         autoSort: function() {
             this.sendEvent("RequestAutoSort", {});
         },

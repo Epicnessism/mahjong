@@ -233,21 +233,15 @@
                                         </v-card>
                                     </v-row>
                                     <v-row>
-                                        <h2>
-                                            Your Hand
-                                        </h2>
-                                        <draggable v-model="myTiles" group="people" @start="drag=true" @end="drag=false" @change="updateTileOrder()">
+                                        <span>
                                             <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
-                                            <!-- <v-btn slot="footer" @click="saveTilePositions()">Save Tile Position</v-btn> -->
-                                        </draggable>
-                                        
+                                        </span>
                                     </v-row>
                                     <v-row>
-                                        <h2>
+                                        <h2 v-if="eatable">
                                             Actively Selected Tiles
                                         </h2>
-                                        <img v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
-
+                                        <img v-if="eatable" v-for="tile in activeTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="deselectTile(tile)">
                                         <div>
                                             <v-btn v-on:click="autoSort()" v-if="myTiles.length > 0" color="light-green">
                                                 Auto Sort
