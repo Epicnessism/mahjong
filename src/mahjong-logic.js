@@ -71,6 +71,7 @@ function checkEat(playerTiles, lastTile, playerIndex, discarderIndex) {
 function implementAnGang(player, tileToGang) {
     var gangedTiles = player.tiles.filter(tile => tile == tileToGang)
     if(gangedTiles.length == 4) {
+        player.visibleTiles.push(gangedTiles)
         player.tiles = player.tiles.filter( tile => !gangedTiles.includes(tile))
         return true
     }
@@ -92,7 +93,7 @@ function implementMatch(player, lastTile) {
     player.tiles = player.tiles.filter(tile => tile != lastTile);
     console.log("Match Visible Tiles: " + player.visibleTiles);
 }
-//player, lastTile, players, discarderIndex, listOfSelectedTiles
+
 function implementEat(player, lastTile, listOfSelectedTiles) {
     console.log(listOfSelectedTiles);
     var eatenTiles = listOfSelectedTiles;

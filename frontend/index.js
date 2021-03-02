@@ -86,7 +86,7 @@ const app = new Vue({
             app.activeTile = null
 
             //check phase buttons
-            toggleOffDiscardButtons()
+            app.toggleOffDiscardButtons()
 
             //the new tile gotten
             app.newTile = null
