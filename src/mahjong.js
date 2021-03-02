@@ -213,10 +213,6 @@ class MahjongGame {
                     })
                 })
                 break
-            
-            case 'UpdateTileOrder':
-                player.tiles = event.eventData.tiles
-                break
                 
             case 'RequestAutoSort':
                 this.autoSortPlayerTiles(player)
