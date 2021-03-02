@@ -45,7 +45,7 @@ function checkAllWinConditions(player, winningTile = null) {
 //this is actually the hardest one to calculate....
 //x1
 function standard(player, winningTile = null) {
-    var playerTiles = player.tiles.sort()
+    var playerTiles = Array.from(player.tiles).sort()
     if(winningTile != null) {
         playerTiles.push(winningTile)
     }
