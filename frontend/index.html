@@ -251,6 +251,9 @@
                                             <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
                                                 Win (胡) literally win the game
                                             </v-btn>
+                                            <v-btn v-on:click="sendEvent('anGang')" v-if="anGangable">
+                                                An-Gang (暗杠) Four of a kind
+                                            </v-btn>
                                             <v-btn v-on:click="sendEvent('Gang')" v-if="gangable">
                                                 Gang (杠) Four of a kind
                                             </v-btn>

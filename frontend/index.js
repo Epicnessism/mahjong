@@ -40,6 +40,7 @@ const app = new Vue({
 
         //check phase buttons
         winnable: false,
+        anGangable: false,
         gangable: false,
         matchable: false,
         eatable: false,
@@ -85,10 +86,7 @@ const app = new Vue({
             app.activeTile = null
 
             //check phase buttons
-            app.winnable = false
-            app.gangable = false
-            app.matchable = false
-            app.eatable = false
+            toggleOffDiscardButtons()
 
             //the new tile gotten
             app.newTile = null
@@ -125,7 +123,6 @@ const app = new Vue({
             }else if(statusType == "waitingCheck") {
                 player.statusColor = "blue"
             }
-
         },
         clearAllPlayerStatuses() {
             app.players.forEach(player => {
@@ -155,7 +152,6 @@ const app = new Vue({
                     app.waitingForPlayers = true
                 })
             }
-            
         },
         createGame: function(players = null) {
             if(players == null) {
@@ -346,7 +342,7 @@ const app = new Vue({
             this.sendEvent("RequestAutoSort", {});
         },
         sendEvent: function(event, eventData = {}) {
-            if(event == "Win" || event == "Gang" || event == "Match" || event == "Pass") {
+            if(event == "Win" || event == "anGang" || event == "Gang" || event == "Match" || event == "Pass") {
                 app.toggleOffDiscardButtons()
             }
             app.socket.send(
@@ -361,6 +357,7 @@ const app = new Vue({
         },
         toggleOffDiscardButtons() {
             app.winnable = false;
+            app.anGangable = false;
             app.gangable = false;
             app.matchable = false;
             app.eatable = false;
@@ -393,7 +390,7 @@ const app = new Vue({
                     document.title = '(*)' + base_title;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
-
+                    app.anGangable = event.eventData.anGangable
                     app.clearAllPlayerStatuses()
                     app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
 

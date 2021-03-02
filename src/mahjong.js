@@ -100,24 +100,15 @@ class MahjongGame {
         this.nextTurn()
     }
 
-    sendGameStateForPlayer(player) {
-        var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
-            return {
-                username: otherPlayer.username
-            }
-        });
-        var allPlayers = this.players.map(player => {
-            return {
-                username: player.username
-            }
-        });
-        // console.log(this.getPlayerOfIndex(this.activePlayer).username)
+    sendGameStateForPlayer(player, actionMessage = null, actionPlayerName = null) {
         player.sendEvent('GameState', {
+            actionMessage: actionMessage != null ? actionMessage : "No Action Message",
+            actionPlayerName: actionPlayerName != null ? actionPlayerName : "No Action Player",
             tiles: player.tiles,
-            players: allPlayers,
+            players: this.players.map(player => { username: player.username }),
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-            otherPlayers: otherPlayers
-        });
+            otherPlayers: this.allOtherPlayers(player).map(otherPlayer => { username: otherPlayer.username })
+        })
         this.sendAllVisibleTilesToPlayer(player)
         this.sendAllDiscardedTilesToPlayer(player)
     }
@@ -177,6 +168,7 @@ class MahjongGame {
 
         newActivePlayer.sendEvent("YourTurn", {
             newTile: newTile,
+            anGangable: mahjongLogic.checkAnGang(newActivePlayer),
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
         })
         this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
@@ -225,7 +217,13 @@ class MahjongGame {
             case 'Eat':
             case 'Pass':
                 this.handleCheckResponses(player, event);
-                break;
+                break
+            case 'AnGang':
+                mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
+                this.players.forEach( eachPlayer => {
+                    this.sendGameStateForPlayer(eachPlayer, "AnGang", player.username)
+                })
+                break
 
             case 'NextGameCreated':
                 console.log('Got NextGameCreated: ', event.eventData.newGameId);
