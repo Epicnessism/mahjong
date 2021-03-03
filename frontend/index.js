@@ -45,6 +45,9 @@ const app = new Vue({
         matchable: false,
         eatable: false,
 
+        //adl;kfjasdf
+        myTilesElements: null,
+
         //the new tile gotten
         newTile: null,
         
@@ -87,6 +90,9 @@ const app = new Vue({
 
             //check phase buttons
             app.toggleOffDiscardButtons()
+
+            //adl;kfjasdf
+            myTilesElements: null,
 
             //the new tile gotten
             app.newTile = null
@@ -340,6 +346,9 @@ const app = new Vue({
                 this.activeTiles.push(tile);
             }
         },
+        toggleOffAllActiveTiles() {
+
+        },
         deselectTile: function(tile) {
             console.log("You deselected: " + tile);
             this.activeTiles.splice(this.activeTiles.indexOf(tile), 1);
@@ -351,6 +360,7 @@ const app = new Vue({
         sendEvent: function(event, eventData = {}) {
             if(event == "Win" || event == "anGang" || event == "Gang" || event == "Match" || event == "Pass") {
                 app.toggleOffDiscardButtons()
+                app.toggleOffAllActiveTiles()
             }
             app.socket.send(
                 JSON.stringify({
@@ -374,11 +384,28 @@ const app = new Vue({
                 app.sendEvent('Pass')
             }
         },
+        eat() {
+            console.log(this.activeTiles)
+            const eatTiles = this.activeTiles
+            this.sendEvent('Eat', eatTiles)
+        },
+        unselectAllTiles() {
+            var myTilesElements = Array.from(document.getElementById("myTilesSpan").childNodes)
+            myTilesElements.forEach( tileElement => {
+                console.log(tileElement.classList)
+                if(tileElement.classList.contains("selected")) {
+                    tileElement.classList.remove("selected")
+                }
+            })
+            console.log("myTilesElements: ", myTilesElements)
+        },
         handleEvent(event) {
             switch(event.eventName) {
                 case 'GameState': 
                     app.updateStatus('Game State updated...');
                     app.myTiles = event.eventData.tiles;
+                    app.unselectAllTiles()
+                    
                     app.players.forEach( clientPlayer => {
                         var backendPlayer = event.eventData.players.filter(backendPlayers => backendPlayers.username == clientPlayer.username)
                         if(backendPlayer.length == 1) {
