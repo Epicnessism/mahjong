@@ -50,3 +50,7 @@ html, body {
 }
 
 [v-cloak] { display: none; }
+
+.selected {
+    padding-bottom: 10px;
+}

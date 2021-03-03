@@ -100,23 +100,17 @@ class MahjongGame {
         this.nextTurn()
     }
 
-    sendGameStateForPlayer(player) {
-        var otherPlayers = this.allOtherPlayers(player).map(otherPlayer => {
-            return {
-                username: otherPlayer.username
-            }
-        });
-        var allPlayers = this.players.map(player => {
-            return {
-                username: player.username
-            }
-        });
-        // console.log(this.getPlayerOfIndex(this.activePlayer).username)
+    sendGameStateForPlayer(player, actionMessage = null, actionPlayerName = null) {
+        const players = this.players.map(player => {
+            return { username: player.username }
+        })
+        console.log(players);
         player.sendEvent('GameState', {
+            actionMessage: actionMessage != null ? actionMessage : "No Action Message",
+            actionPlayerName: actionPlayerName != null ? actionPlayerName : "No Action Player",
             tiles: player.tiles,
-            players: allPlayers,
-            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
-            otherPlayers: otherPlayers
+            players: players,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username
         });
         this.sendAllVisibleTilesToPlayer(player)
         this.sendAllDiscardedTilesToPlayer(player)
@@ -135,17 +129,17 @@ class MahjongGame {
     */
     checkWin(player, tile = null) { 
         var winning = southernRuleset.checkAllWinConditions(player, tile)
-        
+        console.log("winning: ", winning);
         if(winning.winning) {
             this.allOtherPlayers(this.players[this.activePlayer]).forEach(otherPlayer => {
                 otherPlayer.sendEvent("Losing", {
                     winningPlayer: this.players[this.activePlayer].username,
-                    winningHand: winning.hand
+                    winningHand: winning.winningHand
                 })
             })
             this.players[this.activePlayer].sendEvent("Winning", {
                 winningPlayer: this.players[this.activePlayer].username,
-                winningHand: winning.hand
+                winningHand: winning.winningHand
             })
             this.stateOfGame = gameStates.finished
             return true
@@ -177,6 +171,7 @@ class MahjongGame {
 
         newActivePlayer.sendEvent("YourTurn", {
             newTile: newTile,
+            anGangable: mahjongLogic.checkAnGang(newActivePlayer),
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
         })
         this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
@@ -225,7 +220,20 @@ class MahjongGame {
             case 'Eat':
             case 'Pass':
                 this.handleCheckResponses(player, event);
-                break;
+                break
+
+            case 'AnGang':
+                const anGangRes = mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
+                if(anGangRes) {
+                    this.players.forEach( eachPlayer => {
+                        this.sendGameStateForPlayer(eachPlayer, "AnGang", player.username)
+                    })
+                }
+                console.log("Error, AnGang failed to implement.");
+                this.players.forEach(eachPlayer => {
+                    this.sendGameStateForPlayer(eachPlayer)
+                })
+                break
 
             case 'NextGameCreated':
                 console.log('Got NextGameCreated: ', event.eventData.newGameId);
@@ -335,13 +343,13 @@ class MahjongGame {
                         actingPlayerID: win.player.username,
                         action: "Win",
                         lastTile: lastTile,
-                        winningHand: winningHand.hand
+                        winningHand: winningHand.winningHand
                     })
                 })
                 console.log(`winningHand: `, winningHand);
                 win.player.sendEvent('Winning', {
                     winningPlayer: win.player.username,
-                    winningHand: winningHand.hand
+                    winningHand: winningHand.winningHand
                 })
                 this.sendPlayerTiles(win.player)
             }

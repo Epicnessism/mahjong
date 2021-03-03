@@ -3,6 +3,18 @@ function checkMatch(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length >= 2
 }
 
+function checkAnGang(player, newTile = null) {
+    if(newTile != null) {
+        return player.tiles.filter( tile => tile == newTile).length == 4
+    }
+    player.tiles.forEach( thisTile => {
+        if(player.tiles.filter( tile => tile == thisTile).length == 4) {
+            return true
+        }
+    })
+    return false
+}
+
 function checkGang(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length == 3
 }
@@ -51,6 +63,21 @@ function checkEat(playerTiles, lastTile, playerIndex, discarderIndex) {
     return true
 }
 
+/*
+    expects that all tiles are already in the player.tiles
+    tileToGang is just an identifier to know what to get since its unlikely but possible that
+    a player may have more than one AnGangable tiles....
+*/
+function implementAnGang(player, tileToGang) {
+    var gangedTiles = player.tiles.filter(tile => tile == tileToGang)
+    if(gangedTiles.length == 4) {
+        player.visibleTiles.push(gangedTiles)
+        player.tiles = player.tiles.filter( tile => !gangedTiles.includes(tile))
+        return true
+    }
+    return false
+}
+
 function implementGang(player, lastTile) {
     var gangedTiles = player.tiles.filter( tile => tile == lastTile);
     gangedTiles.push(lastTile);
@@ -66,7 +93,7 @@ function implementMatch(player, lastTile) {
     player.tiles = player.tiles.filter(tile => tile != lastTile);
     console.log("Match Visible Tiles: " + player.visibleTiles);
 }
-//player, lastTile, players, discarderIndex, listOfSelectedTiles
+
 function implementEat(player, lastTile, listOfSelectedTiles) {
     console.log(listOfSelectedTiles);
     var eatenTiles = listOfSelectedTiles;
@@ -84,10 +111,12 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
 }
 
 module.exports = {
-    checkMatch,
+    checkAnGang,
     checkGang,
+    checkMatch,
     checkEat,
-    implementMatch,
+    implementAnGang,
     implementGang,
+    implementMatch,
     implementEat
 };

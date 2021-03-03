@@ -139,19 +139,19 @@ function thirteenSingles(player, winningTile = null) {
 
     //check if there is at least 1 duplicate
     playerTilesSanitized.forEach(tile => {
-        var count = playerTilesSanitized.filter(tile).length
+        var count = playerTilesSanitized.filter(countTile => countTile == tile).length
         if (count === 2) {
             //if you get here, then return true, you win
             return {
                 winning: true,
-                hand: playerTilesSanitized
+                winningHand: playerTilesSanitized
             }
         }
     })
     //otherwise you did not win
     return {
         winning: false,
-        hand: playerTilesSanitized
+        winningHand: playerTilesSanitized
     }
 }
 
@@ -192,12 +192,12 @@ function sevenPairs(player, winningTile = null) {
     if (pair === 14) { //this should probably be rewritten with better logic buuuuut this works for now
         return {
             winning: true,
-            hand: playerTilesSanitized
+            winningHand: playerTilesSanitized
         }
     }
     return {
         winning: false,
-        hand: playerTilesSanitized
+        winningHand: playerTilesSanitized
     }
 
 }

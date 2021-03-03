@@ -40,9 +40,13 @@ const app = new Vue({
 
         //check phase buttons
         winnable: false,
+        anGangable: false,
         gangable: false,
         matchable: false,
         eatable: false,
+
+        //adl;kfjasdf
+        myTilesElements: null,
 
         //the new tile gotten
         newTile: null,
@@ -85,10 +89,10 @@ const app = new Vue({
             app.activeTile = null
 
             //check phase buttons
-            app.winnable = false
-            app.gangable = false
-            app.matchable = false
-            app.eatable = false
+            app.toggleOffDiscardButtons()
+
+            //adl;kfjasdf
+            myTilesElements: null,
 
             //the new tile gotten
             app.newTile = null
@@ -125,7 +129,6 @@ const app = new Vue({
             }else if(statusType == "waitingCheck") {
                 player.statusColor = "blue"
             }
-
         },
         clearAllPlayerStatuses() {
             app.players.forEach(player => {
@@ -155,7 +158,6 @@ const app = new Vue({
                     app.waitingForPlayers = true
                 })
             }
-            
         },
         createGame: function(players = null) {
             if(players == null) {
@@ -313,29 +315,39 @@ const app = new Vue({
                 notActivePlayerStyle : player.username != this.activePlayerName,
              }            
         },        
-        clickTile: function(tile) {
-            if(this.yourTurn) {
+        clickTile: function(event, tile) {
+            console.log(event)
+            const cls = ["selected"]
+            
+            if(this.yourTurn && event.target.classList.contains("selected")) {
                 console.log("you chose to discard: " + tile);
                 this.activeTile = tile
-                this.sendEvent('DiscardTile', {
-                    tile: tile
-                })
                 this.myTiles = this.myTiles.filter( otherTile => otherTile != tile)
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
                 document.title = base_title;
-                app.players.forEach(player => {
-                    if(player.username != app.username) {
-                        app.updatePlayerStatus(player.username, "waitingCheck")
-                    }
-                })
-            } else if(this.inCheckPhase) {
-                console.log("You chose: " + tile);
                 this.myTiles.splice(this.myTiles.indexOf(tile), 1);
-                this.activeTiles.push(tile);
+
+                this.sendEvent('DiscardTile', {
+                    tile: tile
+                })
+                // app.players.forEach(player => {
+                //     if(player.username != app.username) {
+                //         app.updatePlayerStatus(player.username, "waitingCheck")
+                //     }
+                // })
+            }
+            //toggle active tiles
+            if(event.target.classList.contains("selected")) {
+                event.target.classList.remove(...cls)
+                this.activeTiles.splice(this.activeTiles.indexOf(tile), 1);
             } else {
-                console.log("not your turn, no active actions, please wait.");
-            }   
+                event.target.classList.add(...cls)
+                this.activeTiles.push(tile);
+            }
+        },
+        toggleOffAllActiveTiles() {
+
         },
         deselectTile: function(tile) {
             console.log("You deselected: " + tile);
@@ -346,8 +358,9 @@ const app = new Vue({
             this.sendEvent("RequestAutoSort", {});
         },
         sendEvent: function(event, eventData = {}) {
-            if(event == "Win" || event == "Gang" || event == "Match" || event == "Pass") {
+            if(event == "Win" || event == "anGang" || event == "Gang" || event == "Match" || event == "Pass") {
                 app.toggleOffDiscardButtons()
+                app.toggleOffAllActiveTiles()
             }
             app.socket.send(
                 JSON.stringify({
@@ -361,6 +374,7 @@ const app = new Vue({
         },
         toggleOffDiscardButtons() {
             app.winnable = false;
+            app.anGangable = false;
             app.gangable = false;
             app.matchable = false;
             app.eatable = false;
@@ -370,11 +384,36 @@ const app = new Vue({
                 app.sendEvent('Pass')
             }
         },
+        anGang() {
+            if(this.activeTiles.length > 1) {
+                console.log("THROW ERROR MORE THAN 1 ACTIVE TILE TO ANGANG")
+                return false
+            }
+            const tileToGang = this.activeTiles[0]
+            app.sendEvent('AnGang', tileToGang)
+        },
+        eat() {
+            // console.log(this.activeTiles)
+            const eatTiles = this.activeTiles
+            this.sendEvent('Eat', eatTiles)
+        },
+        unselectAllTiles() {
+            var myTilesElements = Array.from(document.getElementById("myTilesSpan").childNodes)
+            myTilesElements.forEach( tileElement => {
+                console.log(tileElement.classList)
+                if(tileElement.classList.contains("selected")) {
+                    tileElement.classList.remove("selected")
+                }
+            })
+            console.log("myTilesElements: ", myTilesElements)
+        },
         handleEvent(event) {
             switch(event.eventName) {
                 case 'GameState': 
                     app.updateStatus('Game State updated...');
                     app.myTiles = event.eventData.tiles;
+                    app.unselectAllTiles()
+                    
                     app.players.forEach( clientPlayer => {
                         var backendPlayer = event.eventData.players.filter(backendPlayers => backendPlayers.username == clientPlayer.username)
                         if(backendPlayer.length == 1) {
@@ -393,7 +432,7 @@ const app = new Vue({
                     document.title = '(*)' + base_title;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
-
+                    app.anGangable = event.eventData.anGangable
                     app.clearAllPlayerStatuses()
                     app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
 
