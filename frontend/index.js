@@ -309,29 +309,36 @@ const app = new Vue({
                 notActivePlayerStyle : player.username != this.activePlayerName,
              }            
         },        
-        clickTile: function(tile) {
-            if(this.yourTurn) {
+        clickTile: function(event, tile) {
+            console.log(event)
+            const cls = ["selected"]
+            
+            if(this.yourTurn && event.target.classList.contains("selected")) {
                 console.log("you chose to discard: " + tile);
                 this.activeTile = tile
-                this.sendEvent('DiscardTile', {
-                    tile: tile
-                })
                 this.myTiles = this.myTiles.filter( otherTile => otherTile != tile)
                 this.status = 'Discard submitted';
                 this.yourTurn = false;
                 document.title = base_title;
-                app.players.forEach(player => {
-                    if(player.username != app.username) {
-                        app.updatePlayerStatus(player.username, "waitingCheck")
-                    }
-                })
-            } else if(this.inCheckPhase) {
-                console.log("You chose: " + tile);
                 this.myTiles.splice(this.myTiles.indexOf(tile), 1);
-                this.activeTiles.push(tile);
+
+                this.sendEvent('DiscardTile', {
+                    tile: tile
+                })
+                // app.players.forEach(player => {
+                //     if(player.username != app.username) {
+                //         app.updatePlayerStatus(player.username, "waitingCheck")
+                //     }
+                // })
+            }
+            //toggle active tiles
+            if(event.target.classList.contains("selected")) {
+                event.target.classList.remove(...cls)
+                this.activeTiles.splice(this.activeTiles.indexOf(tile), 1);
             } else {
-                console.log("not your turn, no active actions, please wait.");
-            }   
+                event.target.classList.add(...cls)
+                this.activeTiles.push(tile);
+            }
         },
         deselectTile: function(tile) {
             console.log("You deselected: " + tile);

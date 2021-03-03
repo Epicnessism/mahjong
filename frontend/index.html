@@ -234,7 +234,7 @@
                                     </v-row>
                                     <v-row>
                                         <span>
-                                            <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile(tile)">
+                                            <img v-for="tile in myTiles" v-bind:src="'res/' + tile + '.png'" v-on:click="clickTile($event, tile)">
                                         </span>
                                     </v-row>
                                     <v-row>
