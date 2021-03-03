@@ -384,8 +384,16 @@ const app = new Vue({
                 app.sendEvent('Pass')
             }
         },
+        anGang() {
+            if(this.activeTiles.length > 1) {
+                console.log("THROW ERROR MORE THAN 1 ACTIVE TILE TO ANGANG")
+                return false
+            }
+            const tileToGang = this.activeTiles[0]
+            app.sendEvent('AnGang', tileToGang)
+        },
         eat() {
-            console.log(this.activeTiles)
+            // console.log(this.activeTiles)
             const eatTiles = this.activeTiles
             this.sendEvent('Eat', eatTiles)
         },

@@ -230,6 +230,9 @@ class MahjongGame {
                     })
                 }
                 console.log("Error, AnGang failed to implement.");
+                this.players.forEach(eachPlayer => {
+                    this.sendGameStateForPlayer(eachPlayer)
+                })
                 break
 
             case 'NextGameCreated':
