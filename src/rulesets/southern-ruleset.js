@@ -104,7 +104,7 @@ function recursiveStandard(playerTiles, winningHand) {
         var firstTile = remainingTiles.splice(0,1)[0]
         nextTile1 = remainingTiles.splice(remainingTiles.indexOf((nextTile1[0].suit + "_" + nextTile1[0].value).toString()), 1)[0]
         nextTile2 = remainingTiles.splice(remainingTiles.indexOf((nextTile2[0].suit + "_" + nextTile2[0].value).toString()), 1)[0]
-        var eatSet = [firstTile, nextTile2, nextTile2]
+        var eatSet = [firstTile, nextTile1, nextTile2]
         winningHand.push(eatSet)
         var res = recursiveStandard(remainingTiles, winningHand)
         if (res == false) {
