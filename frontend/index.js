@@ -534,6 +534,7 @@ const app = new Vue({
                 case 'YourTiles':
                     app.updateStatus('got YourTiles')
                     app.myTiles = event.eventData.tiles
+                    app.autoSort()
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
