@@ -136,7 +136,6 @@ api.get('/getPreferences', async (req,res,next)=> {
                 prefResponse[prefName] = dbRes.Item[prefName]
             })
         }
-        
         res.status(200).json(prefResponse);
     } catch(err) {
         console.log(err);
@@ -144,7 +143,7 @@ api.get('/getPreferences', async (req,res,next)=> {
     }
 })
 
-const validPreferences = new Set(["autopass"])
+const validPreferences = new Set(["autopass", "autosort"])
 api.post('/savePreference', (req,res,next)=> {
     console.log(req.body.preference);
     var prefName = req.body.preferenceName

@@ -209,10 +209,10 @@ class MahjongGame {
                 })
                 break
                 
-            case 'RequestAutoSort':
-                this.autoSortPlayerTiles(player)
-                this.sendGameStateForPlayer(player)
-                break
+            // case 'RequestAutoSort':
+            //     this.autoSortPlayerTiles(player)
+            //     this.sendGameStateForPlayer(player)
+            //     break
 
             case 'Win':
             case 'Gang':
@@ -250,7 +250,6 @@ class MahjongGame {
 
     autoSortPlayerTiles(player) {
         player.tiles.sort()
-        console.log("sortedPlayer tiles: ", player.tiles);
     }
 
     sendAllVisibleTilesToPlayer(player) {
