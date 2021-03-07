@@ -37,6 +37,7 @@ const app = new Vue({
         navDrawer: false,
         group: null, //no clue what this does
         autopass: false,
+        autosort: false,
 
         //check phase buttons
         winnable: false,
@@ -306,6 +307,7 @@ const app = new Vue({
             .then( function(response) {
                 console.log(response);
                 app.autopass = response.data.autopass
+                app.autosort = response.data.autosort
             })
         },
         activePlayer: function(player) {            
@@ -355,7 +357,9 @@ const app = new Vue({
             this.myTiles.push(tile);
         },
         autoSort: function() {
-            this.sendEvent("RequestAutoSort", {});
+            if(app.autosort) {
+                app.myTiles.sort()
+            }
         },
         sendEvent: function(event, eventData = {}) {
             if(event == "Win" || event == "anGang" || event == "Gang" || event == "Match" || event == "Pass") {
@@ -425,6 +429,7 @@ const app = new Vue({
                     if(app.players.length == 4 && app.waitingForPlayers) {
                         app.waitingForPlayers = false
                     }
+                    app.autoSort()
                     break;
                 case 'YourTurn':
                     app.activeTile = null;
@@ -440,6 +445,7 @@ const app = new Vue({
                         app.newTile = event.eventData.newTile
                         app.myTiles.push(event.eventData.newTile)
                     }
+                    app.autoSort()
                     break;
                 case 'CheckDiscardedTile':
                     app.updateStatus('Checking if anyone wants ');
@@ -498,6 +504,7 @@ const app = new Vue({
                     //update my tiles here?
                     app.myTiles = event.eventData.tiles;
                     console.log("all players: " + app.players);
+                    app.autoSort()
                     break;
                 case 'OtherPlayerRespondedToCheck':
                     app.updateStatus('Player ' + event.eventData.otherPlayerID + ' has declared ' + event.eventData.checkAction);
@@ -527,6 +534,7 @@ const app = new Vue({
                 case 'YourTiles':
                     app.updateStatus('got YourTiles')
                     app.myTiles = event.eventData.tiles
+                    app.autoSort()
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)

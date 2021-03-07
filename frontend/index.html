@@ -90,6 +90,13 @@
                                         :label="`Auto Pass`"
                                         >
                                     </v-switch>
+                                    <v-switch
+                                        v-model="autosort"
+                                        inset
+                                        @change="savePreference('autosort', autosort)"
+                                        :label="`Auto Sort`"
+                                        >
+                                    </v-switch>
                                 </v-list-item>
                             </v-list-item-group>
                         </v-list>
@@ -238,11 +245,6 @@
                                         </span>
                                     </v-row>
                                     <v-row>
-                                        <div>
-                                            <v-btn v-on:click="autoSort()" v-if="myTiles.length > 0" color="light-green">
-                                                Auto Sort
-                                            </v-btn>
-                                        </div>
                                         <div v-if="inCheckPhase && waitingForYourCheck">
                                             <v-btn v-on:click="sendEvent('Win')" v-if="winnable">
                                                 Win (胡) literally win the game
