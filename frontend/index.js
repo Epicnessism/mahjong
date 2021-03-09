@@ -93,7 +93,7 @@ const app = new Vue({
             app.toggleOffDiscardButtons()
 
             //adl;kfjasdf
-            myTilesElements: null,
+            // myTilesElements: null,
 
             //the new tile gotten
             app.newTile = null
@@ -366,6 +366,7 @@ const app = new Vue({
                 app.toggleOffDiscardButtons()
                 app.toggleOffAllActiveTiles()
             }
+            app.toggleHighlightNewTile()
             app.socket.send(
                 JSON.stringify({
                     eventName: event,
@@ -409,7 +410,24 @@ const app = new Vue({
                     tileElement.classList.remove("selected")
                 }
             })
-            console.log("myTilesElements: ", myTilesElements)
+        },
+        toggleHighlightNewTile(newTile = null) {
+            if(newTile) {
+                const newTileIndex = app.myTiles.indexOf(newTile)
+                var elementsArray = Array.from(document.getElementById("myTilesSpan").childNodes)
+                if(elementsArray[newTileIndex].classList.contains("highlighted")) {
+                    elementsArray[newTileIndex].classList.remove("highlighted")    
+                } else {
+                    elementsArray[newTileIndex].classList.add("highlighted")
+                }
+            } else {
+                Array.from(document.getElementById("myTilesSpan").childNodes).forEach( tileElement => {
+                    if(tileElement.classList.contains("highlighted")) {
+                        tileElement.classList.remove("highlighted")
+                    }
+                })
+            }
+            
         },
         handleEvent(event) {
             switch(event.eventName) {
@@ -444,8 +462,9 @@ const app = new Vue({
                     if(event.eventData.newTile) {
                         app.newTile = event.eventData.newTile
                         app.myTiles.push(event.eventData.newTile)
+                        app.autoSort()
+                        app.toggleHighlightNewTile(app.newTile)
                     }
-                    app.autoSort()
                     break;
                 case 'CheckDiscardedTile':
                     app.updateStatus('Checking if anyone wants ');
