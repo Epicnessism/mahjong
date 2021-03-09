@@ -54,3 +54,8 @@ html, body {
 .selected {
     padding-bottom: 10px;
 }
+
+.highlighted {
+    border-style: dashed;
+    border-color: #50de7b;
+}
