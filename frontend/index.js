@@ -333,11 +333,6 @@ const app = new Vue({
                 this.sendEvent('DiscardTile', {
                     tile: tile
                 })
-                // app.players.forEach(player => {
-                //     if(player.username != app.username) {
-                //         app.updatePlayerStatus(player.username, "waitingCheck")
-                //     }
-                // })
             }
             //toggle active tiles
             if(event.target.classList.contains("selected")) {
@@ -366,7 +361,9 @@ const app = new Vue({
                 app.toggleOffDiscardButtons()
                 app.toggleOffAllActiveTiles()
             }
-            app.toggleHighlightNewTile()
+            if(event != "KeepAlive") {
+                app.toggleHighlightNewTile()
+            }
             app.socket.send(
                 JSON.stringify({
                     eventName: event,
