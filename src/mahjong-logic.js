@@ -3,6 +3,10 @@ function checkMatch(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length >= 2
 }
 
+function checkWin(player, tile = null) {
+    
+}
+
 function checkAnGang(player, newTile = null) {
     if(newTile != null) {
         return player.tiles.filter( tile => tile == newTile).length == 4
@@ -107,10 +111,10 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     
     // player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
     console.log("Eat Visible Tiles: " + player.visibleTiles);
-    
 }
 
 module.exports = {
+    checkWin,
     checkAnGang,
     checkGang,
     checkMatch,

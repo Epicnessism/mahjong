@@ -4,13 +4,11 @@ const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
 
 
-// const gameStates = new Set(["waitingForPlayers", "In-Progress", "Finished"])
 const gameStates = {
      waitingForPlayers: "initialized",
      inProgress: "inProgress",
      finished: "finished",
 }
-
 
 class MahjongGame {
     constructor(gameId, tileSet='no-flowers', ruleset='southernRuleset') {
@@ -86,7 +84,7 @@ class MahjongGame {
         this.nextTurn()
     }
 
-    sendGameStateForPlayer(player, actionMessage = null, actionPlayerName = null) {
+    sendGameStateForPlayer(player, discardedTile = null, actionMessage = null, actionPlayerName = null) {
         const playerNames = this.players.map(player => {
             return { username: player.username }
         })
@@ -95,13 +93,15 @@ class MahjongGame {
                 player: curPlayer.username,
                 tiles: curPlayer.visibleTiles
             }
-        });
+        })
         var discardedTilesMap = this.players.map( curPlayer => {
             return {
                 player: curPlayer.username,
                 tiles: curPlayer.discardedTiles
             }
         })
+        var possibleActions = discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
+        
         player.sendEvent('GameState', {
             actionMessage: actionMessage != null ? actionMessage : "No Action Message",
             actionPlayerName: actionPlayerName != null ? actionPlayerName : "No Action Player",
@@ -109,8 +109,14 @@ class MahjongGame {
             playerNames: playerNames,
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
             visibleTilesMap: visibleTilesMap,
-            discardedTilesMap: discardedTilesMap
+            discardedTilesMap: discardedTilesMap,
+            discardedTile: discardedTile,
+            possibleActions: possibleActions
         });
+    }
+
+    sendInvalidStateForPlayer(player, invalidStateMessage) {
+        player.sendEvent(invalidStateMessage)
     }
 
     getPlayerOfIndex(playerIndex) {
@@ -120,9 +126,11 @@ class MahjongGame {
     getPlayerByName(playerName) {
         return this.players.filter( player => player.username == playerName)[0]
     }
+
     /*
-        returns boolean of winning or not
-        tile can be null
+    * @param {Player} player object to check win on
+    * @param {String} default null
+    * @returns {boolean}
     */
     checkWin(player, tile = null) { 
         var winning = southernRuleset.checkAllWinConditions(player, tile)
@@ -192,20 +200,12 @@ class MahjongGame {
 
     handleClientResponse(player, event) {
         if(event.eventName != "KeepAlive") {
-            console.log(player);
             console.log('player ' + player.username + ' got event ' + event);
         }
-        // console.log('Handling input event ' + event);
         switch(event.eventName) {
             case 'DiscardTile':
                 this.discardTile(player, event.eventData.tile)
-                this.sendGameStateForPlayer(player)
-                this.allOtherPlayers(player).forEach(otherPlayer => {
-                    otherPlayer.sendEvent('CheckDiscardedTile', {
-                        tile: event.eventData.tile,
-                        possibleActions: this.checkEligibileDiscardResponses(otherPlayer)
-                    })
-                })
+                this.sendGameStateForPlayer(player, event.eventData.tile)
                 break
             case 'Win':
             case 'Gang':
@@ -214,17 +214,21 @@ class MahjongGame {
             case 'Pass':
                 this.handleCheckResponses(player, event);
                 break
+            case 'MingGang':
+                //TODO minggang here
+                break
             case 'AnGang':
                 const anGangRes = mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
                 if(anGangRes) {
                     this.players.forEach( eachPlayer => {
-                        this.sendGameStateForPlayer(eachPlayer, "AnGang", player.username)
+                        this.sendGameStateForPlayer(eachPlayer, null, "AnGang", player.username)
                     })
                 }
                 console.log("Error, AnGang failed to implement.");
-                this.players.forEach(eachPlayer => {
-                    this.sendGameStateForPlayer(eachPlayer)
-                })
+                this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
+                // this.players.forEach(eachPlayer => {
+                //     this.sendGameStateForPlayer(eachPlayer)
+                // })
                 break
 
             case 'NextGameCreated':
@@ -251,7 +255,6 @@ class MahjongGame {
     }
 
     handleCheckResponses(player, event) {
-        // console.log(this.discardedTiles);
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
         if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile).winning) {
             player.sendEvent('InvalidCheckResponse', {});
