@@ -4,7 +4,7 @@ function checkMatch(playerTiles, lastTile) {
 }
 
 function checkWin(player, tile = null) {
-    
+
 }
 
 function checkAnGang(player, newTile = null) {
@@ -16,6 +16,11 @@ function checkAnGang(player, newTile = null) {
             return true
         }
     })
+    return false
+}
+
+function checkMingGang(player, newTile) {
+    // TODO mingGang logic
     return false
 }
 
@@ -82,6 +87,11 @@ function implementAnGang(player, tileToGang) {
     return false
 }
 
+function implementMingGang(player, tileToGang) {
+    // TODO mingGang logic
+    return false
+}
+
 function implementGang(player, lastTile) {
     var gangedTiles = player.tiles.filter( tile => tile == lastTile);
     gangedTiles.push(lastTile);
@@ -116,10 +126,12 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
 module.exports = {
     checkWin,
     checkAnGang,
+    checkMingGang,
     checkGang,
     checkMatch,
     checkEat,
     implementAnGang,
+    implementMingGang,
     implementGang,
     implementMatch,
     implementEat

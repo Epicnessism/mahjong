@@ -215,7 +215,15 @@ class MahjongGame {
                 this.handleCheckResponses(player, event);
                 break
             case 'MingGang':
-                //TODO minggang here
+                const mingGangRes = mahjongLogic.implementMingGang(player, event.eventData.tileToGang)
+                if(mingGangRes) {
+                    this.players.forEach( eachPlayer => {
+                        this.sendGameStateForPlayer(eachPlayer, null, "AnGang", player.username)
+                    })
+                } else {
+                    console.log("Error, mingGang failed to implement.");
+                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, mingGang failed to implement."))
+                }
                 break
             case 'AnGang':
                 const anGangRes = mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
@@ -224,11 +232,13 @@ class MahjongGame {
                         this.sendGameStateForPlayer(eachPlayer, null, "AnGang", player.username)
                     })
                 }
-                console.log("Error, AnGang failed to implement.");
-                this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
-                // this.players.forEach(eachPlayer => {
-                //     this.sendGameStateForPlayer(eachPlayer)
-                // })
+                else {
+                    console.log("Error, AnGang failed to implement.");
+                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
+                    // this.players.forEach(eachPlayer => {
+                    //     this.sendGameStateForPlayer(eachPlayer)
+                    // })
+                }
                 break
 
             case 'NextGameCreated':
