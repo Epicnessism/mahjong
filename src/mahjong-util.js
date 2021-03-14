@@ -26,9 +26,29 @@ function killEmptyGames() {
 function setGames(updatedGames) {
     games = updatedGames
 }
+/*
+* @param {boolean} flower
+* @returns {Array} gameTiles
+*/
+function getGameTiles(flower = false) {
+    var gameTiles = []
+    gameTiles = gameTiles.concat(Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "dot_" + x))
+    gameTiles = gameTiles.concat(Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "bamboo_" + x))
+    gameTiles = gameTiles.concat(Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "tenk_" + x))
+    gameTiles = gameTiles.concat(Array.from(Array(7).keys()).map((x) => x + 1).map((x) => "char_" + x))
+    gameTiles = gameTiles.concat(gameTiles).concat(gameTiles).concat(gameTiles) //x4
+    //separated the flowers since flowers are only used in certain sets of mahjong not all.
+    if(flower) {
+        const flowertiles = Array.from(Array(4).keys()).map((x) => x + 1).map((x) => "flower_" + x)
+        gameTiles = gameTiles.concat(flowertiles).concat(flowertiles)
+    }
+    return gameTiles
+}
 
+console.log(getGameTiles());
 
 module.exports = {
     killEmptyGames,
-    setGames
+    setGames,
+    getGameTiles
 }

@@ -4,18 +4,6 @@ const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
 
 
-//referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
-//TODO add the rest
-const dotTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "dot_" + x);  //x4
-const bambooTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "bamboo_" + x); //x4
-const tenkTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "tenk_" + x); //x4
-const characterTiles = Array.from(Array(7).keys()).map((x) => x + 1).map((x) => "char_" + x); //x4
-const flowerTiles = Array.from(Array(4).keys()).map((x) => x + 1).map((x) => "flower_" + x); //x2 //separated the flowers since flowers are only used in certain sets of mahjong not all.
-
-const tileSuitSetUnique = dotTiles.concat(bambooTiles).concat(tenkTiles).concat(characterTiles);
-const tileSetFullnoFlowers = tileSuitSetUnique.concat(tileSuitSetUnique).concat(tileSuitSetUnique).concat(tileSuitSetUnique);
-const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flowerTiles);
-
 // const gameStates = new Set(["waitingForPlayers", "In-Progress", "Finished"])
 const gameStates = {
      waitingForPlayers: "initialized",
@@ -30,22 +18,20 @@ class MahjongGame {
         this.checkResponses = [];
         this.gameId = gameId
         // this.ruleset = ruleset;
-        // this.mahjongLogic = mahjongLogic;
-
         this.createdDate = Date.now()
         console.log(`game created at: ${this.createdDate}`);
         this.players = [];
         this.joinedPlayers = 0;
         this.stateOfGame = gameStates.waitingForPlayers
-
         this.activePlayer = 3;
 
         if(tileSet == "flowers") {
-            this.tiles = Array.from(tileSetFullwFlowers);
+            this.tiles = mahjongLogic.getGameTiles(true)
         } else {
-            this.tiles = Array.from(tileSetFullnoFlowers);
+            this.tiles = mahjongLogic.getGameTiles()
         }
         util.shuffleArray(this.tiles);
+
         this.tileFrontIdx = 0;
         this.tileBackIdx = this.tiles.length - 1;
     }
@@ -91,7 +77,7 @@ class MahjongGame {
     }
 
     start() {
-        console.log("New game starting");
+        console.log("New game starting")
         this.stateOfGame = gameStates.inProgress
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13))
@@ -101,19 +87,30 @@ class MahjongGame {
     }
 
     sendGameStateForPlayer(player, actionMessage = null, actionPlayerName = null) {
-        const players = this.players.map(player => {
+        const playerNames = this.players.map(player => {
             return { username: player.username }
         })
-        console.log(players);
+        var visibleTilesMap =  this.players.map(curPlayer => {
+            return  {
+                player: curPlayer.username,
+                tiles: curPlayer.visibleTiles
+            }
+        });
+        var discardedTilesMap = this.players.map( curPlayer => {
+            return {
+                player: curPlayer.username,
+                tiles: curPlayer.discardedTiles
+            }
+        })
         player.sendEvent('GameState', {
             actionMessage: actionMessage != null ? actionMessage : "No Action Message",
             actionPlayerName: actionPlayerName != null ? actionPlayerName : "No Action Player",
             tiles: player.tiles,
-            players: players,
-            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username
+            playerNames: playerNames,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
+            visibleTilesMap: visibleTilesMap,
+            discardedTilesMap: discardedTilesMap
         });
-        this.sendAllVisibleTilesToPlayer(player)
-        this.sendAllDiscardedTilesToPlayer(player)
     }
 
     getPlayerOfIndex(playerIndex) {
@@ -183,6 +180,15 @@ class MahjongGame {
 
         this.checkWin(newActivePlayer)
     }
+    
+    discardTile(player, tile) {
+        if(!player.activeTurn) {
+            return
+        }
+        player.removeTile(tile)
+        player.addTileToDiscard(tile)
+        this.discardedTiles.push(tile)
+    }
 
     handleClientResponse(player, event) {
         if(event.eventName != "KeepAlive") {
@@ -192,14 +198,7 @@ class MahjongGame {
         // console.log('Handling input event ' + event);
         switch(event.eventName) {
             case 'DiscardTile':
-                if(!player.activeTurn) {
-                    return
-                }
-                player.removeTile(event.eventData.tile)
-                player.addTileToDiscard(event.eventData.tile)
-                this.discardedTiles.push(event.eventData.tile)
-
-                //do the check phase
+                this.discardTile(player, event.eventData.tile)
                 this.sendGameStateForPlayer(player)
                 this.allOtherPlayers(player).forEach(otherPlayer => {
                     otherPlayer.sendEvent('CheckDiscardedTile', {
@@ -208,12 +207,6 @@ class MahjongGame {
                     })
                 })
                 break
-                
-            // case 'RequestAutoSort':
-            //     this.autoSortPlayerTiles(player)
-            //     this.sendGameStateForPlayer(player)
-            //     break
-
             case 'Win':
             case 'Gang':
             case 'Match':
@@ -221,7 +214,6 @@ class MahjongGame {
             case 'Pass':
                 this.handleCheckResponses(player, event);
                 break
-
             case 'AnGang':
                 const anGangRes = mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
                 if(anGangRes) {
@@ -246,30 +238,6 @@ class MahjongGame {
                 })
                 break
         }
-    }
-
-    autoSortPlayerTiles(player) {
-        player.tiles.sort()
-    }
-
-    sendAllVisibleTilesToPlayer(player) {
-        var visibleTilesMap =  this.players.map(curPlayer => {
-            return  {
-                player: curPlayer.username,
-                tiles: curPlayer.visibleTiles
-            }
-        });
-        player.sendEvent('VisibleTilesUpdate', visibleTilesMap);
-    }
-
-    sendAllDiscardedTilesToPlayer(player) {
-        var discardedTilesMap = this.players.map( curPlayer => {
-            return {
-                player: curPlayer.username,
-                tiles: curPlayer.discardedTiles
-            }
-        })
-        player.sendEvent('DiscardedTilesUpdate', discardedTilesMap)
     }
 
     checkEligibileDiscardResponses(player) {
