@@ -123,7 +123,7 @@ class MahjongGame {
                 tiles: curPlayer.discardedTiles
             }
         })
-        var possibleActions = discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
+        // var possibleActions = discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
         
         player.sendEvent('GameState', {
             actionMessage: actionMessage != null ? actionMessage : "No Action Message",
@@ -131,10 +131,11 @@ class MahjongGame {
             tiles: player.tiles,
             playerNames: playerNames,
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
+            stateOfGame: this.stateOfGame,
             visibleTilesMap: visibleTilesMap,
             discardedTilesMap: discardedTilesMap,
             discardedTile: discardedTile,
-            possibleActions: possibleActions
+            possibleActions: discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
         });
     }
 

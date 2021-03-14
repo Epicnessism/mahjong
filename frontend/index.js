@@ -426,25 +426,54 @@ const app = new Vue({
             }
             
         },
+        updateVisibleTiles(visibleTilesMap) {
+            visibleTilesMap.forEach(playerTiles => {
+                if(playerTiles.player == app.username) {
+                    app.myVisibleTiles = playerTiles.tiles
+                } else {
+                    app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles
+                }
+            });
+        },
+        updateDiscardedTiles(discardedTilesMap) {
+            discardedTilesMap.forEach(playerTiles => {
+                if(playerTiles.player == app.username) {
+                    app.myDiscardedTiles = playerTiles.tiles
+                } else {
+                    app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
+                }
+            })
+        },
         handleEvent(event) {
             switch(event.eventName) {
                 case 'GameState': 
                     app.updateStatus('Game State updated...');
-                    app.myTiles = event.eventData.tiles;
                     app.unselectAllTiles()
+                    app.myTiles = event.eventData.tiles
+                    app.autoSort()
+                    app.players = event.eventData.playerNames
+                    app.activePlayerName = event.eventData.activePlayerName
+                    //handle possible actions and waiting checks
+                    if(event.eventData.possibleActions != null && event.eventData.discardedTile != null) {
+                        app.inCheckPhase = true
+                        app.waitingForYourCheck = true
+                        app.activeTile = event.eventData.discardedTile
+                        app.winnable = event.eventData.possibleActions.win
+                        app.gangable = event.eventData.possibleActions.gang
+                        app.matchable = event.eventData.possibleActions.match
+                        app.eatable = event.eventData.possibleActions.eat
+                        app.checkAutoPass()
+                    }
+
+                    app.updateVisibleTiles(event.eventData.visibleTilesMap)
+                    app.updateDiscardedTiles(event.eventData.discardedTilesMap)
+
                     
-                    app.players.forEach( clientPlayer => {
-                        var backendPlayer = event.eventData.players.filter(backendPlayers => backendPlayers.username == clientPlayer.username)
-                        if(backendPlayer.length == 1) {
-                            backendPlayer[0].statusColor = clientPlayer.statusColor
-                        }
-                    })
-                    app.players = event.eventData.players;
-                    app.activePlayerName = event.eventData.activePlayerName;
-                    if(app.players.length == 4 && app.waitingForPlayers) {
+                    
+                    if(app.players.length == 4 && app.waitingForPlayers && event.eventData.stateOfGame == 'inProgress') {
                         app.waitingForPlayers = false
                     }
-                    app.autoSort()
+                    
                     break;
                 case 'YourTurn':
                     app.activeTile = null;
@@ -462,52 +491,6 @@ const app = new Vue({
                         app.autoSort()
                         app.toggleHighlightNewTile(app.newTile)
                     }
-                    break;
-                case 'CheckDiscardedTile':
-                    app.updateStatus('Checking if anyone wants ');
-                    app.activeTile = event.eventData.tile
-                    app.inCheckPhase = true;
-                    app.waitingForYourCheck = true;
-                    document.title = '(*)' + base_title;
-
-                    app.players.forEach(player => {
-                        if(player.username != app.activePlayerName) {
-                            app.updatePlayerStatus(player.username, "waitingCheck")
-                        }
-                    })
-
-                    app.winnable = event.eventData.possibleActions.win
-                    app.gangable = event.eventData.possibleActions.gang
-                    app.matchable = event.eventData.possibleActions.match
-                    app.eatable = event.eventData.possibleActions.eat
-                    app.checkAutoPass()
-                    break;
-                case 'VisibleTilesUpdate':
-                    app.updateStatus('updating all visible tiles');
-                    console.log(event.eventData);
-                    event.eventData.forEach(playerTiles => {
-                        console.log(playerTiles);
-                        if(playerTiles.player == app.username) {
-                            console.log('Got my own played tiles');
-                            app.myVisibleTiles = playerTiles.tiles
-                        }else {
-                            console.log('Got other played tilies')
-                        }
-                        console.log(playerTiles.tiles);
-                        app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
-                    });
-                    break;
-                case 'DiscardedTilesUpdate':
-                    app.updateStatus('updating all discarded tiles')
-                    console.log(event.eventData)
-                    event.eventData.forEach(playerTiles => {
-                        console.log(playerTiles);
-                        if(playerTiles.player == app.username) {
-                            console.log('Got my own played tiles');
-                            app.myDiscardedTiles = playerTiles.tiles
-                        }
-                        app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
-                    })
                     break;
                 case 'NextTurnNotYou':
                     app.updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
