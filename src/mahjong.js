@@ -32,6 +32,29 @@ class MahjongGame {
 
         this.tileFrontIdx = 0;
         this.tileBackIdx = this.tiles.length - 1;
+        this.turnOrder = []
+        
+    }
+
+    setTurnOrderBasedOnFirstPlayer(playerName) {
+        var firstPlayerIndex = this.players.map(player => {
+            return player.username
+        }).findIndex(playerName)
+        
+        // this.turnOrder = [this.player]
+
+
+
+        if(!this.turnOrder.includes(playerName)) {
+            this.turnOrder.push(playerName)
+        }
+        if(this.turnOrder.length > 4) {
+            console.log("WARNING TURNORDER SIZE > 4")
+        }
+    }
+
+    clearTurnOrder() {
+        this.turnOrder = []
     }
 
     addPlayer(playerObject) {
@@ -218,7 +241,7 @@ class MahjongGame {
                 const mingGangRes = mahjongLogic.implementMingGang(player, event.eventData.tileToGang)
                 if(mingGangRes) {
                     this.players.forEach( eachPlayer => {
-                        this.sendGameStateForPlayer(eachPlayer, null, "AnGang", player.username)
+                        this.sendGameStateForPlayer(eachPlayer, null, "mingGang", player.username)
                     })
                 } else {
                     console.log("Error, mingGang failed to implement.");
@@ -235,9 +258,6 @@ class MahjongGame {
                 else {
                     console.log("Error, AnGang failed to implement.");
                     this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
-                    // this.players.forEach(eachPlayer => {
-                    //     this.sendGameStateForPlayer(eachPlayer)
-                    // })
                 }
                 break
 
@@ -331,7 +351,7 @@ class MahjongGame {
                     winningPlayer: win.player.username,
                     winningHand: winningHand.winningHand
                 })
-                this.sendPlayerTiles(win.player)
+                // this.sendPlayerTiles(win.player)
             }
             
         } else if(gang) {
@@ -353,7 +373,8 @@ class MahjongGame {
             });
             nextPlayer = gang.player;
             giveNextPlayerTile = false;
-            this.sendPlayerTiles(gang.player)
+            // this.sendPlayerTiles(gang.player)
+            // this.sendGameStateForPlayer(match.player)
 
         } else if(match) {
             lastTile = this.discardedTiles.pop();
@@ -369,7 +390,8 @@ class MahjongGame {
             })
             nextPlayer = match.player;
             giveNextPlayerTile = false
-            this.sendPlayerTiles(match.player)
+            // this.sendPlayerTiles(match.player)
+            // this.sendGameStateForPlayer(match.player)
             
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
@@ -384,7 +406,8 @@ class MahjongGame {
             })
             nextPlayer = eat.player;
             giveNextPlayerTile = false
-            this.sendPlayerTiles(eat.player)
+            // this.sendPlayerTiles(eat.player)
+            // this.sendGameStateForPlayer(match.player)
         } else {
             //do nothing, go to expected next turn
             this.players.forEach( otherPlayer => {
@@ -402,13 +425,6 @@ class MahjongGame {
         })
         
         this.nextTurn(nextPlayer, giveNextPlayerTile);
-    }
-
-    sendPlayerTiles(player) {
-        console.log(player.tiles);
-        player.sendEvent('YourTiles', {
-            tiles: player.tiles
-        })
     }
 
     findByPlayerID(username) {
