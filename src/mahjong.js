@@ -12,8 +12,9 @@ const gameStates = {
 
 class MahjongGame {
     constructor(gameId, tileSet='no-flowers', ruleset='southernRuleset') {
-        this.discardedTiles = [];
-        this.checkResponses = [];
+        this.discardedTiles = []
+        this.checkResponses = []
+        this.turnOrder = []
         this.gameId = gameId
         // this.ruleset = ruleset;
         this.createdDate = Date.now()
@@ -24,15 +25,15 @@ class MahjongGame {
         this.activePlayer = 3;
 
         if(tileSet == "flowers") {
-            this.tiles = mahjongLogic.getGameTiles(true)
+            this.tiles = mahjongUtil.getGameTiles(true)
         } else {
-            this.tiles = mahjongLogic.getGameTiles()
+            this.tiles = mahjongUtil.getGameTiles()
         }
         util.shuffleArray(this.tiles);
 
         this.tileFrontIdx = 0;
         this.tileBackIdx = this.tiles.length - 1;
-        this.turnOrder = []
+        
         
     }
 
@@ -134,9 +135,9 @@ class MahjongGame {
             stateOfGame: this.stateOfGame,
             visibleTilesMap: visibleTilesMap,
             discardedTilesMap: discardedTilesMap,
-            discardedTile: discardedTile,
-            possibleActions: discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
-        });
+            discardedTile: player != this.players[this.activePlayer] ? discardedTile : null,
+            possibleActions: discardedTile != null && player != this.players[this.activePlayer] ? this.checkEligibileResponses(player, this.players[this.activePlayer].tiles[this.players[this.activePlayer].tiles.length - 1]) : null
+        })
     }
 
     sendInvalidStateForPlayer(player, invalidStateMessage) {
@@ -178,6 +179,7 @@ class MahjongGame {
     }
 
     nextTurn(nextPlayer = null, giveTile = true) {
+        console.log("next turned");
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
             this.activePlayer = this.players.indexOf(nextPlayer);
@@ -229,7 +231,9 @@ class MahjongGame {
         switch(event.eventName) {
             case 'DiscardTile':
                 this.discardTile(player, event.eventData.tile)
-                this.sendGameStateForPlayer(player, event.eventData.tile)
+                this.players.forEach(eachPlayer => {
+                    this.sendGameStateForPlayer(eachPlayer, event.eventData.tile)
+                })
                 break
             case 'Win':
             case 'Gang':
@@ -275,17 +279,20 @@ class MahjongGame {
         }
     }
 
-    checkEligibileDiscardResponses(player) {
+    checkEligibileResponses(player, newTile = null) {
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
         return {
             win: southernRuleset.checkAllWinConditions(player, lastTile).winning,
             gang: mahjongLogic.checkGang(player.tiles, lastTile),
             match: mahjongLogic.checkMatch(player.tiles, lastTile),
-            eat: mahjongLogic.checkEat(player.tiles, lastTile, this.players.indexOf(player), this.activePlayer)
+            eat: mahjongLogic.checkEat(player.tiles, lastTile, this.players.indexOf(player), this.activePlayer),
+            anGang: mahjongLogic.checkAnGang(player, newTile),
+            mingGang: mahjongLogic.checkMingGang(player, newTile),
         }
     }
 
     handleCheckResponses(player, event) {
+        console.log("inside handleResposes");
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
         if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile).winning) {
             player.sendEvent('InvalidCheckResponse', {});
@@ -320,7 +327,7 @@ class MahjongGame {
             checkAction: event.eventName,
             otherPlayerID: player.username
         }))
-
+        console.log("checking length: {}", this.checkResponses.length < 3);
         if (this.checkResponses.length < 3) {
             return
         }
@@ -422,6 +429,7 @@ class MahjongGame {
         
         //just send the entire gamestate, this wraps visible and discarded tiles
         this.players.forEach(player => {
+            console.log("send game state for player: ", player);
             this.sendGameStateForPlayer(player)
         })
         

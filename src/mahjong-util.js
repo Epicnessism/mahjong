@@ -45,8 +45,6 @@ function getGameTiles(flower = false) {
     return gameTiles
 }
 
-console.log(getGameTiles());
-
 module.exports = {
     killEmptyGames,
     setGames,

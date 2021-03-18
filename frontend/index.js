@@ -395,7 +395,6 @@ const app = new Vue({
             app.sendEvent('AnGang', tileToGang)
         },
         eat() {
-            // console.log(this.activeTiles)
             const eatTiles = this.activeTiles
             this.sendEvent('Eat', eatTiles)
         },
@@ -428,20 +427,12 @@ const app = new Vue({
         },
         updateVisibleTiles(visibleTilesMap) {
             visibleTilesMap.forEach(playerTiles => {
-                if(playerTiles.player == app.username) {
-                    app.myVisibleTiles = playerTiles.tiles
-                } else {
-                    app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles
-                }
-            });
+                app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles
+            })
         },
         updateDiscardedTiles(discardedTilesMap) {
             discardedTilesMap.forEach(playerTiles => {
-                if(playerTiles.player == app.username) {
-                    app.myDiscardedTiles = playerTiles.tiles
-                } else {
-                    app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
-                }
+                app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
             })
         },
         handleEvent(event) {
@@ -460,6 +451,8 @@ const app = new Vue({
                         app.activeTile = event.eventData.discardedTile
                         app.winnable = event.eventData.possibleActions.win
                         app.gangable = event.eventData.possibleActions.gang
+                        app.anGangable = event.eventData.possibleActions.anGang
+                        app.mingGangable = event.eventData.possibleActions.mingGang
                         app.matchable = event.eventData.possibleActions.match
                         app.eatable = event.eventData.possibleActions.eat
                         app.checkAutoPass()
@@ -467,18 +460,14 @@ const app = new Vue({
 
                     app.updateVisibleTiles(event.eventData.visibleTilesMap)
                     app.updateDiscardedTiles(event.eventData.discardedTilesMap)
-
-                    
                     
                     if(app.players.length == 4 && app.waitingForPlayers && event.eventData.stateOfGame == 'inProgress') {
                         app.waitingForPlayers = false
                     }
-                    
                     break;
                 case 'YourTurn':
                     app.activeTile = null;
                     app.yourTurn = true;
-                    document.title = '(*)' + base_title;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
                     app.anGangable = event.eventData.anGangable
@@ -529,11 +518,6 @@ const app = new Vue({
                     app.updateStatus('Player ' + event.eventData.actingPlayerID + ' has ' + event.eventData.action + " " + event.eventData.lastTile + "!")
                     app.activeTile = null
                     app.activeTiles = []
-                    break;
-                case 'YourTiles':
-                    app.updateStatus('got YourTiles')
-                    app.myTiles = event.eventData.tiles
-                    app.autoSort()
                     break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
