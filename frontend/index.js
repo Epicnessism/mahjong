@@ -63,6 +63,7 @@ const app = new Vue({
         stateOfGame: 'somethingHereLol',
         winningHand: null,
         gameOver: false,
+        winningPlayer: null,
 
         nextGameId: null
 
@@ -105,6 +106,7 @@ const app = new Vue({
             app.stateOfGame = null
             app.winningHand = null
             app.gameOver = false
+            app.winningPlayer = null
         },
         nextGame: function() {
             if(app.nextGameId != null) {
@@ -142,7 +144,7 @@ const app = new Vue({
                 .post('/joinGame/' + app.nextGameId, {})
                 .then( response => {
                     console.log(response);
-                    // app.currentGameId = app.joinGameInputField
+                    app.currentGameId = app.joinGameInputField
                     app.socket.close()
                     app.socket = null
                     app.establishWsConnection()
@@ -154,7 +156,7 @@ const app = new Vue({
                 .post('/joinGame/' + this.joinGameInputField, {})
                 .then( response => {
                     console.log(response);
-                    // app.currentGameId = app.joinGameInputField
+                    app.currentGameId = app.joinGameInputField
                     app.establishWsConnection()
                     app.waitingForPlayers = true
                 })
@@ -524,6 +526,7 @@ const app = new Vue({
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
                     console.log(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'winning'
+                    app.winningPlayer = event.eventData.winningPlayer
                     app.winningHand = event.eventData.winningHand
                     app.gameOver = true
                     break;
@@ -531,6 +534,7 @@ const app = new Vue({
                     app.updateStatus(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`)
                     console.log(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'losing'
+                    app.winningPlayer = event.eventData.winningPlayer
                     app.gameOver = true
                     app.winningHand = event.eventData.winningHand
                     break;
