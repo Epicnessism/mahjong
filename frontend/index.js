@@ -500,16 +500,17 @@ const app = new Vue({
 
                     break;
                 case 'InvalidCheckResponse':
-                    app.updateStatus('Illegal Response!');
+                    app.updateStatus('Illegal Response!')
+                    app.unselectAllTiles()
                     break;
                 case 'SuccessfulCheckResponse': 
-                    app.updateStatus('Successful Check Response');
-                    app.activeTiles = [];
-                    app.inCheckPhase = false;
-                    app.waitingForYourCheck = false;
-                    document.title = base_title;
+                    app.updateStatus('Successful Check Response')
+                    app.activeTiles = []
+                    app.inCheckPhase = false
+                    app.waitingForYourCheck = false
+                    app.unselectAllTiles()
                     app.updatePlayerStatus(app.username, "clear")
-                    app.myTiles = event.eventData.playerTiles;
+                    app.myTiles = event.eventData.playerTiles
                     break;
                 case 'AlreadySubmittedCheckResponse':
                     app.updateStatus('Response already submitted');
