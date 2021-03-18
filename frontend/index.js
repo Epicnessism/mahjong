@@ -138,6 +138,10 @@ const app = new Vue({
                 app.updatePlayerStatus(player.username, "clear")
             })
         },
+        async copyGameId(gameId) {
+            await navigator.clipboard.writeText(gameId);
+            console.log("copies gameID");
+        },
         joinGame: function() {
             if(app.nextGameId != null) {
                 axios

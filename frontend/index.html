@@ -24,7 +24,7 @@
                         <v-toolbar-title>Online Mahjong</v-toolbar-title>
                         <v-row justify="end">
                             <div>
-                                <v-btn v-if="joined" ><b>{{ currentGameId }}</b></v-btn>
+                                <v-btn v-if="joined" @click="copyGameId(currentGameId)" ><b>{{ currentGameId }}</b></v-btn>
                             </div>
                             <v-icon v-if=!signedIn>
                                 person_outline
