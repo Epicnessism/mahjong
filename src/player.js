@@ -29,12 +29,12 @@ class Player {
 
     handleRecv(data) {
         if(data.eventName != "KeepAlive") {
-            console.log('player ' + this.username + ' got data ' + data);
+            console.log('insideHandleRecv: player ' + this.username + ' got data ' + data);
         }
         this.currentGame.handleClientResponse(this, JSON.parse(data));
     }
 
-    sendEvent(eventName, eventData) {
+    sendEvent(eventName, eventData = {}) {
         const data = JSON.stringify({
             'eventName': eventName,
             'eventData': eventData

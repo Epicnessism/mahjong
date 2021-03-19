@@ -63,6 +63,7 @@ const app = new Vue({
         stateOfGame: 'somethingHereLol',
         winningHand: null,
         gameOver: false,
+        winningPlayer: null,
 
         nextGameId: null
 
@@ -105,6 +106,7 @@ const app = new Vue({
             app.stateOfGame = null
             app.winningHand = null
             app.gameOver = false
+            app.winningPlayer = null
         },
         nextGame: function() {
             if(app.nextGameId != null) {
@@ -136,13 +138,17 @@ const app = new Vue({
                 app.updatePlayerStatus(player.username, "clear")
             })
         },
+        async copyGameId(gameId) {
+            await navigator.clipboard.writeText(gameId);
+            console.log("copies gameID");
+        },
         joinGame: function() {
             if(app.nextGameId != null) {
                 axios
                 .post('/joinGame/' + app.nextGameId, {})
                 .then( response => {
                     console.log(response);
-                    // app.currentGameId = app.joinGameInputField
+                    app.currentGameId = app.joinGameInputField
                     app.socket.close()
                     app.socket = null
                     app.establishWsConnection()
@@ -154,7 +160,7 @@ const app = new Vue({
                 .post('/joinGame/' + this.joinGameInputField, {})
                 .then( response => {
                     console.log(response);
-                    // app.currentGameId = app.joinGameInputField
+                    app.currentGameId = app.joinGameInputField
                     app.establishWsConnection()
                     app.waitingForPlayers = true
                 })
@@ -395,7 +401,6 @@ const app = new Vue({
             app.sendEvent('AnGang', tileToGang)
         },
         eat() {
-            // console.log(this.activeTiles)
             const eatTiles = this.activeTiles
             this.sendEvent('Eat', eatTiles)
         },
@@ -426,30 +431,49 @@ const app = new Vue({
             }
             
         },
+        updateVisibleTiles(visibleTilesMap) {
+            visibleTilesMap.forEach(playerTiles => {
+                app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles
+            })
+        },
+        updateDiscardedTiles(discardedTilesMap) {
+            discardedTilesMap.forEach(playerTiles => {
+                app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
+            })
+        },
         handleEvent(event) {
             switch(event.eventName) {
                 case 'GameState': 
                     app.updateStatus('Game State updated...');
-                    app.myTiles = event.eventData.tiles;
                     app.unselectAllTiles()
+                    app.myTiles = event.eventData.tiles
+                    app.autoSort()
+                    app.players = event.eventData.playerNames
+                    app.activePlayerName = event.eventData.activePlayerName
+                    //handle possible actions and waiting checks
+                    if(event.eventData.possibleActions != null && event.eventData.discardedTile != null) {
+                        app.inCheckPhase = true
+                        app.waitingForYourCheck = true
+                        app.activeTile = event.eventData.discardedTile
+                        app.winnable = event.eventData.possibleActions.win
+                        app.gangable = event.eventData.possibleActions.gang
+                        app.anGangable = event.eventData.possibleActions.anGang
+                        app.mingGangable = event.eventData.possibleActions.mingGang
+                        app.matchable = event.eventData.possibleActions.match
+                        app.eatable = event.eventData.possibleActions.eat
+                        app.checkAutoPass()
+                    }
+
+                    app.updateVisibleTiles(event.eventData.visibleTilesMap)
+                    app.updateDiscardedTiles(event.eventData.discardedTilesMap)
                     
-                    app.players.forEach( clientPlayer => {
-                        var backendPlayer = event.eventData.players.filter(backendPlayers => backendPlayers.username == clientPlayer.username)
-                        if(backendPlayer.length == 1) {
-                            backendPlayer[0].statusColor = clientPlayer.statusColor
-                        }
-                    })
-                    app.players = event.eventData.players;
-                    app.activePlayerName = event.eventData.activePlayerName;
-                    if(app.players.length == 4 && app.waitingForPlayers) {
+                    if(app.players.length == 4 && app.waitingForPlayers && event.eventData.stateOfGame == 'inProgress') {
                         app.waitingForPlayers = false
                     }
-                    app.autoSort()
                     break;
                 case 'YourTurn':
                     app.activeTile = null;
                     app.yourTurn = true;
-                    document.title = '(*)' + base_title;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
                     app.anGangable = event.eventData.anGangable
@@ -462,52 +486,6 @@ const app = new Vue({
                         app.autoSort()
                         app.toggleHighlightNewTile(app.newTile)
                     }
-                    break;
-                case 'CheckDiscardedTile':
-                    app.updateStatus('Checking if anyone wants ');
-                    app.activeTile = event.eventData.tile
-                    app.inCheckPhase = true;
-                    app.waitingForYourCheck = true;
-                    document.title = '(*)' + base_title;
-
-                    app.players.forEach(player => {
-                        if(player.username != app.activePlayerName) {
-                            app.updatePlayerStatus(player.username, "waitingCheck")
-                        }
-                    })
-
-                    app.winnable = event.eventData.possibleActions.win
-                    app.gangable = event.eventData.possibleActions.gang
-                    app.matchable = event.eventData.possibleActions.match
-                    app.eatable = event.eventData.possibleActions.eat
-                    app.checkAutoPass()
-                    break;
-                case 'VisibleTilesUpdate':
-                    app.updateStatus('updating all visible tiles');
-                    console.log(event.eventData);
-                    event.eventData.forEach(playerTiles => {
-                        console.log(playerTiles);
-                        if(playerTiles.player == app.username) {
-                            console.log('Got my own played tiles');
-                            app.myVisibleTiles = playerTiles.tiles
-                        }else {
-                            console.log('Got other played tilies')
-                        }
-                        console.log(playerTiles.tiles);
-                        app.players.filter(player => player.username == playerTiles.player)[0].visibleTiles = playerTiles.tiles;
-                    });
-                    break;
-                case 'DiscardedTilesUpdate':
-                    app.updateStatus('updating all discarded tiles')
-                    console.log(event.eventData)
-                    event.eventData.forEach(playerTiles => {
-                        console.log(playerTiles);
-                        if(playerTiles.player == app.username) {
-                            console.log('Got my own played tiles');
-                            app.myDiscardedTiles = playerTiles.tiles
-                        }
-                        app.players.filter(player => player.username == playerTiles.player)[0].discardedTiles = playerTiles.tiles
-                    })
                     break;
                 case 'NextTurnNotYou':
                     app.updateStatus('Player ' + event.eventData.activePlayerID + ' is starting their turn.');
@@ -528,16 +506,17 @@ const app = new Vue({
 
                     break;
                 case 'InvalidCheckResponse':
-                    app.updateStatus('Illegal Response!');
+                    app.updateStatus('Illegal Response!')
+                    app.unselectAllTiles()
                     break;
                 case 'SuccessfulCheckResponse': 
-                    app.updateStatus('Successful Check Response');
-                    app.activeTiles = [];
-                    app.inCheckPhase = false;
-                    app.waitingForYourCheck = false;
-                    document.title = base_title;
+                    app.updateStatus('Successful Check Response')
+                    app.activeTiles = []
+                    app.inCheckPhase = false
+                    app.waitingForYourCheck = false
+                    app.unselectAllTiles()
                     app.updatePlayerStatus(app.username, "clear")
-                    app.myTiles = event.eventData.playerTiles;
+                    app.myTiles = event.eventData.playerTiles
                     break;
                 case 'AlreadySubmittedCheckResponse':
                     app.updateStatus('Response already submitted');
@@ -547,15 +526,11 @@ const app = new Vue({
                     app.activeTile = null
                     app.activeTiles = []
                     break;
-                case 'YourTiles':
-                    app.updateStatus('got YourTiles')
-                    app.myTiles = event.eventData.tiles
-                    app.autoSort()
-                    break;
                 case 'Winning':
                     app.updateStatus(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`)
                     console.log(`Congrats! [YOU]${event.eventData.winningPlayer} have won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'winning'
+                    app.winningPlayer = event.eventData.winningPlayer
                     app.winningHand = event.eventData.winningHand
                     app.gameOver = true
                     break;
@@ -563,6 +538,7 @@ const app = new Vue({
                     app.updateStatus(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`)
                     console.log(`RIP! [NOT YOU]${event.eventData.winningPlayer} has won the game! ${event.eventData.winningHand}`);
                     app.stateOfGame = 'losing'
+                    app.winningPlayer = event.eventData.winningPlayer
                     app.gameOver = true
                     app.winningHand = event.eventData.winningHand
                     break;

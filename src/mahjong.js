@@ -4,50 +4,58 @@ const southernRuleset = require('./rulesets/southern-ruleset');
 const mahjongLogic = require('./mahjong-logic');
 
 
-//referencing this https://en.wikipedia.org/wiki/Mahjong_tiles
-//TODO add the rest
-const dotTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "dot_" + x);  //x4
-const bambooTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "bamboo_" + x); //x4
-const tenkTiles = Array.from(Array(9).keys()).map((x) => x + 1).map((x) => "tenk_" + x); //x4
-const characterTiles = Array.from(Array(7).keys()).map((x) => x + 1).map((x) => "char_" + x); //x4
-const flowerTiles = Array.from(Array(4).keys()).map((x) => x + 1).map((x) => "flower_" + x); //x2 //separated the flowers since flowers are only used in certain sets of mahjong not all.
-
-const tileSuitSetUnique = dotTiles.concat(bambooTiles).concat(tenkTiles).concat(characterTiles);
-const tileSetFullnoFlowers = tileSuitSetUnique.concat(tileSuitSetUnique).concat(tileSuitSetUnique).concat(tileSuitSetUnique);
-const tileSetFullwFlowers = tileSetFullnoFlowers.concat(flowerTiles).concat(flowerTiles);
-
-// const gameStates = new Set(["waitingForPlayers", "In-Progress", "Finished"])
 const gameStates = {
      waitingForPlayers: "initialized",
      inProgress: "inProgress",
      finished: "finished",
 }
 
-
 class MahjongGame {
     constructor(gameId, tileSet='no-flowers', ruleset='southernRuleset') {
-        this.discardedTiles = [];
-        this.checkResponses = [];
+        this.discardedTiles = []
+        this.checkResponses = []
+        this.turnOrder = []
         this.gameId = gameId
         // this.ruleset = ruleset;
-        // this.mahjongLogic = mahjongLogic;
-
         this.createdDate = Date.now()
         console.log(`game created at: ${this.createdDate}`);
         this.players = [];
         this.joinedPlayers = 0;
         this.stateOfGame = gameStates.waitingForPlayers
-
         this.activePlayer = 3;
 
         if(tileSet == "flowers") {
-            this.tiles = Array.from(tileSetFullwFlowers);
+            this.tiles = mahjongUtil.getGameTiles(true)
         } else {
-            this.tiles = Array.from(tileSetFullnoFlowers);
+            this.tiles = mahjongUtil.getGameTiles()
         }
         util.shuffleArray(this.tiles);
+
         this.tileFrontIdx = 0;
         this.tileBackIdx = this.tiles.length - 1;
+        
+        
+    }
+
+    setTurnOrderBasedOnFirstPlayer(playerName) {
+        var firstPlayerIndex = this.players.map(player => {
+            return player.username
+        }).findIndex(playerName)
+        
+        // this.turnOrder = [this.player]
+
+
+
+        if(!this.turnOrder.includes(playerName)) {
+            this.turnOrder.push(playerName)
+        }
+        if(this.turnOrder.length > 4) {
+            console.log("WARNING TURNORDER SIZE > 4")
+        }
+    }
+
+    clearTurnOrder() {
+        this.turnOrder = []
     }
 
     addPlayer(playerObject) {
@@ -91,7 +99,7 @@ class MahjongGame {
     }
 
     start() {
-        console.log("New game starting");
+        console.log("New game starting")
         this.stateOfGame = gameStates.inProgress
         this.players.forEach(player => {
             player.setTiles(this.takeTiles(13))
@@ -100,20 +108,40 @@ class MahjongGame {
         this.nextTurn()
     }
 
-    sendGameStateForPlayer(player, actionMessage = null, actionPlayerName = null) {
-        const players = this.players.map(player => {
+    sendGameStateForPlayer(player, discardedTile = null, actionMessage = null, actionPlayerName = null) {
+        const playerNames = this.players.map(player => {
             return { username: player.username }
         })
-        console.log(players);
+        var visibleTilesMap =  this.players.map(curPlayer => {
+            return  {
+                player: curPlayer.username,
+                tiles: curPlayer.visibleTiles
+            }
+        })
+        var discardedTilesMap = this.players.map( curPlayer => {
+            return {
+                player: curPlayer.username,
+                tiles: curPlayer.discardedTiles
+            }
+        })
+        // var possibleActions = discardedTile != null ? this.checkEligibileDiscardResponses(player) : null
+        
         player.sendEvent('GameState', {
             actionMessage: actionMessage != null ? actionMessage : "No Action Message",
             actionPlayerName: actionPlayerName != null ? actionPlayerName : "No Action Player",
             tiles: player.tiles,
-            players: players,
-            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username
-        });
-        this.sendAllVisibleTilesToPlayer(player)
-        this.sendAllDiscardedTilesToPlayer(player)
+            playerNames: playerNames,
+            activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
+            stateOfGame: this.stateOfGame,
+            visibleTilesMap: visibleTilesMap,
+            discardedTilesMap: discardedTilesMap,
+            discardedTile: player != this.players[this.activePlayer] ? discardedTile : null,
+            possibleActions: discardedTile != null && player != this.players[this.activePlayer] ? this.checkEligibileResponses(player, this.players[this.activePlayer].tiles[this.players[this.activePlayer].tiles.length - 1]) : null
+        })
+    }
+
+    sendInvalidStateForPlayer(player, invalidStateMessage) {
+        player.sendEvent(invalidStateMessage)
     }
 
     getPlayerOfIndex(playerIndex) {
@@ -123,9 +151,11 @@ class MahjongGame {
     getPlayerByName(playerName) {
         return this.players.filter( player => player.username == playerName)[0]
     }
+
     /*
-        returns boolean of winning or not
-        tile can be null
+    * @param {Player} player object to check win on
+    * @param {String} default null
+    * @returns {boolean}
     */
     checkWin(player, tile = null) { 
         var winning = southernRuleset.checkAllWinConditions(player, tile)
@@ -149,6 +179,7 @@ class MahjongGame {
     }
 
     nextTurn(nextPlayer = null, giveTile = true) {
+        console.log("next turned");
         this.players[this.activePlayer].activeTurn = false;
         if(nextPlayer) {
             this.activePlayer = this.players.indexOf(nextPlayer);
@@ -183,37 +214,27 @@ class MahjongGame {
 
         this.checkWin(newActivePlayer)
     }
+    
+    discardTile(player, tile) {
+        if(!player.activeTurn) {
+            return
+        }
+        player.removeTile(tile)
+        player.addTileToDiscard(tile)
+        this.discardedTiles.push(tile)
+    }
 
     handleClientResponse(player, event) {
         if(event.eventName != "KeepAlive") {
-            console.log(player);
             console.log('player ' + player.username + ' got event ' + event);
         }
-        // console.log('Handling input event ' + event);
         switch(event.eventName) {
             case 'DiscardTile':
-                if(!player.activeTurn) {
-                    return
-                }
-                player.removeTile(event.eventData.tile)
-                player.addTileToDiscard(event.eventData.tile)
-                this.discardedTiles.push(event.eventData.tile)
-
-                //do the check phase
-                this.sendGameStateForPlayer(player)
-                this.allOtherPlayers(player).forEach(otherPlayer => {
-                    otherPlayer.sendEvent('CheckDiscardedTile', {
-                        tile: event.eventData.tile,
-                        possibleActions: this.checkEligibileDiscardResponses(otherPlayer)
-                    })
+                this.discardTile(player, event.eventData.tile)
+                this.players.forEach(eachPlayer => {
+                    this.sendGameStateForPlayer(eachPlayer, event.eventData.tile)
                 })
                 break
-                
-            // case 'RequestAutoSort':
-            //     this.autoSortPlayerTiles(player)
-            //     this.sendGameStateForPlayer(player)
-            //     break
-
             case 'Win':
             case 'Gang':
             case 'Match':
@@ -221,18 +242,28 @@ class MahjongGame {
             case 'Pass':
                 this.handleCheckResponses(player, event);
                 break
-
+            case 'MingGang':
+                const mingGangRes = mahjongLogic.implementMingGang(player, event.eventData.tileToGang)
+                if(mingGangRes) {
+                    this.players.forEach( eachPlayer => {
+                        this.sendGameStateForPlayer(eachPlayer, null, "mingGang", player.username)
+                    })
+                } else {
+                    console.log("Error, mingGang failed to implement.");
+                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, mingGang failed to implement."))
+                }
+                break
             case 'AnGang':
                 const anGangRes = mahjongLogic.implementAnGang(player, event.eventData.tileToGang)
                 if(anGangRes) {
                     this.players.forEach( eachPlayer => {
-                        this.sendGameStateForPlayer(eachPlayer, "AnGang", player.username)
+                        this.sendGameStateForPlayer(eachPlayer, null, "AnGang", player.username)
                     })
                 }
-                console.log("Error, AnGang failed to implement.");
-                this.players.forEach(eachPlayer => {
-                    this.sendGameStateForPlayer(eachPlayer)
-                })
+                else {
+                    console.log("Error, AnGang failed to implement.");
+                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
+                }
                 break
 
             case 'NextGameCreated':
@@ -248,42 +279,20 @@ class MahjongGame {
         }
     }
 
-    autoSortPlayerTiles(player) {
-        player.tiles.sort()
-    }
-
-    sendAllVisibleTilesToPlayer(player) {
-        var visibleTilesMap =  this.players.map(curPlayer => {
-            return  {
-                player: curPlayer.username,
-                tiles: curPlayer.visibleTiles
-            }
-        });
-        player.sendEvent('VisibleTilesUpdate', visibleTilesMap);
-    }
-
-    sendAllDiscardedTilesToPlayer(player) {
-        var discardedTilesMap = this.players.map( curPlayer => {
-            return {
-                player: curPlayer.username,
-                tiles: curPlayer.discardedTiles
-            }
-        })
-        player.sendEvent('DiscardedTilesUpdate', discardedTilesMap)
-    }
-
-    checkEligibileDiscardResponses(player) {
+    checkEligibileResponses(player, newTile = null) {
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
         return {
             win: southernRuleset.checkAllWinConditions(player, lastTile).winning,
             gang: mahjongLogic.checkGang(player.tiles, lastTile),
             match: mahjongLogic.checkMatch(player.tiles, lastTile),
-            eat: mahjongLogic.checkEat(player.tiles, lastTile, this.players.indexOf(player), this.activePlayer)
+            eat: mahjongLogic.checkEat(player.tiles, lastTile, this.players.indexOf(player), this.activePlayer),
+            anGang: mahjongLogic.checkAnGang(player, newTile),
+            mingGang: mahjongLogic.checkMingGang(player, newTile),
         }
     }
 
     handleCheckResponses(player, event) {
-        // console.log(this.discardedTiles);
+        console.log("inside handleResposes");
         var lastTile = this.discardedTiles[this.discardedTiles.length - 1];
         if (event.eventName == 'Win' && !southernRuleset.checkAllWinConditions(player, lastTile).winning) {
             player.sendEvent('InvalidCheckResponse', {});
@@ -318,7 +327,7 @@ class MahjongGame {
             checkAction: event.eventName,
             otherPlayerID: player.username
         }))
-
+        console.log("checking length: {}", this.checkResponses.length < 3);
         if (this.checkResponses.length < 3) {
             return
         }
@@ -350,7 +359,7 @@ class MahjongGame {
                     winningPlayer: win.player.username,
                     winningHand: winningHand.winningHand
                 })
-                this.sendPlayerTiles(win.player)
+                // this.sendPlayerTiles(win.player)
             }
             
         } else if(gang) {
@@ -372,7 +381,8 @@ class MahjongGame {
             });
             nextPlayer = gang.player;
             giveNextPlayerTile = false;
-            this.sendPlayerTiles(gang.player)
+            // this.sendPlayerTiles(gang.player)
+            // this.sendGameStateForPlayer(match.player)
 
         } else if(match) {
             lastTile = this.discardedTiles.pop();
@@ -388,7 +398,8 @@ class MahjongGame {
             })
             nextPlayer = match.player;
             giveNextPlayerTile = false
-            this.sendPlayerTiles(match.player)
+            // this.sendPlayerTiles(match.player)
+            // this.sendGameStateForPlayer(match.player)
             
         } else if(eat) {
             lastTile = this.discardedTiles.pop();
@@ -403,7 +414,8 @@ class MahjongGame {
             })
             nextPlayer = eat.player;
             giveNextPlayerTile = false
-            this.sendPlayerTiles(eat.player)
+            // this.sendPlayerTiles(eat.player)
+            // this.sendGameStateForPlayer(match.player)
         } else {
             //do nothing, go to expected next turn
             this.players.forEach( otherPlayer => {
@@ -417,17 +429,11 @@ class MahjongGame {
         
         //just send the entire gamestate, this wraps visible and discarded tiles
         this.players.forEach(player => {
+            console.log("send game state for player: ", player);
             this.sendGameStateForPlayer(player)
         })
         
         this.nextTurn(nextPlayer, giveNextPlayerTile);
-    }
-
-    sendPlayerTiles(player) {
-        console.log(player.tiles);
-        player.sendEvent('YourTiles', {
-            tiles: player.tiles
-        })
     }
 
     findByPlayerID(username) {

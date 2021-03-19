@@ -3,6 +3,10 @@ function checkMatch(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length >= 2
 }
 
+function checkWin(player, tile = null) {
+
+}
+
 function checkAnGang(player, newTile = null) {
     if(newTile != null) {
         return player.tiles.filter( tile => tile == newTile).length == 4
@@ -12,6 +16,11 @@ function checkAnGang(player, newTile = null) {
             return true
         }
     })
+    return false
+}
+
+function checkMingGang(player, newTile) {
+    // TODO mingGang logic
     return false
 }
 
@@ -78,6 +87,11 @@ function implementAnGang(player, tileToGang) {
     return false
 }
 
+function implementMingGang(player, tileToGang) {
+    // TODO mingGang logic
+    return false
+}
+
 function implementGang(player, lastTile) {
     var gangedTiles = player.tiles.filter( tile => tile == lastTile);
     gangedTiles.push(lastTile);
@@ -107,15 +121,17 @@ function implementEat(player, lastTile, listOfSelectedTiles) {
     
     // player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
     console.log("Eat Visible Tiles: " + player.visibleTiles);
-    
 }
 
 module.exports = {
+    checkWin,
     checkAnGang,
+    checkMingGang,
     checkGang,
     checkMatch,
     checkEat,
     implementAnGang,
+    implementMingGang,
     implementGang,
     implementMatch,
     implementEat

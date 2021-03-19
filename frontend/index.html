@@ -23,6 +23,9 @@
                         <img src="res/bamboo_1.png" @click="navDrawer = true">
                         <v-toolbar-title>Online Mahjong</v-toolbar-title>
                         <v-row justify="end">
+                            <div>
+                                <v-btn v-if="joined" @click="copyGameId(currentGameId)" ><b>{{ currentGameId }}</b></v-btn>
+                            </div>
                             <v-icon v-if=!signedIn>
                                 person_outline
                             </v-icon>
@@ -35,7 +38,6 @@
                                         dark
                                         v-bind="attrs"
                                         v-on="on"
-
                                       >
                                         <v-icon>
                                             person
@@ -164,8 +166,6 @@
                         <v-container fluid class="maingame-container" v-if="signedIn">
                             <v-row>
                                 <div id="main-game" v-if="joined">
-                                    <span>Game ID: <b>{{ currentGameId }}</b></span>
-                                    <br>
                                     <v-progress-circular
                                         indeterminate
                                         color="primary"
@@ -303,8 +303,11 @@
                                 max-width="800"
                             >
                                 <v-card>
-                                    <v-card-title class="headline">
-                                        you are {{stateOfGame}}!!!
+                                    <v-card-title v-if="stateOfGame != 'winning'" class="headline">
+                                        You won the game!
+                                    </v-card-title>
+                                    <v-card-title v-if="stateOfGame == 'winning'" class="headline">
+                                        {{app.winningPlayer}} has won the game!
                                     </v-card-title>
                                     <span v-for="set in winningHand">
                                         <img v-for="tile in set" v-bind:src="'res/' + tile + '.png'">
