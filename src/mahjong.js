@@ -343,10 +343,8 @@ class MahjongGame {
         
         var nextPlayer = null;
         var giveNextPlayerTile = true;
-
+        lastTile = this.discardedTiles[this.discardedTiles-1];
         if(win) {
-            lastTile = this.discardedTiles.pop();
-            this.players[this.activePlayer].discardedTiles.pop();
             var winningHand = southernRuleset.checkAllWinConditions(win.player, lastTile)
             if(winningHand.winning) {
                 this.allOtherPlayers(win.player).forEach( otherPlayer => {
@@ -362,12 +360,9 @@ class MahjongGame {
                     winningPlayer: win.player.username,
                     winningHand: winningHand.winningHand
                 })
-                // this.sendPlayerTiles(win.player)
             }
             
         } else if(gang) {
-            lastTile = this.discardedTiles.pop();
-            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementGang(gang.player, lastTile);
             this.allOtherPlayers(gang.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
@@ -384,29 +379,20 @@ class MahjongGame {
             });
             nextPlayer = gang.player;
             giveNextPlayerTile = false;
-            // this.sendPlayerTiles(gang.player)
-            // this.sendGameStateForPlayer(match.player)
 
         } else if(match) {
-            lastTile = this.discardedTiles.pop();
-            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementMatch(match.player, lastTile);
             this.allOtherPlayers(match.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
                     actingPlayerID: match.player.username,
                     action: "Matched",
                     lastTile: lastTile,
-                    //are we passing stuff here or no?
                 })
             })
             nextPlayer = match.player;
             giveNextPlayerTile = false
-            // this.sendPlayerTiles(match.player)
-            // this.sendGameStateForPlayer(match.player)
             
         } else if(eat) {
-            lastTile = this.discardedTiles.pop();
-            this.players[this.activePlayer].discardedTiles.pop();
             mahjongLogic.implementEat(eat.player, lastTile, eat.eventData);
             this.allOtherPlayers(eat.player).forEach( otherPlayer => {
                 otherPlayer.sendEvent('CheckPhaseResolved', {
@@ -417,8 +403,6 @@ class MahjongGame {
             })
             nextPlayer = eat.player;
             giveNextPlayerTile = false
-            // this.sendPlayerTiles(eat.player)
-            // this.sendGameStateForPlayer(match.player)
         } else {
             //do nothing, go to expected next turn
             this.players.forEach( otherPlayer => {

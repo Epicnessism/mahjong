@@ -1,3 +1,4 @@
+const Player = require("../src/player")
 
 function checkMatch(playerTiles, lastTile) {
     return playerTiles.filter( tile => tile == lastTile).length >= 2
@@ -78,11 +79,14 @@ function checkEat(playerTiles, lastTile, playerIndex, discarderIndex) {
     return true
 }
 
-/*
-    expects that all tiles are already in the player.tiles
-    tileToGang is just an identifier to know what to get since its unlikely but possible that
-    a player may have more than one AnGangable tiles....
-*/
+/**
+ * * expects that all tiles are already in the player.tiles 
+ * * tileToGang is just an identifier to know what to get since its 
+ * * unlikely but possible that a player may have more than one AnGangable tiles....
+ * @param {Player} player 
+ * @param {String} tileToGang 
+ * @returns boolean
+ */
 function implementAnGang(player, tileToGang) {
     var gangedTiles = player.tiles.filter(tile => tile == tileToGang)
     if(gangedTiles.length == 4) {
@@ -92,6 +96,7 @@ function implementAnGang(player, tileToGang) {
     }
     return false
 }
+
 /**
  * * Should add tile to visibleSet that was Ganged
  * * Should add reinforced tile to player hand
@@ -103,14 +108,12 @@ function implementAnGang(player, tileToGang) {
  * @returns {boolean} mingGanged
  */
 function implementMingGang(player, tileToGang) {
-    var mingGanged = false
+    let mingGanged = false
     if(checkMingGang(player, tileToGang)) {
         player.visibleTiles.find( visibleSet => {
             if(visibleSet.filter(tile => tile == visibleSet[0]).length == 3 && visibleSet[0] == tileToGang) {
                 visibleSet.push(player.tiles.splice(player.tiles.findIndex( tile => tile == tileToGang), 1)) //remove the first instance of this tile, push it to visibleSet
                 player.tiles.push(player.currentGame.takeTiles(1, true)[0]) //take reinforced tile from currentGame and add to player tiles
-                // player.currentGame.discardedTiles.pop() //remove lastTile since it was used
-                // player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
                 mingGanged = true
                 return true //returning true speeds up optimization, stops .find() immediately after getting here
             }
@@ -121,39 +124,52 @@ function implementMingGang(player, tileToGang) {
 }
 
 /**
- * * Does not remove or alter lastTile
- * @param {*Player} player 
- * @param {*String} lastTile 
+ * * takes care of popping discardedTiles
+ * @param {Player} player 
+ * @param {String} lastTile 
  */
 function implementGang(player, lastTile) {
-    var gangedTiles = player.tiles.filter( tile => tile == lastTile);
-    gangedTiles.push(lastTile);
-    player.tiles = player.tiles.filter(tile => tile != lastTile);
-    player.visibleTiles.push(gangedTiles);
-    console.log("Gang Visible Tiles: " + player.visibleTiles);
+    var gangedTiles = player.tiles.filter( tile => tile == lastTile)
+    gangedTiles.push(lastTile)
+    player.tiles = player.tiles.filter(tile => tile != lastTile)
+    player.visibleTiles.push(gangedTiles)
+    player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+    player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+    console.log("Gang Visible Tiles: " + player.visibleTiles)
 }
-
+/**
+ * * takes care of popping discardedTiles
+ * @param {Player} player
+ * @param {String} lastTile
+ */
 function implementMatch(player, lastTile) {
-    var matchedTiles = player.tiles.filter( tile => tile == lastTile);
-    matchedTiles.push(lastTile);
-    player.visibleTiles.push(matchedTiles);
-    player.tiles = player.tiles.filter(tile => tile != lastTile);
-    console.log("Match Visible Tiles: " + player.visibleTiles);
+    var matchedTiles = player.tiles.filter( tile => tile == lastTile)
+    matchedTiles.push(lastTile)
+    player.visibleTiles.push(matchedTiles)
+    player.tiles = player.tiles.filter(tile => tile != lastTile)
+    player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+    player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+    console.log("Match Visible Tiles: " + player.visibleTiles)
 }
 
+/**
+ * * takes care of popping discardedTiles
+ * @param {Player} player 
+ * @param {String} lastTile 
+ * @param {Array} listOfSelectedTiles 
+ */
 function implementEat(player, lastTile, listOfSelectedTiles) {
-    console.log(listOfSelectedTiles);
-    var eatenTiles = listOfSelectedTiles;
-    eatenTiles.push(lastTile);
-    player.visibleTiles.push(eatenTiles);
-
+    console.log(listOfSelectedTiles)
+    var eatenTiles = listOfSelectedTiles
+    eatenTiles.push(lastTile)
+    player.visibleTiles.push(eatenTiles)
     var firstIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[0])
     player.tiles.splice(firstIndex, 1)
     var secondIndex = player.tiles.findIndex(tile => tile == listOfSelectedTiles[1])
     player.tiles.splice(secondIndex, 1)
-    
-    // player.tiles = player.tiles.filter(tile => !listOfSelectedTiles.includes(tile)); //get tiles not included in this other list
-    console.log("Eat Visible Tiles: " + player.visibleTiles);
+    player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+    player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+    console.log("Eat Visible Tiles: " + player.visibleTiles)
 }
 
 module.exports = {

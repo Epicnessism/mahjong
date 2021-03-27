@@ -25,6 +25,9 @@ function checkAllWinConditions(player, winningTile = null) {
     var thirteenSinglesWin = thirteenSingles(player, winningTile)
     var sevenPairsWin = sevenPairs(player, winningTile)
 
+    player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+    player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+    
     if(standardWin.winning) {
         console.log(`standardWin winning: ${standardWin}`);
         return standardWin
