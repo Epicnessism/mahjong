@@ -202,9 +202,11 @@ class MahjongGame {
 
         newActivePlayer.sendEvent("YourTurn", {
             newTile: newTile,
-            anGangable: mahjongLogic.checkAnGang(newActivePlayer),
+            anGang: mahjongLogic.checkAnGang(newActivePlayer),
+            mingGang: mahjongLogic.checkMingGang(newActivePlayer, newTile),
             activePlayerName: this.getPlayerOfIndex(this.activePlayer).username,
         })
+
         this.allOtherPlayers(newActivePlayer).forEach( otherPlayer => {
             otherPlayer.sendEvent('NextTurnNotYou', {
                 activePlayerID: newActivePlayer.username,
@@ -250,7 +252,8 @@ class MahjongGame {
                     })
                 } else {
                     console.log("Error, mingGang failed to implement.");
-                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, mingGang failed to implement."))
+                    player.
+                    this.sendInvalidStateForPlayer(player, "Error, mingGang failed to implement.")
                 }
                 break
             case 'AnGang':
@@ -262,7 +265,7 @@ class MahjongGame {
                 }
                 else {
                     console.log("Error, AnGang failed to implement.");
-                    this.players.forEach(eachPlayer => this.sendInvalidStateForPlayer(eachPlayer, "Error, AnGang failed to implement."))
+                    this.sendInvalidStateForPlayer(player, "Error, AnGang failed to implement.")
                 }
                 break
 

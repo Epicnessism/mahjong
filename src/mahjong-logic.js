@@ -21,6 +21,7 @@ function checkAnGang(player, newTile = null) {
 
 /**
  * * Ming Gang is when the player has a visible match and draws the 4th tile for that set
+ * * we assume that newTile cannot be null since it MUST be a newTile
  * @param {Player} player 
  * @param {String} newTile
  * @returns {boolean} true of mingGangable
@@ -94,7 +95,9 @@ function implementAnGang(player, tileToGang) {
 /**
  * * Should add tile to visibleSet that was Ganged
  * * Should add reinforced tile to player hand
+ * * should remove newTile from playerHand -- YES since newTile will be added to hand prior to userinput to press button to mingGang
  * * Does handle lastTile, DiscardedTile of player as well
+ * * no handling of lastTile or discard tile needed since this is a self-draw
  * @param {Player} player 
  * @param {String} tileToGang 
  * @returns {boolean} mingGanged
@@ -104,10 +107,10 @@ function implementMingGang(player, tileToGang) {
     if(checkMingGang(player, tileToGang)) {
         player.visibleTiles.find( visibleSet => {
             if(visibleSet.filter(tile => tile == visibleSet[0]).length == 3 && visibleSet[0] == tileToGang) {
-                visibleSet.push(tileToGang) //add to end of the set to make 4
+                visibleSet.push(player.tiles.splice(player.tiles.findIndex( tile => tile == tileToGang), 1)) //remove the first instance of this tile, push it to visibleSet
                 player.tiles.push(player.currentGame.takeTiles(1, true)[0]) //take reinforced tile from currentGame and add to player tiles
-                player.currentGame.discardedTiles.pop() //remove lastTile since it was used
-                player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+                // player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+                // player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
                 mingGanged = true
                 return true //returning true speeds up optimization, stops .find() immediately after getting here
             }

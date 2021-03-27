@@ -42,6 +42,7 @@ const app = new Vue({
         //check phase buttons
         winnable: false,
         anGangable: false,
+        mingGangable: false,
         gangable: false,
         matchable: false,
         eatable: false,
@@ -140,7 +141,7 @@ const app = new Vue({
         },
         async copyGameId(gameId) {
             await navigator.clipboard.writeText(gameId);
-            console.log("copies gameID");
+            console.log("copied gameID");
         },
         joinGame: function() {
             if(app.nextGameId != null) {
@@ -383,12 +384,13 @@ const app = new Vue({
         toggleOffDiscardButtons() {
             app.winnable = false;
             app.anGangable = false;
+            app.mingGangable = false;
             app.gangable = false;
             app.matchable = false;
             app.eatable = false;
         },
         checkAutoPass() {
-            if(app.autopass && !app.winnable && !app.gangable && !app.matchable && !app.eatable) {
+            if(app.autopass && !app.winnable && !app.gangable && !app.mingGangable && !app.matchable && !app.eatable) {
                 app.sendEvent('Pass')
             }
         },
@@ -399,6 +401,9 @@ const app = new Vue({
             }
             const tileToGang = this.activeTiles[0]
             app.sendEvent('AnGang', tileToGang)
+        },
+        mingGang() {
+            app.sendEvent('mingGang', this.newTile)
         },
         eat() {
             const eatTiles = this.activeTiles
@@ -476,7 +481,8 @@ const app = new Vue({
                     app.yourTurn = true;
                     app.updateStatus("It is your turn")
                     app.activePlayerName = event.eventData.activePlayerName
-                    app.anGangable = event.eventData.anGangable
+                    app.anGangable = event.eventData.anGang
+                    app.mingGangable = event.eventData.mingGang
                     app.clearAllPlayerStatuses()
                     app.updatePlayerStatus(app.activePlayerName, "waitingTurn")
 
