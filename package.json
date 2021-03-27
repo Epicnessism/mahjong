@@ -4,7 +4,8 @@
   "description": "mahjong",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "vue-cli-service build --dest build"
   },
   "repository": {
     "type": "git",

@@ -19,9 +19,14 @@ function checkAnGang(player, newTile = null) {
     return false
 }
 
+/**
+ * * Ming Gang is when the player has a visible match and draws the 4th tile for that set
+ * @param {Player} player 
+ * @param {String} newTile
+ * @returns {boolean} true of mingGangable
+ */
 function checkMingGang(player, newTile) {
-    // TODO mingGang logic
-    return false
+    return player.visibleTiles.some( visibleSet => visibleSet.includes(newTile) && visibleSet.filter( tile => visibleSet[0] == tile).length == 3)
 }
 
 function checkGang(playerTiles, lastTile) {
@@ -86,12 +91,37 @@ function implementAnGang(player, tileToGang) {
     }
     return false
 }
-
+/**
+ * * Should add tile to visibleSet that was Ganged
+ * * Should add reinforced tile to player hand
+ * * Does handle lastTile, DiscardedTile of player as well
+ * @param {Player} player 
+ * @param {String} tileToGang 
+ * @returns {boolean} mingGanged
+ */
 function implementMingGang(player, tileToGang) {
-    // TODO mingGang logic
-    return false
+    var mingGanged = false
+    if(checkMingGang(player, tileToGang)) {
+        player.visibleTiles.find( visibleSet => {
+            if(visibleSet.filter(tile => tile == visibleSet[0]).length == 3 && visibleSet[0] == tileToGang) {
+                visibleSet.push(tileToGang) //add to end of the set to make 4
+                player.tiles.push(player.currentGame.takeTiles(1, true)[0]) //take reinforced tile from currentGame and add to player tiles
+                player.currentGame.discardedTiles.pop() //remove lastTile since it was used
+                player.currentGame.players[player.currentGame.activePlayer].discardedTiles.pop() //remove it from the player's discardedTiles that discarded that tile
+                mingGanged = true
+                return true //returning true speeds up optimization, stops .find() immediately after getting here
+            }
+            return false //false continues .find()
+        })
+    }
+    return mingGanged
 }
 
+/**
+ * * Does not remove or alter lastTile
+ * @param {*Player} player 
+ * @param {*String} lastTile 
+ */
 function implementGang(player, lastTile) {
     var gangedTiles = player.tiles.filter( tile => tile == lastTile);
     gangedTiles.push(lastTile);
